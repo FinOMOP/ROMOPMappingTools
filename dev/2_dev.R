@@ -45,6 +45,8 @@ usethis::use_r("importOMOPtables")
 
 usethis::use_r("importDatabasesCodeCountsTables")
 
+usethis::use_r("autoFixDatabaseCodeCountTable")
+
 
 usethis::use_r("calculateMappingStatus")
 
@@ -56,59 +58,6 @@ usethis::use_r("buildStatusDashboard")
 
 
 
-
-
-usethis::use_r("readMappingVocabulariesInfoFile")
-usethis::use_test("readMappingVocabulariesInfoFile")
-
-usethis::use_r("readFilesFromMappingVocabulariesInfoTibble")
-
-
-
-usethis::use_r("importDatabasesCodeCounts")
-
-usethis::use_r("calculateMappingStatus")
-
-
-
-
-usethis::use_r("readUsagiCCRFile")
-
-usethis::use_r("readVocabularyInfoFile")
-
-usethis::use_r("convertVocabularyMappingsToOMOPtables")
-
-
-
-
-usethis::use_r("readVocabulariesInfo")
-usethis::use_r("readVocabularyMappings")
-
-usethis::use_r("validateOMOPtables")
-
-usethis::use_r("readOMOPtables")
-usethis::use_r("mergeOMOPtables")
-
-usethis::use_r("mapOMOPtoCodesFrequencies")
-
-### data visualization
-usethis::use_r("tableMappingStatus")
-usethis::use_r("tableVocabularyStatus")
-usethis::use_r("buildMappingStatusDashboard")
-
-
-## TEST
-usethis::use_test("validateUsagiFile")
-
-usethis::use_test("readVocabulariesInfo")
-usethis::use_test("readVocabularyMappings")
-usethis::use_test("convertVocabularyMappingsToOMOPtables")
-
-usethis::use_test("readOMOPtables")
-#usethis::use_r("mergeOMOPtables")
-
-usethis::use_test("importCodesFrequencies")# to do
-#usethis::use_r("mapOMOPtoCodesFrequencies")
 
 
 
