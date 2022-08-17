@@ -1,0 +1,137 @@
+---
+title: "run demo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{run}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tidyverse)
+devtools::load_all(".")
+```
+
+```{r}
+path_to_input_mapping_vocabularies_info_file <- here::here("tests", "testing_repo", "VOCABULARIES", "vocabularies_info.csv")
+path_to_input_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "input_omop_vocabulary")
+path_to_input_database_counts_file <- here::here("tests", "testing_repo", "CODE_COUNTS", "databases_coverage.csv")
+path_to_input_vocabularies_coverage_file <- here::here("tests", "testing_repo", "CODE_COUNTS", "vocabularies_coverage.csv")
+
+path_to_temp_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "temp_omop_vocabulary")
+
+path_to_output_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "output_omop_vocabulary")
+path_to_output_dashboard_file <- here::here("tests", "testing_repo", "StatusReport", "dashboard.html")
+```
+
+
+
+# Read vocabularies_info.csv 
+
+vocabularies_info.csv contains the information to build the vocabularies 
+
+```{r}
+mapping_tables <- importMappingTables(path_to_input_mapping_vocabularies_info_file)
+
+usagi_mapping_tables <- mapping_tables$usagi_mapping_tables
+vocabulary_info_mapping_tables <- mapping_tables$vocabulary_info_mapping_tables
+
+usagi_mapping_tables
+vocabulary_info_mapping_tables
+```
+
+```{r}
+
+usagi_mapping_tables <- usagi_mapping_tables |> validateTables("UsagiForCCR")
+vocabulary_info_mapping_tables <- vocabulary_info_mapping_tables |> validateTables("VocabularyInfo")
+
+usagi_mapping_tables
+vocabulary_info_mapping_tables
+```
+
+
+# Convert mapping files to OMOP tables 
+
+This will only run these with no errors
+```{r}
+convertMappingsTablesToOMOPtables(
+  usagi_mapping_tables,
+  vocabulary_info_mapping_tables,
+  path_to_temp_omop_vocabulary_folder, 
+  ignore_failed_rules = TRUE
+)
+```
+
+
+# merge with ahtena vocabularies 
+
+```{r}
+mergeOMOPtables(path_to_input_omop_vocabulary_folder,
+                path_to_temp_omop_vocabulary_folder,
+                path_to_output_omop_vocabulary_folder)
+```
+
+
+
+## Validate the newely created vocabularies
+```{r}
+omop_tables <- importOMOPtables(path_to_input_omop_vocabulary_folder, c("CONCEPT", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
+
+omop_tables <- validateTables(omop_tables)
+
+omop_tables
+```
+
+
+## Import code counts
+
+```{r}
+databases_code_counts_tables <- importDatabasesCodeCountsTables(path_to_input_database_counts_file)
+
+databases_code_counts_tables <- validateTables(databases_code_counts_tables, table_type = "CodeCounts")
+
+databases_code_counts_tables
+
+```
+
+
+# check coverage 
+
+```{r}
+mapping_status <- calculateMappingStatus(
+  path_to_input_vocabularies_coverage_file,
+  omop_tables, 
+  databases_code_counts_tables)
+```
+
+
+```{r}
+plotTableMappingStatus(mapping_status)
+```
+
+```{r}
+plotTableVocabularyStatus(mapping_status, "ICD10fi")
+```
+
+
+```{r}
+tmp_html <- file.path(tempdir(), "MappingStatusDashboard.html")
+buildStatusDashboard(
+  usagi_mapping_tables = usagi_mapping_tables,
+  vocabulary_info_mapping_tables = vocabulary_info_mapping_tables,
+  omop_tables  = omop_tables, 
+  databases_code_counts_tables = databases_code_counts_tables, 
+  mapping_status  = mapping_status,
+  output_file_html = tmp_html)
+browseURL(tmp_html) 
+```
+
+
+

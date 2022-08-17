@@ -1,0 +1,208 @@
+---
+title: "Mapping status FinOMOP"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+params: 
+  usagi_mapping_tables: NULL
+  vocabulary_info_mapping_tables: NULL
+  omop_tables: NULL
+  databases_code_counts_tables: NULL
+  mapping_status: NULL
+---
+
+
+```{r}
+library(flexdashboard)
+```
+
+```{r}
+usagi_mapping_tables <- params$usagi_mapping_tables
+vocabulary_info_mapping_tables <- params$vocabulary_info_mapping_tables
+omop_tables <- params$omop_tables
+databases_code_counts_tables <- params$databases_code_counts_tables
+mapping_status <- params$mapping_status
+```
+
+
+
+USAGI Tables Validation
+===================================== 
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description 
+dasdas
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(usagi_mapping_tables)){
+  .printSumary(usagi_mapping_tables)
+}
+```
+
+```{r results='asis'}
+if(!is.null(usagi_mapping_tables)){
+  .printValidationTables(usagi_mapping_tables)
+}
+```
+
+
+Vocabulary Info Tables Validation
+===================================== 
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description 
+dasdas
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(vocabulary_info_mapping_tables)){
+  .printSumary(vocabulary_info_mapping_tables)
+}
+```
+
+```{r results='asis'}
+if(!is.null(vocabulary_info_mapping_tables)){
+  .printValidationTables(vocabulary_info_mapping_tables)
+}
+```
+
+
+
+OMOP Tables Validation
+=====================================
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(omop_tables)){
+  .printSumary(omop_tables)
+}
+```
+
+```{r results='asis'}
+if(!is.null(omop_tables)){
+  .printValidationTables(omop_tables)
+}
+```
+
+
+
+
+Databases Counts Tables Validation
+=====================================
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(databases_code_counts_tables)){
+  .printSumary(databases_code_counts_tables)
+}
+```
+
+```{r results='asis'}
+if(!is.null(databases_code_counts_tables)){
+  .printValidationTables(databases_code_counts_tables)
+}
+```
+
+
+
+Databases Coverage
+=====================================
+
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description
+
+The table on the right summarizes the current status of the FimOMOP mapping repository.
+
+Each row shows a `Vocabulary`. If it is `Maintaned by` OMOP, FinnOMOP, or OMOP+FinnOMOP for a combination of both.
+`Mapping progress` shows the proportion of codes in a vocabulary that have been mapped to one or more OMOP-standard concepts.
+
+
+Following columns, shows how well the vocabulary covers the events in different databases. Last column is a combination of all the databases.
+A code used in a clinical event may fall in one of the following categories:
+
+
+<span style="background-color: #51A350">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> **Events with standard code**: the code exist in the target vocabulary and is mapped to an OMOP-standard concept.
+
+<span style="background-color: #F1AE4A">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> **Events with non-standard code**: the code exist in the target vocabulary but is not yet mapped to an OMOP-standard concept
+
+<span style="background-color: #EC6173">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span> **Events with not found code**: the code do not exist in the target vocabulary.
+
+
+Exactly what events fall in each category can be explored by selecting the vocabulary's tab over the main table.
+
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+
+```{r}
+plotTableMappingStatus(mapping_status)
+```
+
+```{r results='asis'}
+valid_source_vocabulary_id <- mapping_status$code_counts_matched |>
+  dplyr::distinct(source_vocabulary_id) |>
+  dplyr::pull(source_vocabulary_id)
+
+for(source_vocabulary_id in valid_source_vocabulary_id){
+
+  cat("### ", source_vocabulary_id, "\n")
+
+  shiny::div(
+    tryCatch({
+      plotTableVocabularyStatus(mapping_status, source_vocabulary_id)
+    }, error = function(e) {
+      if(stringr::str_detect(e$message, "Each row of output must be identified")){
+        return("ERROR, THE VOCABULARY HAS DUPLICATED SOURCE CODES !!!")
+      }else{
+        return(e$message)
+      }
+    } )
+  ) |>
+    print()
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
