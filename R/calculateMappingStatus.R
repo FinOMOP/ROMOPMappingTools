@@ -20,7 +20,7 @@ calculateMappingStatus <- function(
 
   omop_tables |> checkmate::assertTibble()
   omop_tables |> names() |> checkmate::assertSubset(c("name", "table", "validation_summary", "failed_rules_table", "n_failed_rules"))
-  omop_tables |> dplyr::pull(name) |> checkmate::assertSubset(c("CONCEPT", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
+  c("CONCEPT", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM") |> checkmate::assertSubset(omop_tables |> dplyr::pull(name))
 
   databases_code_counts_tables |>  checkmate::assertTibble()
   databases_code_counts_tables |> names() |> checkmate::assertSubset(c("name", "table", "validation_summary", "failed_rules_table", "n_failed_rules" ))

@@ -56,7 +56,8 @@ tables_valid_format <-  tibble::tribble(
   validate::validator(
     sourceCode.and.conceptId.are.uniques = is_unique(sourceCode, conceptId),
     sourceCode.is.not.empty = is_complete(sourceCode),
-    sourceName.is.not.empty = is_complete(sourceName)
+    sourceName.is.not.empty = is_complete(sourceName),
+    sourceName.lessthan.255char = field_length(sourceName, min=0, max=255)
   ),
   #
   "VocabularyInfo",
@@ -67,7 +68,8 @@ tables_valid_format <-  tibble::tribble(
     text_name = readr::col_character()
   ),
   validate::validator(
-    concept_id.is.uniques = is_unique(concept_id)
+    concept_id.is.uniques = is_unique(concept_id),
+    text_id.lessthan.20char = field_length(text_id , min=0, max=20)
   ),
   #
   "VocabulariesCoverage",
@@ -122,12 +124,22 @@ tables_valid_format <-  tibble::tribble(
   ),
   validate::validator(
     concept_id.is.unique = is_unique(concept_id),
+    concept_id.is.complete = is_complete(concept_id),
+    concept_name.is.complete = is_complete(concept_name),
     concept_name.lessthan.255char = field_length(concept_name, min=0, max=255),
+    domain_id.is.complete = is_complete(domain_id),
     domain_id.lessthan.20char = field_length(domain_id , min=0, max=20),
+    vocabulary_id.is.complete = is_complete(vocabulary_id),
     vocabulary_id.lessthan.20char = field_length(vocabulary_id, min=0, max=20),
+    concept_class_id.is.complete = is_complete(concept_class_id),
     concept_class_id.lessthan.20char = field_length(concept_class_id, min=0, max=20),
-    standard_concept.equal.1char = field_length(standard_concept, n=1),
-    concept_code.lessthan.50char = field_length(concept_code, min=0, max=50)
+    standard_concept.equal.1char = is.na(standard_concept)|field_length(standard_concept, n=1),
+    concept_code.is.complete = is_complete(concept_code),
+    concept_code.lessthan.50char = field_length(concept_code, min=0, max=50),
+    valid_start_date.is.complete = is_complete(valid_start_date),
+    valid_end_date.is.complete = is_complete(valid_end_date),
+    invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1)
+
   ),
   #
   "CONCEPT_ANCESTOR",
@@ -145,7 +157,13 @@ tables_valid_format <-  tibble::tribble(
     concept_class_name = readr::col_character(),
     concept_class_concept_id = readr::col_integer()
   ),
-  validate::validator(),
+  validate::validator(
+    concept_class_id.is.complete = is_complete(concept_class_id),
+    concept_class_id.lessthan.255char = field_length(concept_class_id, min=0, max=20),
+    concept_class_name.is.complete = is_complete(concept_class_name),
+    concept_class_name.lessthan.255char = field_length(concept_class_name, min=0, max=255),
+    concept_class_concept_id.is.complete = is_complete(concept_class_concept_id)
+  ),
   #
   "CONCEPT_RELATIONSHIP",
   readr::cols(
@@ -156,7 +174,15 @@ tables_valid_format <-  tibble::tribble(
     valid_end_date =  readr::col_date("%Y%m%d"),
     invalid_reason = readr::col_character()
   ),
-  validate::validator(),
+  validate::validator(
+    concept_id_1.is.complete = is_complete(concept_id_1),
+    concept_id_2.is.complete = is_complete(concept_id_2),
+    relationship_id.is.complete = is_complete(relationship_id),
+    relationship_id.lessthan.255char = field_length(relationship_id, min=0, max=20),
+    valid_start_date.is.complete = is_complete(valid_start_date),
+    valid_end_date.is.complete = is_complete(valid_end_date),
+    invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1)
+  ),
   #
   "CONCEPT_SYNONYM",
   readr::cols(
@@ -164,7 +190,12 @@ tables_valid_format <-  tibble::tribble(
     concept_synonym_name = readr::col_character(),
     language_concept_id = readr::col_integer()
   ),
-  validate::validator(),
+  validate::validator(
+    concept_id.is.complete = is_complete(concept_id),
+    concept_synonym_name.is.complete = is_complete(concept_synonym_name),
+    concept_synonym_name.lessthan.1000char = field_length(concept_synonym_name, min=0, max=1000),
+    language_concept_id.is.complete = is_complete(language_concept_id)
+  ),
   #
   "DOMAIN",
   readr::cols(
@@ -210,7 +241,15 @@ tables_valid_format <-  tibble::tribble(
     vocabulary_version = readr::col_character(),
     vocabulary_concept_id = readr::col_integer()
   ),
-  validate::validator()
+  validate::validator(
+    vocabulary_id.is.complete = is_complete(vocabulary_id),
+    vocabulary_id.lessthan.255char = field_length(vocabulary_id, min=0, max=20),
+    vocabulary_name.is.complete = is_complete(vocabulary_name),
+    vocabulary_name.lessthan.255char = field_length(vocabulary_name, min=0, max=255),
+    vocabulary_reference.lessthan.255char = field_length(vocabulary_reference, min=0, max=255),
+    vocabulary_version.lessthan.255char = field_length(vocabulary_version, min=0, max=255),
+    vocabulary_concept_id.is.complete = is_complete(vocabulary_concept_id)
+  )
 )
 
 usethis::use_data(tables_valid_format, overwrite = TRUE)

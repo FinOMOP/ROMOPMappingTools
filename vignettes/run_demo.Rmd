@@ -20,15 +20,17 @@ devtools::load_all(".")
 ```
 
 ```{r}
-path_to_input_mapping_vocabularies_info_file <- here::here("tests", "testing_repo", "VOCABULARIES", "vocabularies_info.csv")
-path_to_input_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "input_omop_vocabulary")
-path_to_input_database_counts_file <- here::here("tests", "testing_repo", "CODE_COUNTS", "databases_coverage.csv")
-path_to_input_vocabularies_coverage_file <- here::here("tests", "testing_repo", "CODE_COUNTS", "vocabularies_coverage.csv")
+base_path <- r"(C:\Users\javier\REPOS\GITLAB_FinOMOP\finomopvocabularies)"
 
-path_to_temp_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "temp_omop_vocabulary")
+path_to_input_mapping_vocabularies_info_file <- file.path(base_path, "VOCABULARIES", "vocabularies_info.csv")
+path_to_input_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "input_omop_vocabulary")
+path_to_input_database_counts_file <- file.path(base_path, "CODE_COUNTS", "databases_coverage.csv")
+path_to_input_vocabularies_coverage_file <- file.path(base_path, "CODE_COUNTS", "vocabularies_coverage.csv")
 
-path_to_output_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "output_omop_vocabulary")
-path_to_output_dashboard_file <- here::here("tests", "testing_repo", "StatusReport", "dashboard.html")
+path_to_temp_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "temp_omop_vocabulary")
+
+path_to_output_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "output_omop_vocabulary")
+path_to_output_dashboard_file <- file.path(base_path, "StatusReport", "dashboard.html")
 ```
 
 
@@ -82,7 +84,7 @@ mergeOMOPtables(path_to_input_omop_vocabulary_folder,
 
 ## Validate the newely created vocabularies
 ```{r}
-omop_tables <- importOMOPtables(path_to_input_omop_vocabulary_folder, c("CONCEPT", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
+omop_tables <- importOMOPtables(path_to_output_omop_vocabulary_folder, c("CONCEPT", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
 
 omop_tables <- validateTables(omop_tables)
 

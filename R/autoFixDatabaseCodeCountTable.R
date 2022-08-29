@@ -1,6 +1,6 @@
 
 
-autoFixDatabaseCodeCountTable <- function(database_name, database_count_table, keep_only_source_vocabulary_ids=NULL) {
+autoFixDatabaseCodeCountTable <- function(database_count_table, database_name="", keep_only_source_vocabulary_ids=NULL) {
 
 
 
@@ -50,7 +50,7 @@ autoFixDatabaseCodeCountTable <- function(database_name, database_count_table, k
   if(n_more_that_5 > 0){
 
     database_count_table <- database_count_table |>
-      dplyr::filter(n_events<0 & n_events>5)
+      dplyr::filter( n_events>5)
 
     warning(
       "AutoFixing Database ", database_name,

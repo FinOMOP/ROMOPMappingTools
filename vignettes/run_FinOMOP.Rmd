@@ -20,15 +20,18 @@ devtools::load_all(".")
 ```
 
 ```{r}
-path_to_input_mapping_vocabularies_info_file <- here::here("tests", "testing_repo", "VOCABULARIES", "vocabularies_info.csv")
-path_to_input_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "input_omop_vocabulary")
-path_to_input_database_counts_file <- here::here("tests", "testing_repo", "CODE_COUNTS", "databases_coverage.csv")
-path_to_input_vocabularies_coverage_file <- here::here("tests", "testing_repo", "CODE_COUNTS", "vocabularies_coverage.csv")
 
-path_to_temp_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "temp_omop_vocabulary")
+base_path <- r"(C:\Users\javier\REPOS\GITLAB_FinOMOP\finomop_omop_vocabulary)"
 
-path_to_output_omop_vocabulary_folder <- here::here("tests", "testing_repo", "OMOP_VOCABULARIES", "output_omop_vocabulary")
-path_to_output_dashboard_file <- here::here("tests", "testing_repo", "StatusReport", "dashboard.html")
+path_to_input_mapping_vocabularies_info_file <- file.path(base_path, "VOCABULARIES", "vocabularies_info.csv")
+path_to_input_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "input_omop_vocabulary")
+path_to_input_database_counts_file <- file.path(base_path, "CODE_COUNTS", "databases_coverage.csv")
+path_to_input_vocabularies_coverage_file <- file.path(base_path, "CODE_COUNTS", "vocabularies_coverage.csv")
+
+path_to_temp_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "temp_omop_vocabulary")
+
+path_to_output_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "output_omop_vocabulary")
+path_to_output_dashboard_file <- file.path(base_path, "StatusReport", "dashboard.html")
 ```
 
 
@@ -47,8 +50,15 @@ usagi_mapping_tables
 vocabulary_info_mapping_tables
 ```
 
-```{r}
 
+temp fix:icd9fi, 
+```{r}
+usagi_mapping_tables[[4,5]][[1]] <- usagi_mapping_tables[[4,5]][[1]] |> 
+dplyr::distinct(sourceCode, .keep_all = TRUE )
+```
+
+
+```{r}
 usagi_mapping_tables <- usagi_mapping_tables |> validateTables("UsagiForCCR")
 vocabulary_info_mapping_tables <- vocabulary_info_mapping_tables |> validateTables("VocabularyInfo")
 
@@ -65,7 +75,7 @@ convertMappingsTablesToOMOPtables(
   usagi_mapping_tables,
   vocabulary_info_mapping_tables,
   path_to_temp_omop_vocabulary_folder, 
-  ignore_failed_rules = TRUE
+  ignore_failed_rules = FALSE
 )
 ```
 
@@ -82,7 +92,7 @@ mergeOMOPtables(path_to_input_omop_vocabulary_folder,
 
 ## Validate the newely created vocabularies
 ```{r}
-omop_tables <- importOMOPtables(path_to_input_omop_vocabulary_folder, c("CONCEPT", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
+omop_tables <- importOMOPtables(path_to_output_omop_vocabulary_folder, c("CONCEPT","VOCABULARY", "CONCEPT_CLASS", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
 
 omop_tables <- validateTables(omop_tables)
 
@@ -106,7 +116,7 @@ autofix
 
 databases_code_counts_tables <- databases_code_counts_tables |> 
   mutate(table = if_else(n_failed_rules==0, table, 
-                                map2(.x=name, .y=table, .f=~autoFixDatabaseCodeCountTable(.x,.y))
+                                map2(.x=table, .y=name, .f=~autoFixDatabaseCodeCountTable(.x,.y))
                                 ))
 
 databases_code_counts_tables <- validateTables(databases_code_counts_tables, table_type = "CodeCounts")
@@ -135,9 +145,10 @@ plotTableMappingStatus(mapping_status)
 plotTableVocabularyStatus(mapping_status, "ICD10fi")
 ```
 
+# Build report
 
 ```{r}
-tmp_html <- file.path(tempdir(), "MappingStatusDashboard.html")
+tmp_html <- path_to_output_dashboard_file
 buildStatusDashboard(
   usagi_mapping_tables = usagi_mapping_tables,
   vocabulary_info_mapping_tables = vocabulary_info_mapping_tables,
@@ -146,6 +157,60 @@ buildStatusDashboard(
   mapping_status  = mapping_status,
   output_file_html = tmp_html)
 browseURL(tmp_html) 
+```
+
+
+
+# Test against posgress
+
+Start postgress database and rung pgAdmin4
+
+```{bash}
+pg_ctl -D /c/Users/javier/WORKSPACES/OHDSI/postgres  -logfile start
+
+/c/Users/javier/AppData/Local/postgresql-14.4-1-windows-x64-binaries/pgsql/pgAdmin\ 4/bin/pgAdmin4.exe
+```
+
+
+password `5Yjyc%:R.0YmLh[pm<N%`
+
+```{r}
+# For those interested in seeing the CDM changes from 5.3 to 5.4, please see: http://ohdsi.github.io/CommonDataModel/cdm54Changes.html
+
+cd_admin <- DatabaseConnector::createConnectionDetails(
+  dbms     = "postgresql",
+  server   = "localhost/testmappings",
+  user     = "ohdsi_admin_user",
+  password = 'admin1',
+  port     = 5432,
+  pathToDriver = Sys.getenv("DATABASECONNECTOR_DRIVER_POSTGRES")
+)
+
+con <- DatabaseConnector::connect(cd_admin)
+```
+
+
+```{r}
+DatabaseConnector::disconnect(con)
+```
+
+
+```{r}
+cdmSchema      <- "cdm_vocabs"
+cdmVersion     <- "5.4"
+syntheaVersion <- "2.7.0"
+syntheaSchema  <- "source"
+#syntheaFileLoc <- r"(C:\Users\javier\WORKSPACES\OHDSI\data\synthea_sample_data_csv_apr2020\csv)"
+vocabFileLoc   <- path_to_output_omop_vocabulary_folder
+```
+
+
+```{r}
+ETLSyntheaBuilder::CreateCDMTables(connectionDetails = cd_admin, cdmSchema = cdmSchema, cdmVersion = cdmVersion)
+```
+
+```{r}
+ETLSyntheaBuilder::LoadVocabFromCsv(connectionDetails = cd_admin, cdmSchema = cdmSchema, vocabFileLoc = vocabFileLoc)
 ```
 
 

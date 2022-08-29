@@ -62,7 +62,6 @@ convertMappingsTablesToOMOPtables <- function(
     # VOCABULARY table
     ##
     vocabularies_info_for_CCR |>  dplyr::filter(type=="Vocabulary") |>
-      dplyr::left_join(code_mappings_for_CCR |> dplyr::rename(text_id = vocabName), by = "text_id") |>
       dplyr::transmute(
         vocabulary_id = text_id,
         vocabulary_name = text_name,
