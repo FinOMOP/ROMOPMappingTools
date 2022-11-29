@@ -168,7 +168,7 @@ Start postgress database and rung pgAdmin4
 ```{bash} 
 pg_ctl -D /c/Users/javier/WORKSPACES/OHDSI/postgres  -logfile start
 
-/c/Users/javier/AppData/Local/postgresql-14.4-1-windows-x64-binaries/pgsql/pgAdmin\ 4/bin/pgAdmin4.exe
+/c/Users/javier/AppData/Local/postgresql-14.4-1-windows-x64-binaries/pgsql/pgAdmin\ 4/bin/pgAdmin4.exe 
 ```
 
 
