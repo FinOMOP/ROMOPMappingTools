@@ -43,7 +43,7 @@ convertMappingsTablesToOMOPtables <- function(
     usagi_mapping_tables <- usagi_mapping_tables |> dplyr::filter(name %in% valid_vocabs_names)
 
     if(!is.null(vocabulary_info_mapping_tables)){
-        vocabulary_info_mapping_tables <- vocabulary_info_mapping_tables |> dplyr::filter(name %in% valid_vocabs_names)
+      vocabulary_info_mapping_tables <- vocabulary_info_mapping_tables |> dplyr::filter(name %in% valid_vocabs_names)
     }
   }
 
@@ -69,7 +69,10 @@ convertMappingsTablesToOMOPtables <- function(
         vocabulary_version = paste("FinOMOP", text_id, mapping_version, sep = "-"),
         vocabulary_concept_id = concept_id
       ) |>
-      readr::write_tsv(file.path(path_to_temp_omop_vocabulary_folder, "VOCABULARY.csv"), col_names = FALSE)
+      readr::write_tsv(
+        file.path(path_to_temp_omop_vocabulary_folder, "VOCABULARY.csv"),
+        col_names = FALSE,
+        na = "")
 
     ##
     # CONCEPT_CLASS table
@@ -80,7 +83,10 @@ convertMappingsTablesToOMOPtables <- function(
         concept_class_name = text_name,
         concept_class_concept_id = concept_id
       )|>
-      readr::write_tsv(file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT_CLASS.csv"), col_names = FALSE)
+      readr::write_tsv(
+        file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT_CLASS.csv"),
+        col_names = FALSE,
+        na = "")
 
     ##
     # CONCEPT_SYNONYM table
@@ -118,7 +124,10 @@ convertMappingsTablesToOMOPtables <- function(
       concept_synonym_fi,
       concept_synonym_se
     )|>
-      readr::write_tsv(file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT_SYNONYM.csv"), col_names = FALSE)
+      readr::write_tsv(
+        file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT_SYNONYM.csv"),
+        col_names = FALSE,
+        na = "")
 
     ##
     # CONCEPT table
@@ -183,7 +192,10 @@ convertMappingsTablesToOMOPtables <- function(
         valid_start_date =  .date_to_character(valid_start_date),
         valid_end_date =  .date_to_character(valid_end_date)
       ) |>
-      readr::write_tsv(file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT.csv"), col_names = FALSE)
+      readr::write_tsv(
+        file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT.csv"),
+        col_names = FALSE,
+        na = "")
 
     ##
     # CONCEPT_RELATIONSHIP table
@@ -218,7 +230,10 @@ convertMappingsTablesToOMOPtables <- function(
         valid_start_date =  .date_to_character(valid_start_date),
         valid_end_date =  .date_to_character(valid_end_date)
       ) |>
-      readr::write_tsv(file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT_RELATIONSHIP.csv"), col_names = FALSE)
+      readr::write_tsv(
+        file.path(path_to_temp_omop_vocabulary_folder, "CONCEPT_RELATIONSHIP.csv"),
+        col_names = FALSE,
+        na = "")
 
   }
 
