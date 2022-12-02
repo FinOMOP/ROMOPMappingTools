@@ -95,6 +95,7 @@ mergeOMOPtables(path_to_input_omop_vocabulary_folder,
 omop_tables <- importOMOPtables(path_to_output_omop_vocabulary_folder, c("CONCEPT","VOCABULARY", "CONCEPT_CLASS", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
 
 omop_tables <- validateTables(omop_tables)
+omop_tables <- validateOMOPTablesRelationships(omop_tables)
 
 omop_tables
 ```
