@@ -32,7 +32,7 @@ tables_valid_format <-  tibble::tribble(
     sourceName = readr::col_character(),
     sourceFrequency = readr::col_integer(),
     sourceAutoAssignedConceptIds = readr::col_integer(),
-    `ADD_INFO:sourceConceptId` = readr::col_integer(),
+    `ADD_INFO:sourceConceptId` = readr::col_double(),
     `ADD_INFO:sourceName_fi` = readr::col_character(),
     `ADD_INFO:sourceConceptClass` = readr::col_character(),
     `ADD_INFO:sourceDomain` = readr::col_character(),
