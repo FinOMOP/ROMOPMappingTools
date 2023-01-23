@@ -62,7 +62,7 @@ tables_valid_format <-  tibble::tribble(
   #
   "VocabularyInfo",
   readr::cols(
-    concept_id = readr::col_integer(),
+    concept_id = readr::col_double(),
     type = readr::col_character(),
     text_id = readr::col_character(),
     text_name = readr::col_character()
