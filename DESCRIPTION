@@ -21,8 +21,9 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    validate, 
-    checkmate
+    validate,
+    checkmate,
+    flexdashboard
 Depends: 
     R (>= 2.10)
 LazyData: true

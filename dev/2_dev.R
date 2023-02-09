@@ -22,6 +22,8 @@ usethis::use_package("reactable")
 usethis::use_package("reactablefmtr")
 usethis::use_package("validate")
 
+usethis::use_package("flexdashboard")
+
 
 
 ## DATA
