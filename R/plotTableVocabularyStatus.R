@@ -1,5 +1,14 @@
 
 
+#' plotTableVocabularyStatus
+#'
+#' @param mapping_status
+#' @param source_vocabulary_id
+#'
+#' @return
+#' @export
+#'
+#' @examples
 plotTableVocabularyStatus <- function(mapping_status, source_vocabulary_id) {
 
 

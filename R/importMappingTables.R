@@ -1,5 +1,12 @@
 
-
+#' importMappingTables
+#'
+#' @param path_to_input_vocabularies_info_file
+#'
+#' @return
+#' @export
+#'
+#' @examples
 importMappingTables <- function(path_to_input_vocabularies_info_file) {
 
   ###

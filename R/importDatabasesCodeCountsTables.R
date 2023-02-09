@@ -1,6 +1,15 @@
 
 
 
+#' importDatabasesCodeCountsTables
+#'
+#' @param path_to_database_code_counts_file
+#' @param calculate_all_databases
+#'
+#' @return
+#' @export
+#'
+#' @examples
 importDatabasesCodeCountsTables <- function(path_to_database_code_counts_file, calculate_all_databases=TRUE) {
 
   ###

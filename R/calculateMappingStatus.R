@@ -1,5 +1,17 @@
 
 
+#' calculateMappingStatus
+#'
+#' @param path_to_vocabularies_coverage_file
+#' @param omop_tables
+#' @param databases_code_counts_tables
+#' @param ignore_failed_rules
+#' @param calculate_all_databases
+#'
+#' @return
+#' @export
+#'
+#' @examples
 calculateMappingStatus <- function(
     path_to_vocabularies_coverage_file,
     omop_tables,

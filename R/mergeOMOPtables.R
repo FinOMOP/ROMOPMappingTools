@@ -9,7 +9,7 @@ mergeOMOPtables <- function(path_to_input_omop_vocabulary_folder,
                             path_to_toappend_omop_vocabulary_folder,
                             path_to_output_omop_vocabulary_folder) {
 
-  utils::data("valid_OMOP_tables_v53", package = "RVocabToolsOMOP")
+  utils::data("valid_OMOP_tables_v53", package = "ROMOPMappingTools")
   valid_OMOP_tables <- valid_OMOP_tables_v53
 
   ###

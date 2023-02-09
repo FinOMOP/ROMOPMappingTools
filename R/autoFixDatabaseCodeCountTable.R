@@ -1,5 +1,15 @@
 
 
+#' autoFixDatabaseCodeCountTable
+#'
+#' @param database_count_table
+#' @param database_name
+#' @param keep_only_source_vocabulary_ids
+#'
+#' @return
+#' @export
+#'
+#' @examples
 autoFixDatabaseCodeCountTable <- function(database_count_table, database_name="", keep_only_source_vocabulary_ids=NULL) {
 
 

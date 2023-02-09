@@ -1,5 +1,18 @@
 
 
+#' buildStatusDashboard
+#'
+#' @param usagi_mapping_tables
+#' @param vocabulary_info_mapping_tables
+#' @param omop_tables
+#' @param databases_code_counts_tables
+#' @param mapping_status
+#' @param output_file_html
+#'
+#' @return
+#' @export
+#'
+#' @examples
 buildStatusDashboard <- function(
     usagi_mapping_tables = NULL,
     vocabulary_info_mapping_tables = NULL,

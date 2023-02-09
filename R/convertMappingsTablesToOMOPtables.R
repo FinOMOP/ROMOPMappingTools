@@ -1,4 +1,15 @@
 
+#' convertMappingsTablesToOMOPtables
+#'
+#' @param usagi_mapping_tables
+#' @param vocabulary_info_mapping_tables
+#' @param path_to_temp_omop_vocabulary_folder
+#' @param ignore_failed_rules
+#'
+#' @return
+#' @export
+#'
+#' @examples
 convertMappingsTablesToOMOPtables <- function(
     usagi_mapping_tables,
     vocabulary_info_mapping_tables = NULL,

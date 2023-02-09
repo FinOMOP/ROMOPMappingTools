@@ -1,5 +1,13 @@
 
 
+#' validateOMOPTablesRelationships
+#'
+#' @param tibble_with_tables
+#'
+#' @return
+#' @export
+#'
+#' @examples
 validateOMOPTablesRelationships <- function(
     tibble_with_tables
 ){

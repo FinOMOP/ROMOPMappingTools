@@ -1,5 +1,13 @@
 
-
+#' validateTables
+#'
+#' @param tibble_with_tables
+#' @param table_type
+#'
+#' @return
+#' @export
+#'
+#' @examples
 validateTables <- function(
     tibble_with_tables,
     table_type = NULL
