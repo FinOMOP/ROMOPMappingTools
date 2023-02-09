@@ -9,8 +9,18 @@ mergeOMOPtables <- function(path_to_input_omop_vocabulary_folder,
                             path_to_toappend_omop_vocabulary_folder,
                             path_to_output_omop_vocabulary_folder) {
 
-  utils::data("tables_valid_format", package = "ROMOPMappingTools")
-  valid_OMOP_tables <- tables_valid_format
+
+  valid_OMOP_tables <- c(
+    "CONCEPT",
+    "CONCEPT_ANCESTOR",
+    "CONCEPT_CLASS",
+    "CONCEPT_RELATIONSHIP",
+    "CONCEPT_SYNONYM",
+    "DOMAIN",
+    "DRUG_STRENGTH",
+    "RELATIONSHIP",
+    "VOCABULARY"
+  )
 
   ###
   ## validate input parameters
@@ -24,7 +34,7 @@ mergeOMOPtables <- function(path_to_input_omop_vocabulary_folder,
   ###
 
   # copy base vocabulary
-  for(table_name in valid_OMOP_tables$table_name){
+  for(table_name in valid_OMOP_tables){
     file.copy(
       file.path(path_to_input_omop_vocabulary_folder, paste0(table_name, ".csv") ),
       file.path(path_to_output_omop_vocabulary_folder, paste0(table_name, ".csv")),
@@ -33,7 +43,7 @@ mergeOMOPtables <- function(path_to_input_omop_vocabulary_folder,
   }
 
   # append new vocabulary
-  for(table_name in valid_OMOP_tables$table_name){
+  for(table_name in valid_OMOP_tables){
     # if omop vocab table exists append it
     if(file.exists(file.path(path_to_toappend_omop_vocabulary_folder, paste0(table_name, ".csv")))){
       file.append(
