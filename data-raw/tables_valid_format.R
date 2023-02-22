@@ -3,7 +3,7 @@
 
 
 tables_valid_format <-  tibble::tribble(
-  ~table_type, ~col_type, ~validation_rules,
+  ~table_type, ~col_type, ~validation_rules, ~table_description, ~columns_description,
 
   ###
   # mapping tables
@@ -24,6 +24,9 @@ tables_valid_format <-  tibble::tribble(
     source_vocabulary_id.is.unique = is_unique(source_vocabulary_id),
     twobillionare_code.is.unique = is_unique(twobillionare_code),
     mapping_type.valid.values.are.CCR.or.STCM = mapping_type %in% c("CCR", "STCM")
+  ),
+  "",
+  list(
   ),
   #
   "UsagiForCCR",
@@ -59,6 +62,32 @@ tables_valid_format <-  tibble::tribble(
     sourceName.is.not.empty = is_complete(sourceName),
     sourceName.lessthan.255char = field_length(sourceName, min=0, max=255)
   ),
+  "Usagi file with few added columms neede to build the OMOP vocabulary tables",
+  list(
+    sourceCode = "Usagui column: code in the local vocabulary",
+    sourceName = "Usagui column: code's name in English as in the local vocabulary or traslated from",
+    sourceFrequency = "Usagui column: number of times the code appears in the reference database",
+    sourceAutoAssignedConceptIds = "Usagui column:",
+    `ADD_INFO:sourceConceptId` = "Usagui-extended column: over 2 billion unique concept_id",
+    `ADD_INFO:sourceName_fi` = "Usagui-extended column:  code's name in Finnish",
+    `ADD_INFO:sourceConceptClass` = "Usagui-extended column: text id of hierarchy with in the local vocabulary. This must be as it appears in the vocabulary_info file",
+    `ADD_INFO:sourceDomain` = "Usagui-extended column: default domain for the code. If the code has a mapping the domain is infered from the standard code, if not, this value is used.",
+    `ADD_INFO:sourceValidStartDate` = "Usagui-extended column: code's start valididty date in dd-mm-yyyy format. If not available set to ",
+    `ADD_INFO:sourceValidEndDate` = "Usagui-extended column: code's end valididty date in dd-mm-yyyy format. If not available set to",
+    matchScore = "Usagui column:",
+    mappingStatus = "Usagui column:",
+    equivalence = "Usagui column:",
+    statusSetBy = "Usagui column:",
+    statusSetOn = "Usagui column:",
+    conceptId = "Usagui column:",
+    conceptName = "Usagui column:",
+    domainId = "Usagui column:",
+    mappingType ="Usagui column:",
+    comment = "Usagui column:",
+    createdBy = "Usagui column:",
+    createdOn = "Usagui column:",
+    assignedReviewer = "Usagui column:",
+  ),
   #
   "VocabularyInfo",
   readr::cols(
@@ -71,6 +100,8 @@ tables_valid_format <-  tibble::tribble(
     concept_id.is.uniques = is_unique(concept_id),
     text_id.lessthan.20char = field_length(text_id , min=0, max=20)
   ),
+  "",
+  list(),
   #
   "VocabulariesCoverage",
   readr::cols(
@@ -84,6 +115,8 @@ tables_valid_format <-  tibble::tribble(
     target_vocabulary_ids.is.not.na = is_complete(target_vocabulary_ids),
     source_vocabulary_id.and.target_vocabulary_ids.is.uniques = is_unique(concept_id)
   ),
+  "",
+  list(),
   #
   "DatabasesCodeCounts",
   readr::cols(
@@ -95,6 +128,9 @@ tables_valid_format <-  tibble::tribble(
     database_name.is.not.na = is_complete(database_name),
     path_to_code_counts_file.is.not.na = is_complete(path_to_code_counts_file)
   ),
+  "",
+  list(),
+  #
   "CodeCounts",
   readr::cols(
     source_vocabulary_id = readr::col_character(),
@@ -106,6 +142,8 @@ tables_valid_format <-  tibble::tribble(
     source_vocabulary_id.and.source_code.are.unique = is_unique(source_vocabulary_id, source_code),
     n_events.is.more.than.5.or.minus.one = n_events>5|n_events==-1
   ),
+  "",
+  list(),
   ###
   # OMOP vocabulary tables
   ###
@@ -141,6 +179,8 @@ tables_valid_format <-  tibble::tribble(
     invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1)
 
   ),
+  "",
+  list(),
   #
   "CONCEPT_ANCESTOR",
   readr::cols(
@@ -150,6 +190,8 @@ tables_valid_format <-  tibble::tribble(
     max_levels_of_separation = readr::col_integer()
   ),
   validate::validator(),
+  "",
+  list(),
   #
   "CONCEPT_CLASS",
   readr::cols(
@@ -164,6 +206,9 @@ tables_valid_format <-  tibble::tribble(
     concept_class_name.lessthan.255char = field_length(concept_class_name, min=0, max=255),
     concept_class_concept_id.is.complete = is_complete(concept_class_concept_id)
   ),
+
+  "",
+  list(),
   #
   "CONCEPT_RELATIONSHIP",
   readr::cols(
@@ -183,6 +228,8 @@ tables_valid_format <-  tibble::tribble(
     valid_end_date.is.complete = is_complete(valid_end_date),
     invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1)
   ),
+  "",
+  list(),
   #
   "CONCEPT_SYNONYM",
   readr::cols(
@@ -196,6 +243,8 @@ tables_valid_format <-  tibble::tribble(
     concept_synonym_name.lessthan.1000char = field_length(concept_synonym_name, min=0, max=1000),
     language_concept_id.is.complete = is_complete(language_concept_id)
   ),
+  "",
+  list(),
   #
   "DOMAIN",
   readr::cols(
@@ -204,6 +253,8 @@ tables_valid_format <-  tibble::tribble(
     domain_concept_id = readr::col_integer()
   ),
   validate::validator(),
+  "",
+  list(),
   #
   "DRUG_STRENGTH",
   readr::cols(
@@ -221,6 +272,8 @@ tables_valid_format <-  tibble::tribble(
     invalid_reason = readr::col_character()
   ),
   validate::validator(),
+  "",
+  list(),
   #
   "RELATIONSHIP",
   readr::cols(
@@ -232,6 +285,8 @@ tables_valid_format <-  tibble::tribble(
     relationship_concept_id = readr::col_integer()
   ),
   validate::validator(),
+  "",
+  list(),
   #
   "VOCABULARY",
   readr::cols(
@@ -249,7 +304,9 @@ tables_valid_format <-  tibble::tribble(
     vocabulary_reference.lessthan.255char = field_length(vocabulary_reference, min=0, max=255),
     vocabulary_version.lessthan.255char = field_length(vocabulary_version, min=0, max=255),
     vocabulary_concept_id.is.complete = is_complete(vocabulary_concept_id)
-  )
+  ),
+  "",
+  list()
 )
 
 usethis::use_data(tables_valid_format, overwrite = TRUE)
