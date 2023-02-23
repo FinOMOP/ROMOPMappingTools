@@ -30,7 +30,7 @@ plotTableVocabularyStatus <- function(mapping_status, source_vocabulary_id) {
   table <- mapping_status$code_counts_matched |>
     dplyr::filter(source_vocabulary_id %in% !!source_vocabulary_id) |>
     dplyr::select(database_name , mapping_status,
-                  source_code, concept_name, concept_name_fi, source_vocabulary_id,
+                  source_code, concept_name, concept_name_fi, vocabulary_id,
                   n_events
     ) |>
     tidyr::spread(database_name, n_events)
@@ -40,7 +40,7 @@ plotTableVocabularyStatus <- function(mapping_status, source_vocabulary_id) {
 
   table <- table |>
     dplyr::select(!!!table_cols, all_databases) |>
-    dplyr::rename(vocabulary_id = source_vocabulary_id ) |>
+    dplyr::rename(vocabulary_id = vocabulary_id ) |>
     dplyr::mutate(all_databases = all_databases/sum(all_databases)) |>
     dplyr::arrange(dplyr::desc(all_databases))
 
