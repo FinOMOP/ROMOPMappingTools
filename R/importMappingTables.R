@@ -25,10 +25,11 @@ importMappingTables <- function(path_to_input_vocabularies_info_file) {
 
 
   # force to absolute paths
-  mapping_vocabularies_info <- mapping_vocabularies_info |> dplyr::mutate(dplyr::across(
-    dplyr::starts_with("path"),
-    ~stringr::str_replace(., "\\.", dirname(path_to_input_vocabularies_info_file))
-  ))
+  mapping_vocabularies_info <- mapping_vocabularies_info |>
+    dplyr::mutate_at(
+      dplyr::vars(dplyr::starts_with("path")),
+      ~stringr::str_replace(., "\\.", dirname(path_to_input_vocabularies_info_file))
+    )
 
 
   # read usagi files
