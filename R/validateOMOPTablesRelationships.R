@@ -18,7 +18,7 @@ validateOMOPTablesRelationships <- function(
   ###
   tibble_with_tables |> checkmate::assertTibble()
   checkmate::assertSubset(
-    c("CONCEPT","VOCABULARY", "CONCEPT_CLASS", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"),
+    c("CONCEPT","VOCABULARY", "CONCEPT_CLASS", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM", "DOMAIN"),
     tibble_with_tables |> pull(name)
   )
 
@@ -93,6 +93,39 @@ validateOMOPTablesRelationships <- function(
       name = "concept_class_ids in CONCEPT in CONCEPT_CLASS"
     ))
 
+
+  # check domain_id in CONCEPT is in  DOMAIN
+  CONCEPT <- omop_tables |>
+    dplyr::filter(name == "CONCEPT") |> dplyr::select(table) |>  tidyr::unnest(table)
+
+  domain_ids_in_DOMAIN <- omop_tables  |>
+    dplyr::filter(name == "DOMAIN") |> dplyr::select(table) |>  tidyr::unnest(table) |>
+    distinct(domain_id)
+
+
+  domain_ids_in_CONCEPT_notin_DOMAIN <- CONCEPT |>
+    dplyr::anti_join(domain_ids_in_DOMAIN, by="domain_id")
+
+  validation_summary <- dplyr::bind_rows(
+    validation_summary,
+    tibble::tibble(
+      name = "domain_id in CONCEPT is in DOMAIN",
+      items = nrow(CONCEPT),
+      passes = nrow(CONCEPT)-nrwo(domain_ids_in_CONCEPT_notin_DOMAIN),
+      fails=    nrow(domain_ids_in_CONCEPT_notin_DOMAIN),
+      nNA = 0,
+      error = fails>0,
+      warning = FALSE,
+      expression = " CONCEPT |> dplyr::anti_join(domain_ids_in_DOMAIN, by='domain_id')"
+    )
+  )
+
+  failed_rules_table <- dplyr::bind_rows(
+    failed_rules_table,
+    tibble::tibble(
+      fails = domain_ids_in_CONCEPT_notin_DOMAIN,
+      name = "domain_id in CONCEPT is in DOMAIN"
+    ))
 
 
   # return
