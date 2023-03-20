@@ -111,7 +111,7 @@ validateOMOPTablesRelationships <- function(
     tibble::tibble(
       name = "domain_id in CONCEPT is in DOMAIN",
       items = nrow(CONCEPT),
-      passes = nrow(CONCEPT)-nrwo(domain_ids_in_CONCEPT_notin_DOMAIN),
+      passes = nrow(CONCEPT)-nrow(domain_ids_in_CONCEPT_notin_DOMAIN),
       fails=    nrow(domain_ids_in_CONCEPT_notin_DOMAIN),
       nNA = 0,
       error = fails>0,
