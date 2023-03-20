@@ -28,76 +28,69 @@ validateOMOPTablesRelationships <- function(
   validation_summary <- tibble::tibble()
   failed_rules_table <- tibble::tibble()
 
-  # check vocabulary_ids in CONCEPT  in VOCABULARY
-  vocabulary_ids_in_CONCEPT <- omop_tables |>
+  CONCEPT <- omop_tables |>
     dplyr::filter(name == "CONCEPT") |> dplyr::select(table) |>  tidyr::unnest(table) |>
-    distinct(vocabulary_id) |>  pull()
+    dplyr::mutate(row = dplyr::row_number())
+
+  # check vocabulary_ids in CONCEPT  in VOCABULARY
   vocabulary_ids_in_VOCABULARY <- omop_tables |>
     dplyr::filter(name == "VOCABULARY") |> dplyr::select(table) |>  tidyr::unnest(table) |>
-    distinct(vocabulary_id) |>  pull()
+    distinct(vocabulary_id)
 
-  vocabulary_ids_in_CONCEPT_notin_VOCABULARY <- setdiff( vocabulary_ids_in_CONCEPT, vocabulary_ids_in_VOCABULARY)
-
+  vocabulary_ids_in_CONCEPT_notin_VOCABULARY <- CONCEPT |>
+    dplyr::anti_join(vocabulary_ids_in_VOCABULARY, by="vocabulary_id")
 
   validation_summary <- dplyr::bind_rows(
     validation_summary,
     tibble::tibble(
-      name = "vocabulary_ids in CONCEPT in VOCABULARY",
-      items = length(vocabulary_ids_in_CONCEPT),
-      passes = length(vocabulary_ids_in_CONCEPT)-length(vocabulary_ids_in_CONCEPT_notin_VOCABULARY),
-      fails=    length(vocabulary_ids_in_CONCEPT_notin_VOCABULARY),
+      name = "vocabulary_ids in CONCEPT is in VOCABULARY",
+      items = nrow(CONCEPT),
+      passes = nrow(CONCEPT)-nrow(vocabulary_ids_in_CONCEPT_notin_VOCABULARY),
+      fails=    nrow(vocabulary_ids_in_CONCEPT_notin_VOCABULARY),
       nNA = 0,
       error = fails>0,
       warning = FALSE,
-      expression = "setdiff( vocabulary_ids_in_CONCEPT, vocabulary_ids_in_VOCABULARY)"
+      expression = " CONCEPT |> dplyr::anti_join(vocabulary_ids_in_VOCABULARY, by='vocabulary_id')"
     )
   )
 
   failed_rules_table <- dplyr::bind_rows(
     failed_rules_table,
-    tibble::tibble(
-      fails = vocabulary_ids_in_CONCEPT_notin_VOCABULARY,
-      name = "vocabulary_ids in CONCEPT in VOCABULARY"
-    )
+    vocabulary_ids_in_CONCEPT_notin_VOCABULARY |>
+      dplyr::mutate( name = "vocabulary_ids in CONCEPT is in VOCABULARY")
   )
 
 
   # check concept_class_ids in CONCEPT  in CONCEPT_CLASS
-  concept_class_ids_in_CONCEPT <- omop_tables |>
-    dplyr::filter(name == "CONCEPT") |> dplyr::select(table) |>  tidyr::unnest(table) |>
-    distinct(concept_class_id) |>  pull()
   concept_class_ids_in_CONCEPT_CLASS <- omop_tables |>
     dplyr::filter(name == "CONCEPT_CLASS") |> dplyr::select(table) |>  tidyr::unnest(table) |>
-    distinct(concept_class_id) |>  pull()
+    distinct(concept_class_id)
 
-  concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS <- setdiff( concept_class_ids_in_CONCEPT, concept_class_ids_in_CONCEPT_CLASS)
+  concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS <- CONCEPT |>
+    dplyr::anti_join(concept_class_ids_in_CONCEPT_CLASS, by="concept_class_id")
 
   validation_summary <- dplyr::bind_rows(
     validation_summary,
     tibble::tibble(
       name = "concept_class_ids in CONCEPT in CONCEPT_CLASS",
-      items = length(concept_class_ids_in_CONCEPT),
-      passes = length(concept_class_ids_in_CONCEPT)-length(concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS),
-      fails=    length(concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS),
+      items = nrow(CONCEPT),
+      passes = nrow(CONCEPT)-nrow(concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS),
+      fails=    nrow(concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS),
       nNA = 0,
       error = fails>0,
       warning = FALSE,
-      expression = "setdiff( concept_class_ids_in_CONCEPT, concept_class_ids_in_CONCEPT_CLASS)"
+      expression = " CONCEPT |> dplyr::anti_join(concept_class_ids_in_CONCEPT_CLASS, by='concept_class_id')"
     )
   )
 
   failed_rules_table <- dplyr::bind_rows(
     failed_rules_table,
-    tibble::tibble(
-      fails = concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS,
-      name = "concept_class_ids in CONCEPT in CONCEPT_CLASS"
-    ))
+    concept_class_ids_in_CONCEPT_notin_CONCEPT_CLASS |>
+      dplyr::mutate( name = "concept_class_ids in CONCEPT in CONCEPT_CLASS")
+  )
 
 
   # check domain_id in CONCEPT is in  DOMAIN
-  CONCEPT <- omop_tables |>
-    dplyr::filter(name == "CONCEPT") |> dplyr::select(table) |>  tidyr::unnest(table)
-
   domain_ids_in_DOMAIN <- omop_tables  |>
     dplyr::filter(name == "DOMAIN") |> dplyr::select(table) |>  tidyr::unnest(table) |>
     distinct(domain_id)
@@ -122,10 +115,8 @@ validateOMOPTablesRelationships <- function(
 
   failed_rules_table <- dplyr::bind_rows(
     failed_rules_table,
-    tibble::tibble(
-      fails = domain_ids_in_CONCEPT_notin_DOMAIN,
-      name = "domain_id in CONCEPT is in DOMAIN"
-    ))
+    domain_ids_in_CONCEPT_notin_DOMAIN |> dplyr::mutate(name = "domain_id in CONCEPT is in DOMAIN")
+  )
 
 
   # return
