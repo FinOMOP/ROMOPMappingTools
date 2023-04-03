@@ -86,7 +86,7 @@ tables_valid_format <-  tibble::tribble(
     comment = "Usagui column:",
     createdBy = "Usagui column:",
     createdOn = "Usagui column:",
-    assignedReviewer = "Usagui column:",
+    assignedReviewer = "Usagui column:"
   ),
   #
   "VocabularyInfo",
@@ -176,8 +176,8 @@ tables_valid_format <-  tibble::tribble(
     concept_code.lessthan.50char = field_length(concept_code, min=0, max=50),
     valid_start_date.is.complete = is_complete(valid_start_date),
     valid_end_date.is.complete = is_complete(valid_end_date),
-    invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1)
-
+    invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1),
+    valid_start_date.is.lower.than.valid_end_date = valid_start_date<=valid_end_date
   ),
   "",
   list(),
@@ -303,7 +303,8 @@ tables_valid_format <-  tibble::tribble(
     vocabulary_name.lessthan.255char = field_length(vocabulary_name, min=0, max=255),
     vocabulary_reference.lessthan.255char = field_length(vocabulary_reference, min=0, max=255),
     vocabulary_version.lessthan.255char = field_length(vocabulary_version, min=0, max=255),
-    vocabulary_concept_id.is.complete = is_complete(vocabulary_concept_id)
+    vocabulary_concept_id.is.complete = is_complete(vocabulary_concept_id),
+    valid_start_date.is.lower.than.valid_end_date = valid_start_date<=valid_end_date
   ),
   "",
   list()
