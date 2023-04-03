@@ -166,7 +166,6 @@ convertMappingsTablesToOMOPtables <- function(
       dplyr::mutate(
         domainId = dplyr::if_else(mappingStatus=="APPROVED", domainId, "" )
       ) |>
-      dplyr::filter(mappingStatus=="APPROVED")
       #
       dplyr::group_by(
         vocabName ,
