@@ -60,7 +60,8 @@ tables_valid_format <-  tibble::tribble(
     sourceCode.and.conceptId.are.uniques = is_unique(sourceCode, conceptId),
     sourceCode.is.not.empty = is_complete(sourceCode),
     sourceName.is.not.empty = is_complete(sourceName),
-    sourceName.lessthan.255char = field_length(sourceName, min=0, max=255)
+    sourceName.lessthan.255char = field_length(sourceName, min=0, max=255),
+    valid_start_date.is.lower.than.valid_end_date = `ADD_INFO:sourceValidStartDate`<=`ADD_INFO:sourceValidEndDate`
   ),
   "Usagi file with few added columms neede to build the OMOP vocabulary tables",
   list(
@@ -226,7 +227,8 @@ tables_valid_format <-  tibble::tribble(
     relationship_id.lessthan.255char = field_length(relationship_id, min=0, max=20),
     valid_start_date.is.complete = is_complete(valid_start_date),
     valid_end_date.is.complete = is_complete(valid_end_date),
-    invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1)
+    invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1),
+    valid_start_date.is.lower.than.valid_end_date = valid_start_date<=valid_end_date
   ),
   "",
   list(),
@@ -303,8 +305,7 @@ tables_valid_format <-  tibble::tribble(
     vocabulary_name.lessthan.255char = field_length(vocabulary_name, min=0, max=255),
     vocabulary_reference.lessthan.255char = field_length(vocabulary_reference, min=0, max=255),
     vocabulary_version.lessthan.255char = field_length(vocabulary_version, min=0, max=255),
-    vocabulary_concept_id.is.complete = is_complete(vocabulary_concept_id),
-    valid_start_date.is.lower.than.valid_end_date = valid_start_date<=valid_end_date
+    vocabulary_concept_id.is.complete = is_complete(vocabulary_concept_id)
   ),
   "",
   list()
