@@ -162,6 +162,12 @@ convertMappingsTablesToOMOPtables <- function(
 
     # code concepts
     concept_vocab <- code_mappings_for_CCR |>
+      # clear domain the mapping has not been accepted
+      dplyr::mutate(
+        domainId = dplyr::if_else(mappingStatus=="APPROVED", domainId, "" )
+      ) |>
+      dplyr::filter(mappingStatus=="APPROVED")
+      #
       dplyr::group_by(
         vocabName ,
         `ADD_INFO:sourceConceptId`,
@@ -192,7 +198,7 @@ convertMappingsTablesToOMOPtables <- function(
       dplyr::transmute(
         concept_id = `ADD_INFO:sourceConceptId`,
         concept_name = sourceName |> stringr::str_sub(1,255),
-        domain_id = recalcualted_domainId, # at the moment
+        domain_id = recalcualted_domainId,
         vocabulary_id = vocabName,
         concept_class_id = `ADD_INFO:sourceConceptClass`,
         standard_concept = as.character(NA),
