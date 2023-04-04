@@ -229,7 +229,9 @@ tables_valid_format <-  tibble::tribble(
     valid_start_date.is.complete = is_complete(valid_start_date),
     valid_end_date.is.complete = is_complete(valid_end_date),
     invalid_reason.equal.1char = is.na(invalid_reason)|field_length(invalid_reason, n=1),
-    valid_start_date.is.lower.than.valid_end_date = valid_start_date<=valid_end_date
+    valid_start_date.is.lower.than.valid_end_date = valid_start_date<=valid_end_date,
+    concept_id_1.is.not.0 = concept_id_1!=0,
+    concept_id_2.is.not.0 = concept_id_2!=0,
   ),
   "",
   list(),
