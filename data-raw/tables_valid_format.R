@@ -61,7 +61,8 @@ tables_valid_format <-  tibble::tribble(
     sourceCode.is.not.empty = is_complete(sourceCode),
     sourceName.is.not.empty = is_complete(sourceName),
     sourceName.lessthan.255char = field_length(sourceName, min=0, max=255),
-    valid_start_date.is.lower.than.valid_end_date = `ADD_INFO:sourceValidStartDate`<=`ADD_INFO:sourceValidEndDate`
+    valid_start_date.is.lower.than.valid_end_date = `ADD_INFO:sourceValidStartDate`<=`ADD_INFO:sourceValidEndDate`,
+    concept_id.is.not.0.for.ACCEPTED.mappingStatus = (mappingStatus=="APPROVED" & conceptId!=0)
   ),
   "Usagi file with few added columms neede to build the OMOP vocabulary tables",
   list(
