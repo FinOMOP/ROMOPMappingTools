@@ -46,7 +46,7 @@ validateTable <- function(table, table_type) {
   failed_rules_rows <- validate::values(validations) |> tibble::as_tibble()
   if(ncol(failed_rules_rows)>0){
     failed_rules_rows <- failed_rules_rows |>
-      dplyr::mutate(dplyr::across(.fns = ~dplyr::if_else(!.x,dplyr::row_number(), as.integer(NA)))) |>
+      dplyr::mutate_all(~dplyr::if_else(!.x,dplyr::row_number(), as.integer(NA))) |>
       tidyr::pivot_longer(cols = tidyr::everything(), names_to = "name", values_to = "row", values_drop_na = TRUE) |>
       dplyr::mutate(name = stringr::str_replace_all(name, "\\.", " "))
   }else{
