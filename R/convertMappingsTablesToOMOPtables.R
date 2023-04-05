@@ -189,8 +189,6 @@ convertMappingsTablesToOMOPtables <- function(
         recalcualted_domainId == "Device Procedure" ~      "Device/Procedure",
         recalcualted_domainId == "Drug Procedure" ~        "Drug/Procedure",
         recalcualted_domainId == "Measurement Procedure" ~ "Meas/Procedure",
-        recalcualted_domainId == "Meas Value Procedure" ~ "Meas/Procedure",
-        recalcualted_domainId == "Meas Value Operator Procedure" ~ "Meas/Procedure",
         recalcualted_domainId == "Observation Procedure" ~ "Obs/Procedure",
         recalcualted_domainId == "" ~ `ADD_INFO:sourceDomain`,
         TRUE ~ recalcualted_domainId
