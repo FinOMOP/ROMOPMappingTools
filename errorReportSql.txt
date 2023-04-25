@@ -1,0 +1,44 @@
+DBMS:
+duckdb
+
+Error:
+rapi_execute: Failed to run query
+Error: Invalid Input Error: Could not convert string "2340000000000000" to DECIMAL(18,3) at line 40891 in column 4. Parser options:
+  file=C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary/OMOP_VOCABULARIES/output_omop_vocabulary/DRUG_STRENGTH.csv
+  delimiter='	'
+  quote=''
+  escape='' (default)
+  header=1
+  sample_size=20480
+  ignore_errors=0
+  all_varchar=0 
+
+SQL:
+COPY DRUG_STRENGTH FROM 'C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary/OMOP_VOCABULARIES/output_omop_vocabulary/DRUG_STRENGTH.csv' (DATEFORMAT '%Y%m%d', DELIM '	', HEADER true, QUOTE '')
+
+R version:
+R version 4.2.2 (2022-10-31 ucrt)
+
+Platform:
+x86_64-w64-mingw32
+
+Attached base packages:
+- stats
+- graphics
+- grDevices
+- utils
+- datasets
+- methods
+- base
+
+Other attached packages:
+- ROMOPMappingTools (0.0.0.9000)
+- forcats (1.0.0)
+- stringr (1.5.0)
+- dplyr (1.1.0)
+- purrr (1.0.1)
+- readr (2.1.4)
+- tidyr (1.3.0)
+- tibble (3.2.0)
+- ggplot2 (3.4.1)
+- tidyverse (1.3.2)
