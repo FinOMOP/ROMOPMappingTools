@@ -2,19 +2,49 @@ DBMS:
 duckdb
 
 Error:
-rapi_execute: Failed to run query
-Error: Invalid Input Error: Could not convert string "2340000000000000" to DECIMAL(18,3) at line 40891 in column 4. Parser options:
-  file=C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary/OMOP_VOCABULARIES/output_omop_vocabulary/DRUG_STRENGTH.csv
-  delimiter='	'
-  quote=''
-  escape='' (default)
-  header=1
-  sample_size=20480
-  ignore_errors=0
-  all_varchar=0 
+rapi_prepare: Failed to prepare query SELECT
+        c.vocabulary_id AS vocabulary_id,
+        c.concept_code AS concept_code,
+        c.concept_name AS concept_name,
+        cs.concept_synonym_name AS concept_name_fi,
+        c.concept_id AS concept_id,
+        cr.concept_id_2 AS concept_id_2
+      FROM main.CONCEPT AS c
+      LEFT JOIN (
+        SELECT concept_id, concept_synonym_name  FROM main.CONCEPT_RELATIONSHIP
+        WHERE relationship_id = 'Maps to'
+      ) AS cr
+        ON c.concept_id = cr.concept_id_1
+      LEFT JOIN (
+        SELECT concept_id, concept_synonym_name  FROM main.CONCEPT_SYNONYM
+        WHERE language_concept_id == 4181730
+      ) AS cs
+        ON c.concept_id = cs.concept_id
+      WHERE c.vocabulary_id IN ('ATC', 'ICD10', 'ICD10fi', 'FGVisitType', 'ICPC')
+Error: Binder Error: Referenced column "concept_synonym_name" not found in FROM clause!
+Candidate bindings: "CONCEPT_RELATIONSHIP.concept_id_1"
 
 SQL:
-COPY DRUG_STRENGTH FROM 'C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary/OMOP_VOCABULARIES/output_omop_vocabulary/DRUG_STRENGTH.csv' (DATEFORMAT '%Y%m%d', DELIM '	', HEADER true, QUOTE '')
+      SELECT
+        c.vocabulary_id AS vocabulary_id,
+        c.concept_code AS concept_code,
+        c.concept_name AS concept_name,
+        cs.concept_synonym_name AS concept_name_fi,
+        c.concept_id AS concept_id,
+        cr.concept_id_2 AS concept_id_2
+      FROM main.CONCEPT AS c
+      LEFT JOIN (
+        SELECT concept_id, concept_synonym_name  FROM main.CONCEPT_RELATIONSHIP
+        WHERE relationship_id = 'Maps to'
+      ) AS cr
+        ON c.concept_id = cr.concept_id_1
+      LEFT JOIN (
+        SELECT concept_id, concept_synonym_name  FROM main.CONCEPT_SYNONYM
+        WHERE language_concept_id == 4181730
+      ) AS cs
+        ON c.concept_id = cs.concept_id
+      WHERE c.vocabulary_id IN ('ATC', 'ICD10', 'ICD10fi', 'FGVisitType', 'ICPC') 
+  
 
 R version:
 R version 4.2.2 (2022-10-31 ucrt)

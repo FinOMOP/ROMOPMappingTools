@@ -21,6 +21,7 @@ devtools::load_all(".")
 
 ```{r}
 
+base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary_test)"
 base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary)"
 
 path_to_input_mapping_vocabularies_info_file <- file.path(base_path, "VOCABULARIES", "vocabularies_info.csv")
@@ -92,12 +93,12 @@ mergeOMOPtables(path_to_input_omop_vocabulary_folder,
 
 ## Validate the newely created vocabularies
 ```{r}
-omop_tables <- importOMOPtables(path_to_output_omop_vocabulary_folder, c("CONCEPT","VOCABULARY", "CONCEPT_CLASS", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
 
-omop_tables <- validateTables(omop_tables)
-omop_tables <- validateOMOPTablesRelationships(omop_tables)
+connection_details_omop_tables <- createTemporalDatabaseWithOMOPtable(path_to_output_omop_vocabulary_folder)
 
-omop_tables
+results_DQD <- validateOMOPtablesWithDQD(connection_details_omop_tables)
+
+
 ```
 
 
@@ -133,7 +134,7 @@ databases_code_counts_tables
 ```{r}
 mapping_status <- calculateMappingStatus(
   path_to_input_vocabularies_coverage_file,
-  omop_tables, 
+  connection_details_omop_tables, 
   databases_code_counts_tables)
 ```
 
@@ -153,7 +154,7 @@ tmp_html <- path_to_output_dashboard_file
 buildStatusDashboard(
   usagi_mapping_tables = usagi_mapping_tables,
   vocabulary_info_mapping_tables = vocabulary_info_mapping_tables,
-  omop_tables  = omop_tables, 
+  results_DQD  = results_DQD, 
   databases_code_counts_tables = databases_code_counts_tables, 
   mapping_status  = mapping_status,
   output_file_html = tmp_html)
@@ -169,76 +170,7 @@ browseURL(tmp_html)
 
 ```{r}
 
-sql <- SqlRender::readSql(system.file("ddl/5.4/sql_server/OMOPCDM_sql_server_5.4_ddl.sql", package = "CommonDataModel", mustWork = TRUE))
-sql <- SqlRender::render(
-    sql = sql,
-    cdmDatabaseSchema = "main"
-    )
-sql <- SqlRender::translate(
-    sql = sql,
-    targetDialect = "duckdb"
-  )
-
-
-databaseFile <- tempfile()
-cd <- DatabaseConnector::createConnectionDetails(
-  dbms = "duckdb", 
-  server = databaseFile, 
-  pathToDriver = "../../"
-)
-
-c <- DatabaseConnector::connect(cd)
-
-DatabaseConnector::dbExecute(c, sql)
-
-vocab_table_names <- c(
-  "CONCEPT", 
-  "CONCEPT_ANCESTOR", 
-  "CONCEPT_CLASS", 
-  "CONCEPT_RELATIONSHIP",
-  "CONCEPT_SYNONYM",
-  "DOMAIN",
-  "RELATIONSHIP",
-  "VOCABULARY"
-)
-
-
-for(vocab_table_name in vocab_table_names){
-  
-  print(vocab_table_name)
-  
-  p <- file.path(path_to_output_omop_vocabulary_folder, paste0(vocab_table_name,".csv"))
-  DatabaseConnector::dbExecute(c, paste0("COPY ", vocab_table_name," FROM '",p,"' (DATEFORMAT '%Y%m%d', DELIM '\t', HEADER true, QUOTE '')"))
-
-}
-
-DatabaseConnector::dbExecute(c, "INSERT INTO main.cdm_source VALUES ('test', 'test', 'test', 'test', 'test', 'test', DATE '1992-09-20' , DATE '1992-09-20', 'test', 1, 'test')")
-
-DatabaseConnector::disconnect(c)
-```
-
-
-```{r}
-
-tablesToExclude = c(
-"CARE_SITE",  "COHORT", "COHORT_ATTRIBUTE",  
- "CONDITION_ERA"  ,     
-"CONDITION_OCCURRENCE", "COST", "DEATH", "DEVICE_EXPOSURE",            
-"DOSE_ERA", "DRUG_ERA", "DRUG_EXPOSURE",  "FACT_RELATIONSHIP",    
-"LOCATION", "MEASUREMENT", "METADATA", "NOTE", "NOTE_NLP" ,           
-"OBSERVATION", "OBSERVATION_PERIOD", "PAYER_PLAN_PERIOD",  "PROCEDURE_OCCURRENCE" ,
-"PROVIDER",   "SPECIMEN", "VISIT_DETAIL"         ,
-"VISIT_OCCURRENCE" , "EPISODE", "EPISODE_EVENT", "PERSON" , "CDM_SOURCE", "COHORT_DEFINITION" )
-
-a <- DataQualityDashboard::executeDqChecks(connectionDetails = cd, 
-                                    cdmDatabaseSchema = "main", 
-                                    resultsDatabaseSchema = "main", 
-                                    cdmSourceName = "test", 
-                                    outputFolder = tempdir(), 
-                                    tablesToExclude = tablesToExclude, cdmVersion = "5.4"
-                                    
-                                    )
-                                    
+connection_details <- createTemporalDatabaseWithOMOPtable(path_to_output_omop_vocabulary_folder)
 
 
 ```

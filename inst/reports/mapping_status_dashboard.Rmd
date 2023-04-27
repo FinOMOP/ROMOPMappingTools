@@ -6,7 +6,7 @@ output:
 params: 
   usagi_mapping_tables: NULL
   vocabulary_info_mapping_tables: NULL
-  omop_tables: NULL
+  results_DQD: NULL
   databases_code_counts_tables: NULL
   mapping_status: NULL
 ---
@@ -19,7 +19,7 @@ library(flexdashboard)
 ```{r}
 usagi_mapping_tables <- params$usagi_mapping_tables
 vocabulary_info_mapping_tables <- params$vocabulary_info_mapping_tables
-omop_tables <- params$omop_tables
+results_DQD <- params$results_DQD
 databases_code_counts_tables <- params$databases_code_counts_tables
 mapping_status <- params$mapping_status
 ```
@@ -92,14 +92,27 @@ Column {.tabset}
 
 ### Summary
 ```{r }
-if(!is.null(omop_tables)){
-  .printSumary(omop_tables)
-}
-```
-
-```{r results='asis'}
-if(!is.null(omop_tables)){
-  .printValidationTables(omop_tables)
+if(!is.null(results_DQD)){
+  results_DQD$CheckResults |>  tibble::as_tibble() |> 
+    dplyr::transmute(
+      Status = dplyr::case_when(
+        isError==1 ~ "ERROR", 
+        failed==1 ~ "FAIL",
+        passed==1 ~ "PASS"
+      ), 
+      Table=cdmTableName, 
+      Field=cdmFieldName, 
+      Category=category, 
+      Subcategory=subcategory, 
+      Description=checkDescription, 
+      `% Records` = pctViolatedRows
+    ) |> 
+    reactable::reactable(
+      resizable = TRUE,
+      filterable = TRUE,
+      defaultPageSize = 20
+    )
+  
 }
 ```
 
