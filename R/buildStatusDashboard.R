@@ -4,7 +4,7 @@
 #'
 #' @param usagi_mapping_tables
 #' @param vocabulary_info_mapping_tables
-#' @param omop_tables
+#' @param results_DQD
 #' @param databases_code_counts_tables
 #' @param mapping_status
 #' @param output_file_html
@@ -16,7 +16,7 @@
 buildStatusDashboard <- function(
     usagi_mapping_tables = NULL,
     vocabulary_info_mapping_tables = NULL,
-    omop_tables  = NULL,
+    results_DQD  = NULL,
     databases_code_counts_tables = NULL,
     mapping_status  = NULL,
     output_file_html = file.path(tempdir(), "MappingStatusDashboard.html")) {
@@ -43,11 +43,8 @@ buildStatusDashboard <- function(
     vocabulary_info_mapping_tables <- vocabulary_info_mapping_tables |> dplyr::select(-table)
   }
 
-  if(!is.null(omop_tables)){
-    omop_tables |> checkmate::assertTibble()
-    omop_tables |> names() |> checkmate::assertSubset(col_names)
-
-    omop_tables <- omop_tables |> dplyr::select(-table)
+  if(!is.null(results_DQD)){
+    results_DQD |> checkmate::assertList()
   }
 
   if(!is.null(databases_code_counts_tables)){
@@ -66,7 +63,7 @@ buildStatusDashboard <- function(
                     params = list(
                       usagi_mapping_tables = usagi_mapping_tables,
                       vocabulary_info_mapping_tables = vocabulary_info_mapping_tables,
-                      omop_tables  = omop_tables,
+                      results_DQD  = results_DQD,
                       databases_code_counts_tables = databases_code_counts_tables,
                       mapping_status  = mapping_status
                     ),

@@ -52,6 +52,10 @@ usethis::use_r("autoFixDatabaseCodeCountTable")
 
 usethis::use_r("calculateMappingStatus")
 
+
+usethis::use_r("createTemporalDatabaseWithOMOPtable")
+usethis::use_r("validateOMOPtablesWithDQD")
+
 # VISUAL
 usethis::use_r("plotTableMappingStatus")
 usethis::use_r("plotTableVocabularyStatus")

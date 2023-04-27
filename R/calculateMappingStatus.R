@@ -14,7 +14,7 @@
 #' @examples
 calculateMappingStatus <- function(
     path_to_vocabularies_coverage_file,
-    omop_tables,
+    connection_details_omop_tables,
     databases_code_counts_tables,
     ignore_failed_rules = FALSE,
     calculate_all_databases = TRUE) {
@@ -30,10 +30,6 @@ calculateMappingStatus <- function(
 
   .stopIfValidationErrors(vocabs_coverage_validation, "VocabulariesCoverage", path_to_vocabularies_coverage_file)
 
-  omop_tables |> checkmate::assertTibble()
-  omop_tables |> names() |> checkmate::assertSubset(c("name", "table", "validation_summary", "failed_rules_table", "n_failed_rules"))
-  c("CONCEPT", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM") |> checkmate::assertSubset(omop_tables |> dplyr::pull(name))
-
   databases_code_counts_tables |>  checkmate::assertTibble()
   databases_code_counts_tables |> names() |> checkmate::assertSubset(c("name", "table", "validation_summary", "failed_rules_table", "n_failed_rules" ))
 
@@ -44,34 +40,55 @@ calculateMappingStatus <- function(
 
   # CREATE TABLE concepts_to_match
   # Collect concepts in OMOP with mapping relationship and synonyms
+
+  connection <- DatabaseConnector::connect(connection_details_omop_tables)
+
+  sql <- "
+      SELECT
+        c.vocabulary_id AS vocabulary_id,
+        c.concept_code AS concept_code,
+        c.concept_name AS concept_name,
+        cs.concept_synonym_name AS concept_name_fi,
+        c.concept_id AS concept_id,
+        cr.concept_id_2 AS concept_id_2
+      FROM (
+        SELECT * FROM @cdmDatabaseSchema.CONCEPT
+        WHERE vocabulary_id IN (@list_vocabulary_ids)
+      ) AS c
+      LEFT JOIN (
+        SELECT concept_id_1, concept_id_2  FROM @cdmDatabaseSchema.CONCEPT_RELATIONSHIP
+        WHERE relationship_id = 'Maps to'
+      ) AS cr
+        ON c.concept_id = cr.concept_id_1
+      LEFT JOIN (
+        SELECT concept_id, concept_synonym_name  FROM @cdmDatabaseSchema.CONCEPT_SYNONYM
+        WHERE language_concept_id == 4181730
+      ) AS cs
+        ON c.concept_id = cs.concept_id
+
+  "
+
+  sql <- SqlRender::render(
+    sql = sql,
+    cdmDatabaseSchema = "main",
+    list_vocabulary_ids = vocabs_coverage |> dplyr::pull(target_vocabulary_ids) |> sQuote(q=FALSE) |> paste0(collapse = ", ")
+  )
+
+  vocabs_info <- DatabaseConnector::dbGetQuery(connection, sql) |>  tibble::as_tibble()
+
+  DatabaseConnector::disconnect(connection)
+
+
   concepts_to_match <- vocabs_coverage |>
     dplyr::mutate(vocabulary_id = target_vocabulary_ids ) |>
-    # get only the concepts in vocabularies
     dplyr::left_join(
-      omop_tables |> dplyr::filter(name == "CONCEPT") |> dplyr::select(table) |>  tidyr::unnest(table),
-      by = "vocabulary_id"
+      vocabs_info |>
+        dplyr::group_by(vocabulary_id, concept_code, concept_name, concept_name_fi, concept_id) |>
+        dplyr::summarise(standard_concept_ids = stringr::str_c(concept_id_2, collapse = ", "), .groups="drop"),
+      by = "vocabulary_id",
+      multiple = "all"
     ) |>
-    # check if code has mapping
-    dplyr::left_join(
-      omop_tables |> dplyr::filter(name == "CONCEPT_RELATIONSHIP") |> dplyr::select(table) |> tidyr::unnest(table) |>
-        dplyr::filter(relationship_id =="Maps to") |>
-        dplyr::distinct(concept_id_1, .keep_all=TRUE) |>
-        dplyr::select(concept_id = concept_id_1, concept_id_2),
-      by = "concept_id"
-    ) |>
-    dplyr::mutate(has_mapping = dplyr::if_else(is.na(concept_id_2), FALSE, TRUE)) |>
-    # get Finnish name
-    dplyr::left_join(
-      omop_tables |> dplyr::filter(name == "CONCEPT_SYNONYM") |> dplyr::select(table) |> tidyr::unnest(table)|>
-        dplyr::filter(language_concept_id == 4181730) |>
-        dplyr::select(concept_id, concept_name_fi=concept_synonym_name),
-      by = "concept_id"
-    ) |>
-    #
-    dplyr::select(
-      source_vocabulary_id, target_vocabulary_ids, vocabulary_id, mantained_by, concept_code,
-      concept_name, concept_name_fi, concept_id, has_mapping
-    )
+    dplyr::mutate( has_mapping = dplyr::if_else(is.na(standard_concept_ids), FALSE, TRUE))
 
 
   # CREATE TABLE all_code_counts
@@ -110,6 +127,7 @@ calculateMappingStatus <- function(
     dplyr::ungroup()
 
 
+
   ## CALCULATE MAPPINGS
   # calculate mapping status
   code_counts_matched <- all_code_counts |>
@@ -117,7 +135,7 @@ calculateMappingStatus <- function(
       concepts_to_match |> dplyr::rename(source_code = concept_code),
       by = c("source_vocabulary_id", "source_code")
     ) |>
-    dplyr::mutate(has_code = ifelse(is.na(concept_id), FALSE, TRUE)) |>
+    dplyr::mutate( has_code = ifelse(is.na(concept_id), FALSE, TRUE)) |>
     dplyr::mutate(mapping_status = dplyr::case_when(
       has_code & has_mapping ~ "mapped",
       has_code & !has_mapping ~ "no_mapping",
@@ -127,7 +145,7 @@ calculateMappingStatus <- function(
       database_name, source_vocabulary_id, target_vocabulary_ids, vocabulary_id, mantained_by,
       source_code, concept_name, concept_name_fi,
       n_events, per_events,
-      mapping_status
+      mapping_status, standard_concept_ids
     )
 
   mapping_status <- list(

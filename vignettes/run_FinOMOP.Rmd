@@ -21,7 +21,8 @@ devtools::load_all(".")
 
 ```{r}
 
-base_path <- r"(C:\Users\javier\REPOS\GITLAB_FinOMOP\finomop_omop_vocabulary)"
+base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary_test)"
+base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary)"
 
 path_to_input_mapping_vocabularies_info_file <- file.path(base_path, "VOCABULARIES", "vocabularies_info.csv")
 path_to_input_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "input_omop_vocabulary")
@@ -92,12 +93,12 @@ mergeOMOPtables(path_to_input_omop_vocabulary_folder,
 
 ## Validate the newely created vocabularies
 ```{r}
-omop_tables <- importOMOPtables(path_to_output_omop_vocabulary_folder, c("CONCEPT","VOCABULARY", "CONCEPT_CLASS", "CONCEPT_RELATIONSHIP", "CONCEPT_SYNONYM"))
 
-omop_tables <- validateTables(omop_tables)
-omop_tables <- validateOMOPTablesRelationships(omop_tables)
+connection_details_omop_tables <- createTemporalDatabaseWithOMOPtable(path_to_output_omop_vocabulary_folder)
 
-omop_tables
+results_DQD <- validateOMOPtablesWithDQD(connection_details_omop_tables)
+
+
 ```
 
 
@@ -133,7 +134,7 @@ databases_code_counts_tables
 ```{r}
 mapping_status <- calculateMappingStatus(
   path_to_input_vocabularies_coverage_file,
-  omop_tables, 
+  connection_details_omop_tables, 
   databases_code_counts_tables)
 ```
 
@@ -143,7 +144,9 @@ plotTableMappingStatus(mapping_status)
 ```
 
 ```{r}
+tictoc::tic()
 plotTableVocabularyStatus(mapping_status, "ICD10fi")
+tictoc::toc()
 ```
 
 # Build report
@@ -153,7 +156,7 @@ tmp_html <- path_to_output_dashboard_file
 buildStatusDashboard(
   usagi_mapping_tables = usagi_mapping_tables,
   vocabulary_info_mapping_tables = vocabulary_info_mapping_tables,
-  omop_tables  = omop_tables, 
+  results_DQD  = results_DQD, 
   databases_code_counts_tables = databases_code_counts_tables, 
   mapping_status  = mapping_status,
   output_file_html = tmp_html)
@@ -162,57 +165,26 @@ browseURL(tmp_html)
 
 
 
-# Test against posgress
-
-Start postgress database and rung pgAdmin4
-
-```{bash} 
-pg_ctl -D /c/Users/javier/WORKSPACES/OHDSI/postgres  -logfile start
-
-/c/Users/javier/AppData/Local/postgresql-14.4-1-windows-x64-binaries/pgsql/pgAdmin\ 4/bin/pgAdmin4.exe 
-```
 
 
-password `5Yjyc%:R.0YmLh[pm<N%`
+
+# Test dqd against sqlite 
 
 ```{r}
-# For those interested in seeing the CDM changes from 5.3 to 5.4, please see: http://ohdsi.github.io/CommonDataModel/cdm54Changes.html
 
-cd_admin <- DatabaseConnector::createConnectionDetails(
-  dbms     = "postgresql",
-  server   = "localhost/testmappings",
-  user     = "ohdsi_admin_user",
-  password = 'admin1',
-  port     = 5432,
-  pathToDriver = Sys.getenv("DATABASECONNECTOR_DRIVER_POSTGRES")
-)
+connection_details <- createTemporalDatabaseWithOMOPtable(path_to_output_omop_vocabulary_folder)
 
-con <- DatabaseConnector::connect(cd_admin)
+
 ```
 
 
-```{r}
-DatabaseConnector::disconnect(con)
-```
 
 
-```{r}
-cdmSchema      <- "cdm_vocabs"
-cdmVersion     <- "5.4"
-syntheaVersion <- "2.7.0"
-syntheaSchema  <- "source"
-#syntheaFileLoc <- r"(C:\Users\javier\WORKSPACES\OHDSI\data\synthea_sample_data_csv_apr2020\csv)"
-vocabFileLoc   <- path_to_output_omop_vocabulary_folder
-```
 
 
-```{r}
-ETLSyntheaBuilder::CreateCDMTables(connectionDetails = cd_admin, cdmSchema = cdmSchema, cdmVersion = cdmVersion)
-```
 
-```{r}
-ETLSyntheaBuilder::LoadVocabFromCsv(connectionDetails = cd_admin, cdmSchema = cdmSchema, vocabFileLoc = vocabFileLoc)
-```
+
+
 
 
 

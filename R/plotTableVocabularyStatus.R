@@ -11,6 +11,7 @@
 #' @examples
 plotTableVocabularyStatus <- function(mapping_status, source_vocabulary_id) {
 
+  link_to_athena <- "https://athena.ohdsi.org/search-terms/terms/"
 
   ###
   ## validate input parameters
@@ -31,7 +32,7 @@ plotTableVocabularyStatus <- function(mapping_status, source_vocabulary_id) {
     dplyr::filter(source_vocabulary_id %in% !!source_vocabulary_id) |>
     dplyr::select(database_name , mapping_status,
                   source_code, concept_name, concept_name_fi, vocabulary_id,
-                  n_events
+                  n_events, maps_to=standard_concept_ids
     ) |>
     tidyr::spread(database_name, n_events)
 
@@ -61,7 +62,20 @@ plotTableVocabularyStatus <- function(mapping_status, source_vocabulary_id) {
           list(color = color, fontWeight = "bold")
         }
       ),
-
+      maps_to = colDef(cell = function(value, index) {
+        if(is.na(value)){
+         return("")
+        }
+         # values <- str_split_1(value, ", ")
+         # result <- c()
+         # for(value in values){
+         #   url <- paste0(link_to_athena, value)
+         #   result <- c(result, list(htmltools::tags$a(href = url, target = "_blank", as.character(value))), ", ")
+         # }
+         # result <- result[1:(length(result)-1)]
+         # htmltools::tags$div(result)
+        value
+      }),
       all_databases = reactable::colDef(
         format = reactable::colFormat(percent = TRUE, digits = 4)
       )
