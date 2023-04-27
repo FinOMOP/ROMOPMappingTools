@@ -23,7 +23,11 @@ Imports:
     tidyr,
     validate,
     checkmate,
-    flexdashboard
+    flexdashboard,
+    DataQualityDashboard,
+    DatabaseConnector,
+    SqlRender,
+    duckdb
 Depends: 
     R (>= 2.10)
 LazyData: true

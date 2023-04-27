@@ -7,7 +7,7 @@
 buildStatusDashboard(
   usagi_mapping_tables = NULL,
   vocabulary_info_mapping_tables = NULL,
-  omop_tables = NULL,
+  results_DQD = NULL,
   databases_code_counts_tables = NULL,
   mapping_status = NULL,
   output_file_html = file.path(tempdir(), "MappingStatusDashboard.html")

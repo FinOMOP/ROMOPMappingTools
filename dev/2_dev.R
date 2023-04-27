@@ -24,6 +24,11 @@ usethis::use_package("validate")
 
 usethis::use_package("flexdashboard")
 
+usethis::use_package('DataQualityDashboard')
+usethis::use_package('DatabaseConnector')
+usethis::use_package('SqlRender')
+usethis::use_package('duckdb')
+
 
 
 ## DATA

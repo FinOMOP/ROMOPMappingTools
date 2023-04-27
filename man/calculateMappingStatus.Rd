@@ -6,7 +6,7 @@
 \usage{
 calculateMappingStatus(
   path_to_vocabularies_coverage_file,
-  omop_tables,
+  connection_details_omop_tables,
   databases_code_counts_tables,
   ignore_failed_rules = FALSE,
   calculate_all_databases = TRUE
