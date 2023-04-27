@@ -145,7 +145,7 @@ calculateMappingStatus <- function(
       database_name, source_vocabulary_id, target_vocabulary_ids, vocabulary_id, mantained_by,
       source_code, concept_name, concept_name_fi,
       n_events, per_events,
-      mapping_status
+      mapping_status, standard_concept_ids
     )
 
   mapping_status <- list(

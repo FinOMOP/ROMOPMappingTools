@@ -144,7 +144,9 @@ plotTableMappingStatus(mapping_status)
 ```
 
 ```{r}
+tictoc::tic()
 plotTableVocabularyStatus(mapping_status, "ICD10fi")
+tictoc::toc()
 ```
 
 # Build report
@@ -174,6 +176,15 @@ connection_details <- createTemporalDatabaseWithOMOPtable(path_to_output_omop_vo
 
 
 ```
+
+
+
+
+
+
+
+
+
 
 
 
