@@ -42,17 +42,18 @@ createTemporalDatabaseWithOMOPtable <- function(path_to_omop_vocabulary_folder) 
   ## function
   ###
 
-  tempfile
+  tempfile <- file.path(tempdir(),"tmp.duckdb")
+  if(file.exists(tempfile)){file.remove(tempfile)}
   connection_details <- DatabaseConnector::createConnectionDetails(
     dbms = "duckdb",
-    server = file.path(tempdir(),"tmp.duckdb"),
+    server = tempfile,
     pathToDriver = "../" #TEMP: needs an empty file to work
   )
 
   connection <- DatabaseConnector::connect(connection_details)
 
   # create cdm tables
-  sql <- SqlRender::readSql(system.file("ddl/5.4/sql_server/OMOPCDM_sql_server_5.4_ddl.sql", package = "CommonDataModel", mustWork = TRUE))
+  sql <- SqlRender::readSql(system.file("ddl/5.4/sql_server/OMOPCDM_sql_server_5.4_ddl.sql", package = "ROMOPMappingTools", mustWork = TRUE))
   sql <- SqlRender::render(
     sql = sql,
     cdmDatabaseSchema = "main"

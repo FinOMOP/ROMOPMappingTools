@@ -15,14 +15,14 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(tidyverse)
+#library(tidyverse)
 devtools::load_all(".")
 ```
 
 ```{r}
 
-base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary_test)"
-base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary)"
+base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINOMOP\FinOMOP_OMOP_vocabulary_test)"
+#base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary)"
 
 path_to_input_mapping_vocabularies_info_file <- file.path(base_path, "VOCABULARIES", "vocabularies_info.csv")
 path_to_input_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "input_omop_vocabulary")
