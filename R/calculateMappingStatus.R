@@ -1,17 +1,35 @@
 
-
 #' calculateMappingStatus
 #'
-#' @param path_to_vocabularies_coverage_file
-#' @param omop_tables
-#' @param databases_code_counts_tables
-#' @param ignore_failed_rules
-#' @param calculate_all_databases
+#' Calculates the mapping status for code counts in different databases and vocabularies.
 #'
-#' @return
+#' This function calculates the mapping status for code counts in different databases and vocabularies. The calculation involves the following steps:
+#'
+#' 1. Validating the input parameters to ensure they meet the required format.
+#' 2. Reading and validating the provided vocabularies coverage file.
+#' 3. Creating a table called `concepts_to_match` that collects concepts in OMOP with mapping relationships and synonyms.
+#' 4. Creating a table called `all_code_counts` that contains all code counts in the vocabularies coverage, optionally ignoring databases with failed rules.
+#' 5. Creating a new database called "all_databases" with normalized event counts across all databases.
+#' 6. Calculating the percentage of codes per database and vocabulary.
+#' 7. Calculating the mapping status for code counts based on whether they have mappings and codes.
+#' 8. Returning the mapping status information in the form of two tables: `concepts_to_match` and `code_counts_matched`.
+#'
+#' @param path_to_vocabularies_coverage_file The path to the vocabularies coverage file.
+#' @param connection_details_omop_tables The connection details for the OMOP tables.
+#' @param databases_code_counts_tables The tables containing the code counts for different databases.
+#' @param ignore_failed_rules Logical value indicating whether to ignore databases with failed rules (default is FALSE).
+#' @param calculate_all_databases Logical value indicating whether to calculate code counts for all databases (default is TRUE).
+#' @return A list containing two tables: `concepts_to_match` and `code_counts_matched`, representing the mapping status for code counts.
+#'
+#' @importFrom checkmate assertFileExists assertTibble
+#' @importFrom dplyr bind_rows case_when filter group_by left_join mutate rename select semi_join summarize ungroup
+#' @importFrom stringr str_c
+#' @importFrom SqlRender render
+#' @importFrom tidyr unnest
+#' @importFrom tibble as_tibble
+#' @importFrom DatabaseConnector connect dbGetQuery disconnect
+#'
 #' @export
-#'
-#' @examples
 calculateMappingStatus <- function(
     path_to_vocabularies_coverage_file,
     connection_details_omop_tables,

@@ -2,13 +2,18 @@
 % Please edit documentation in R/plotTableVocabularyStatus.R
 \name{plotTableVocabularyStatus}
 \alias{plotTableVocabularyStatus}
-\title{plotTableVocabularyStatus}
+\title{Plot Table Vocabulary Status}
 \usage{
 plotTableVocabularyStatus(mapping_status, source_vocabulary_id)
 }
 \arguments{
-\item{source_vocabulary_id}{}
+\item{mapping_status}{The mapping status data containing code counts.}
+
+\item{source_vocabulary_id}{The source vocabulary ID for which to plot the status.}
+}
+\value{
+A reactive table displaying the vocabulary status.
 }
 \description{
-plotTableVocabularyStatus
+This function plots the vocabulary status for a specific source vocabulary ID.
 }

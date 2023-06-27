@@ -1,13 +1,18 @@
 
-#' validateTables
+#' Validate Tables
 #'
-#' @param tibble_with_tables
-#' @param table_type
+#' This function validates the tables in a tibble and provides validation summaries and failed rules tables.
 #'
-#' @return
+#' @param tibble_with_tables The tibble containing the tables to be validated.
+#' @param table_type The table type to be used for validation. If NULL, the name column of the tibble is used.
+#'
+#' @return A tibble with added validation summaries and failed rules tables.
+#'
+#' @importFrom checkmate assertTibble assertSubset
+#' @importFrom dplyr mutate select right_join row_number
+#' @importFrom purrr map2 map_int
+#'
 #' @export
-#'
-#' @examples
 validateTables <- function(
     tibble_with_tables,
     table_type = NULL

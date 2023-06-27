@@ -1,15 +1,22 @@
 
 #' convertMappingsTablesToOMOPtables
 #'
-#' @param usagi_mapping_tables
-#' @param vocabulary_info_mapping_tables
-#' @param path_to_temp_omop_vocabulary_folder
-#' @param ignore_failed_rules
+#' Converts usagi an info mapping tables to OMOP tables.
 #'
-#' @return
+#' @param usagi_mapping_tables Tibble containing the mapping tables imported from Usagi.csv files.
+#' @param vocabulary_info_mapping_tables Tibble containing the mapping tables imported from info.csv files.
+#' @param path_to_temp_omop_vocabulary_folder Path to the output folder where to write the OMOP vocabulary tables
+#' @param ignore_failed_rules Logical value indicating whether to ignore tables with failed rules.
+#'
+#' @importFrom checkmate assertTibble assertSubset assertDirectoryExists assertLogical
+#' @importFrom readr write_tsv
+#' @importFrom tidyr unnest
+#' @importFrom dplyr filter select pull mutate distinct bind_rows group_by summarise case_when transmute
+#' @importFrom stringr str_c str_sub
+#'
+#' @return None
+#'
 #' @export
-#'
-#' @examples
 convertMappingsTablesToOMOPtables <- function(
     usagi_mapping_tables,
     vocabulary_info_mapping_tables = NULL,

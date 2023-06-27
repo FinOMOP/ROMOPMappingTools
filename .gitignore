@@ -4,6 +4,7 @@
 .httr-oauth
 .DS_Store
 inst/doc
+docs
 
 errorReportSql.txt
 tests/testing_repo/*

@@ -1,12 +1,21 @@
 
 #' importMappingTables
 #'
-#' @param path_to_input_vocabularies_info_file
+#' Imports mapping tables from the given input vocabulary information file.
+#' - Reads the vocabularies_info.csv.
+#' - Throws an error if vocabularies_info.csv has the wrong format.
+#' - Reads all the info.csv and usagi.csv files defined in vocabularies_info.csv, unless `ignore` column is TRUE.
 #'
-#' @return
+#' @param path_to_input_vocabularies_info_file Path to the input vocabulary information file.
+#'
+#' @return A list with two tibbles, tibble combining all the usagi.csv files and tibble combining all the info.cvs files.
+#'
+#' @importFrom checkmate assertFileExists
+#' @importFrom purrr map
+#' @importFrom dplyr select mutate filter starts_with vars
+#' @importFrom stringr str_replace
+#'
 #' @export
-#'
-#' @examples
 importMappingTables <- function(path_to_input_vocabularies_info_file) {
 
   ###

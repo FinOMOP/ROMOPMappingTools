@@ -1,14 +1,19 @@
 
 
-#' plotTableVocabularyStatus
+#' Plot Table Vocabulary Status
 #'
-#' @param mapping_status
-#' @param source_vocabulary_id
+#' This function plots the vocabulary status for a specific source vocabulary ID.
 #'
-#' @return
+#' @param mapping_status The mapping status data containing code counts.
+#' @param source_vocabulary_id The source vocabulary ID for which to plot the status.
+#'
+#' @return A reactive table displaying the vocabulary status.
+#'
+#' @importFrom dplyr distinct pull filter select rename arrange desc
+#' @importFrom tidyr spread
+#' @importFrom reactable reactable
 #' @export
 #'
-#' @examples
 plotTableVocabularyStatus <- function(mapping_status, source_vocabulary_id) {
 
   link_to_athena <- "https://athena.ohdsi.org/search-terms/terms/"

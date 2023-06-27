@@ -1,0 +1,222 @@
+---
+title: "Run steps on demo repo"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{run}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include = FALSE}
+#library(tidyverse)
+devtools::load_all(".")
+```
+
+# Intro 
+This vignette explains the steps to process a repository with vocabulary mappings. 
+It transforms mapping files in usagi-extended format to the OMOP vocabulary tables, appends then to an OMOP vocabulary downloaded from Athena, 
+run some QC, calculates codes coverage from databases, and builds the status dashboard. 
+
+In this example we use the demo repository [FinOMOP_OMOP_vocabulary_test](github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test). 
+
+Notice that this is a guide to understand the package functions. 
+For the use of the package in a running environment, the demo repository already contains the same steps in the internal processing scrip [update_repository.R](https://github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test/blob/development/SCRIPTS/R_repo_management/R_scripts/update_repository.R)
+
+
+# Get the demo repo
+Clone to your local machine the demo repo [FinOMOP_OMOP_vocabulary_test](github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test). 
+
+Set the local path to the demo repo:
+
+```{r eval=FALSE,  echo=TRUE}
+base_path <- "path_to_cloned_repo"
+```
+
+```{r eval=TRUE,  echo=FALSE}
+base_path <- "/Users/javier/Documents/Repos/FinOMOP/FinOMOP_OMOP_vocabulary_test"
+#base_path <- r"(C:\Users\javier\REPOS\GITHUB_FINNGEN\FinOMOP_OMOP_vocabulary)"
+```
+
+```{r}
+path_to_input_mapping_vocabularies_info_file <- file.path(base_path, "VOCABULARIES", "vocabularies_info.csv")
+path_to_input_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "input_omop_vocabulary")
+path_to_input_database_counts_file <- file.path(base_path, "CODE_COUNTS", "databases_coverage.csv")
+path_to_input_vocabularies_coverage_file <- file.path(base_path, "CODE_COUNTS", "vocabularies_coverage.csv")
+
+path_to_temp_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "temp_omop_vocabulary")
+
+path_to_output_omop_vocabulary_folder <- file.path(base_path, "OMOP_VOCABULARIES", "output_omop_vocabulary")
+path_to_output_dashboard_file <- file.path(base_path, "StatusReport", "dashboard.html")
+```
+
+
+
+# Import mapping tables
+vocabularies_info.csv table contains the settings and  links to the usagi.csv and info.csv files for each vocabulary.
+`importMappingTables` reads all the usagi.csv and info.csv files defined in vocabularies_info.csv (unless `ignore` column is TRUE) and combine them into two tibbles respectively. 
+
+```{r}
+mapping_tables <- importMappingTables(path_to_input_mapping_vocabularies_info_file)
+
+usagi_mapping_tables <- mapping_tables$usagi_mapping_tables
+vocabulary_info_mapping_tables <- mapping_tables$vocabulary_info_mapping_tables
+```
+
+```{r}
+usagi_mapping_tables
+```
+
+```{r}
+vocabulary_info_mapping_tables
+```
+
+`validateTables` function is used to check the all the info.csv and usagi.csv tables have the correct format. 
+(validation rule rules are defined in the pacakge variable `tables_valid_format`). 
+This functions adds 3 columns `validation_summary`, `failed_rules_table`, `n_failed_rules`. 
+If `n_failed_rules`>0 it means there is an error in the table format. The specific error can be seen by looking at `failed_rules_table` column. 
+
+```{r}
+usagi_mapping_tables <- usagi_mapping_tables |> validateTables("UsagiForCCR")
+vocabulary_info_mapping_tables <- vocabulary_info_mapping_tables |> validateTables("VocabularyInfo")
+```
+
+
+```{r}
+usagi_mapping_tables
+```
+
+```{r}
+vocabulary_info_mapping_tables
+```
+
+
+# Convert mapping files to OMOP tables 
+
+Once the usagi and info tables are correct, they can be transformed into the OMOP vocabulary tables. 
+`convertMappingsTablesToOMOPtables` Takes the valid usagi and info tibbles an creates the 
+CONCEPT.csv, CONCEPT_RELATIONSIP.csv, CONCEPT_SYNONIM.csv, VOCABULAY.csv, and CONCEPT_CLASS.csv tables in the output 
+`path_to_temp_omop_vocabulary_folder` folder.
+
+```{r}
+convertMappingsTablesToOMOPtables(
+  usagi_mapping_tables,
+  vocabulary_info_mapping_tables,
+  path_to_temp_omop_vocabulary_folder
+)
+```
+
+```{r}
+list.files(path_to_temp_omop_vocabulary_folder)
+```
+
+# Merge new vocabulary tables with vocabulary tables from Athena
+`mergeOMOPtables` merges the vocabulary tables created in `path_to_temp_omop_vocabulary_folder` to the vocabulary tables downloaded from Athena
+stored in `path_to_input_omop_vocabulary_folder`, and save the resulting table into `path_to_output_omop_vocabulary_folder`.
+
+
+```{r}
+mergeOMOPtables(path_to_input_omop_vocabulary_folder,
+                path_to_temp_omop_vocabulary_folder,
+                path_to_output_omop_vocabulary_folder)
+```
+
+
+```{r}
+list.files(path_to_output_omop_vocabulary_folder)
+```
+
+# Validate the newely created vocabularies
+In order run all the check from DataQualityDashboard to the new merged vocabulary tables, we need to load the tables into temporal Duckdb. 
+This is done using `createTemporalDatabaseWithOMOPtable`. Connection details are given to `validateOMOPtablesWithDQD` that runs DQD checks.
+
+(warning: this may not run inside the rmd document, if you get and "globalCallingHandlers" error, copy the code and run it in console)
+
+```{r echo=TRUE, results='hide'}
+connection_details_omop_tables <- createTemporalDatabaseWithOMOPtable(path_to_output_omop_vocabulary_folder)
+results_DQD <- validateOMOPtablesWithDQD(connection_details_omop_tables)
+```
+
+`results_DQD$CheckResults` contains the results. A row with column `numViolatedRows`>0 indicate check failed. 
+```{r}
+results_DQD$CheckResults |> as_tibble() |> filter(numViolatedRows!=0)
+```
+
+# Calculate databases coverage
+## Import databases code_counts
+databases_coverage.csv table contains the settings and links to the code_counts.csv files for each database.
+`importDatabasesCodeCountsTables` reads all the code_counts.csv files defined in databases_coverage.csv (unless `ignore` column is TRUE) and combine them into one tibbles. 
+`validateTables` check the correctness of the code_counts tables. 
+
+The code_counts.csv file have three columns: 
+- source_vocabulary_id: the code's vocabulary
+- source_code: code 
+- n_events: number of time the code appears in the database (for privacy reasons n_events must be less than 5)
+
+```{r}
+databases_code_counts_tables <- importDatabasesCodeCountsTables(path_to_input_database_counts_file)
+
+databases_code_counts_tables <- validateTables(databases_code_counts_tables, table_type = "CodeCounts")
+
+databases_code_counts_tables
+
+```
+
+If `n_failed_rules`>0 it means there is an error in the table format. The specific error can be seen by looking at `failed_rules_table` column. 
+
+Optionally, you can use `autoFixDatabaseCodeCountTable` function to fix some of the common mistakes in the code_counts tables. It is recommended to replace the code_counts.csv file with the fixed result.  
+
+## Check coverage 
+Once the code_counts tables are valid they can be used to assess how the new merged vocabulary covers the event in each database. 
+For this we need a database_coverage.csv file that describes the vocabularies to assess. 
+
+The database_coverage.csv file has the following columns: 
+- source_vocabulary_id: vocabulary id as it appears in the code_counts files 
+- target_vocabulary_ids: vocabulary id as it appears in the concept table 
+- mantained_by: maintainer of the vocabulary, eg "OMOP"
+- ignore: ignore column if TRUE
+
+A source_vocabulary_id may have more than one target_vocabulary_ids. This is use to contemplate extension vocabularies. 
+For example, the ICD10fi vocabulary is an extension of the ICD10 vocabulary. Adding two columns, for source_vocabulary_id="CID10fi",  one with target_vocabulary_ids="ICD10" and other with target_vocabulary_ids="ICD10fi", tells that a "ICD10fi" code in the code counts may be found in the ICD10 or the ICD10fi vocabulary in the concept table.
+
+```{r}
+mapping_status <- calculateMappingStatus(
+  path_to_input_vocabularies_coverage_file,
+  connection_details_omop_tables, 
+  databases_code_counts_tables)
+```
+Results can be explored individually using some of the ploting functions. 
+`plotTableMappingStatus` plots an interactive table with the summary coverage or all the vocabularies and databases. 
+
+
+```{r}
+plotTableMappingStatus(mapping_status)
+```
+`plotTableVocabularyStatus` plots a table with all the existing codes in all the databases for a given vocabulary. 
+```{r}
+plotTableVocabularyStatus(mapping_status, "ICD10fi")
+```
+
+# Build report
+Puts all together into a interactive dashboard. 
+
+```{r,results='hide'}
+tmp_html <- path_to_output_dashboard_file
+buildStatusDashboard(
+  usagi_mapping_tables = usagi_mapping_tables,
+  vocabulary_info_mapping_tables = vocabulary_info_mapping_tables,
+  results_DQD  = results_DQD, 
+  databases_code_counts_tables = databases_code_counts_tables, 
+  mapping_status  = mapping_status,
+  output_file_html = tmp_html)
+browseURL(tmp_html) 
+```
+
+
+

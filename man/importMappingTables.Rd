@@ -7,8 +7,16 @@
 importMappingTables(path_to_input_vocabularies_info_file)
 }
 \arguments{
-\item{path_to_input_vocabularies_info_file}{}
+\item{path_to_input_vocabularies_info_file}{Path to the input vocabulary information file.}
+}
+\value{
+A list with two tibbles, tibble combining all the usagi.csv files and tibble combining all the info.cvs files.
 }
 \description{
-importMappingTables
+Imports mapping tables from the given input vocabulary information file.
+\itemize{
+\item Reads the vocabularies_info.csv.
+\item Throws an error if vocabularies_info.csv has the wrong format.
+\item Reads all the info.csv and usagi.csv files defined in vocabularies_info.csv, unless \code{ignore} column is TRUE.
+}
 }

@@ -11,8 +11,23 @@ autoFixDatabaseCodeCountTable(
 )
 }
 \arguments{
-\item{keep_only_source_vocabulary_ids}{}
+\item{database_count_table}{Tibble containing the database code count table.}
+
+\item{database_name}{Name of the database.}
+
+\item{keep_only_source_vocabulary_ids}{Vector of source vocabulary IDs to keep. Other source vocabularies will be removed.}
+}
+\value{
+Tibble containing the fixed database code count table.
 }
 \description{
-autoFixDatabaseCodeCountTable
+Automatically fixes issues in the database code count table.
+}
+\details{
+This function performs the following fixes on the provided database code count table:
+\enumerate{
+\item Removes unused source vocabularies based on the specified \code{keep_only_source_vocabulary_ids}.
+\item Sums up repeated values for the same source vocabulary and source code.
+\item Removes events with a count less than 5.
+}
 }

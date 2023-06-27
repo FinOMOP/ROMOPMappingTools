@@ -2,17 +2,25 @@
 
 #' autoFixDatabaseCodeCountTable
 #'
-#' @param database_count_table
-#' @param database_name
-#' @param keep_only_source_vocabulary_ids
+#' Automatically fixes issues in the database code count table.
 #'
-#' @return
+#' This function performs the following fixes on the provided database code count table:
+#'
+#' 1. Removes unused source vocabularies based on the specified `keep_only_source_vocabulary_ids`.
+#' 2. Sums up repeated values for the same source vocabulary and source code.
+#' 3. Removes events with a count less than 5.
+#'
+#' @param database_count_table Tibble containing the database code count table.
+#' @param database_name Name of the database.
+#' @param keep_only_source_vocabulary_ids Vector of source vocabulary IDs to keep. Other source vocabularies will be removed.
+#'
+#' @importFrom dplyr distinct filter pull count group_by summarise
+#' @importFrom stringr str_c
+#'
+#' @return Tibble containing the fixed database code count table.
+#'
 #' @export
-#'
-#' @examples
 autoFixDatabaseCodeCountTable <- function(database_count_table, database_name="", keep_only_source_vocabulary_ids=NULL) {
-
-
 
 
   #

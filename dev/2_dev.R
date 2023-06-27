@@ -28,8 +28,8 @@ usethis::use_package('DataQualityDashboard')
 usethis::use_package('DatabaseConnector')
 usethis::use_package('SqlRender')
 usethis::use_package('duckdb')
-
-
+usethis::use_package('rmarkdown')
+usethis::use_package('shiny')
 
 ## DATA
 usethis::use_data_raw("tables_valid_format")

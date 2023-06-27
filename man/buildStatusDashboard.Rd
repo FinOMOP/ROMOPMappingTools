@@ -2,7 +2,7 @@
 % Please edit documentation in R/buildStatusDashboard.R
 \name{buildStatusDashboard}
 \alias{buildStatusDashboard}
-\title{buildStatusDashboard}
+\title{Build Status Dashboard}
 \usage{
 buildStatusDashboard(
   usagi_mapping_tables = NULL,
@@ -14,8 +14,21 @@ buildStatusDashboard(
 )
 }
 \arguments{
-\item{output_file_html}{}
+\item{usagi_mapping_tables}{A tibble containing USAGI mapping tables.}
+
+\item{vocabulary_info_mapping_tables}{A tibble containing vocabulary info mapping tables.}
+
+\item{results_DQD}{A list of results from the DQD (Data Quality Dashboard).}
+
+\item{databases_code_counts_tables}{A tibble containing databases code counts tables.}
+
+\item{mapping_status}{Mapping status information.}
+
+\item{output_file_html}{The path to the output HTML file.}
+}
+\value{
+The path to the output HTML file.
 }
 \description{
-buildStatusDashboard
+This function generates a status dashboard for mapping status.
 }

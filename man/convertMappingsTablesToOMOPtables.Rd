@@ -12,8 +12,17 @@ convertMappingsTablesToOMOPtables(
 )
 }
 \arguments{
-\item{ignore_failed_rules}{}
+\item{usagi_mapping_tables}{Tibble containing the mapping tables imported from Usagi.csv files.}
+
+\item{vocabulary_info_mapping_tables}{Tibble containing the mapping tables imported from info.csv files.}
+
+\item{path_to_temp_omop_vocabulary_folder}{Path to the output folder where to write the OMOP vocabulary tables}
+
+\item{ignore_failed_rules}{Logical value indicating whether to ignore tables with failed rules.}
+}
+\value{
+None
 }
 \description{
-convertMappingsTablesToOMOPtables
+Converts usagi an info mapping tables to OMOP tables.
 }

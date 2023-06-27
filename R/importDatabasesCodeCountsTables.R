@@ -1,15 +1,20 @@
 
 
 
-#' importDatabasesCodeCountsTables
+#' Import Databases Code Counts Tables
 #'
-#' @param path_to_database_code_counts_file
-#' @param calculate_all_databases
+#' This function imports individu databases code counts tables.
 #'
-#' @return
+#' @param path_to_database_code_counts_file The path to the file containing databases code counts.
+#' @param calculate_all_databases Boolean indicating whether to calculate counts for all databases.
+#'
+#' @return The imported databases code counts tables.
+#'
+#' @importFrom checkmate assertFileExists
+#' @importFrom dplyr mutate select
+#' @importFrom purrr map
+#'
 #' @export
-#'
-#' @examples
 importDatabasesCodeCountsTables <- function(path_to_database_code_counts_file, calculate_all_databases=TRUE) {
 
   ###
@@ -37,7 +42,7 @@ importDatabasesCodeCountsTables <- function(path_to_database_code_counts_file, c
   ## function
   ###
 
-  # read usagi files
+  # read code_counts files
   databases_code_counts <- databases_code_counts |>
     dplyr::select(name = database_name, path_to_code_counts_file) |>
     dplyr::mutate(table = purrr::map(.x = path_to_code_counts_file , .f = ~readTable(.x, "CodeCounts"))) |>

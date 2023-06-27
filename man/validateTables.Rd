@@ -2,13 +2,18 @@
 % Please edit documentation in R/validateTables.R
 \name{validateTables}
 \alias{validateTables}
-\title{validateTables}
+\title{Validate Tables}
 \usage{
 validateTables(tibble_with_tables, table_type = NULL)
 }
 \arguments{
-\item{table_type}{}
+\item{tibble_with_tables}{The tibble containing the tables to be validated.}
+
+\item{table_type}{The table type to be used for validation. If NULL, the name column of the tibble is used.}
+}
+\value{
+A tibble with added validation summaries and failed rules tables.
 }
 \description{
-validateTables
+This function validates the tables in a tibble and provides validation summaries and failed rules tables.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/importDatabasesCodeCountsTables.R
 \name{importDatabasesCodeCountsTables}
 \alias{importDatabasesCodeCountsTables}
-\title{importDatabasesCodeCountsTables}
+\title{Import Databases Code Counts Tables}
 \usage{
 importDatabasesCodeCountsTables(
   path_to_database_code_counts_file,
@@ -10,8 +10,13 @@ importDatabasesCodeCountsTables(
 )
 }
 \arguments{
-\item{calculate_all_databases}{}
+\item{path_to_database_code_counts_file}{The path to the file containing databases code counts.}
+
+\item{calculate_all_databases}{Boolean indicating whether to calculate counts for all databases.}
+}
+\value{
+The imported databases code counts tables.
 }
 \description{
-importDatabasesCodeCountsTables
+This function imports individu databases code counts tables.
 }
