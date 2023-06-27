@@ -1,10 +1,16 @@
 
 # ROMOPMappingTools
 
-![sticker](https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/1b8283d1-6513-4a13-adcf-109ff9c23623)
-
 <!-- badges: start -->
 <!-- badges: end -->
+
+
+
+The goal of ROMOPMappingTools is to ...
+
+<img src='https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/1b8283d1-6513-4a13-adcf-109ff9c23623' align="right" height="139" />
+
+
 
 The goal of ROMOPMappingTools is to ...
 

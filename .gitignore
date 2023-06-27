@@ -7,4 +7,3 @@ inst/doc
 #docs keep docks run pkgdown locy and upload
 
 errorReportSql.txt
-tests/testing_repo/*
