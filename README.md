@@ -1,6 +1,8 @@
 
 # ROMOPMappingTools
 
+![sticker](https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/1b8283d1-6513-4a13-adcf-109ff9c23623)
+
 <!-- badges: start -->
 <!-- badges: end -->
 
@@ -23,3 +25,4 @@ library(ROMOPMappingTools)
 ## basic example code
 ```
 
+https://github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test
