@@ -4,7 +4,7 @@
 .httr-oauth
 .DS_Store
 inst/doc
-docs
+#docs keep docks run pkgdown locy and upload
 
 errorReportSql.txt
 tests/testing_repo/*
