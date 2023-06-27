@@ -1,6 +1,6 @@
 Package: ROMOPMappingTools
 Title: ROMOPMappingTools
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: 
     person("Javier", "Gracia-Tabuenca", , "javier.graciatabuenca@tuni.fi", role = c("aut", "cre"),
            comment = c(ORCID = "YOUR-ORCID-ID"))
@@ -27,11 +27,12 @@ Imports:
     DataQualityDashboard,
     DatabaseConnector,
     SqlRender,
-    duckdb
+    duckdb,
+    rmarkdown,
+    shiny
 Depends: 
     R (>= 2.10)
 LazyData: true
 Suggests: 
-    knitr,
-    rmarkdown
+    knitr
 VignetteBuilder: knitr
