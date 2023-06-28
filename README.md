@@ -4,7 +4,7 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-![](./hexIcon.png)
+![hexIcon](https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/6c195491-eceb-447c-86c9-86d66b8ee63d)
 
 ROMOPMappingTools provides the functions needed to maintain a repository with mappings of medical vocabularies to OMOP vocabularies. 
 
