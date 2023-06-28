@@ -50,6 +50,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="articles/files_description.html">Files description</a>
+    </li>
+    <li>
       <a href="articles/run_on_demo_repo.html">Run steps on demo repo</a>
     </li>
   </ul>
@@ -75,19 +78,18 @@
 </h1></div>
 <!-- badges: start -->
 <!-- badges: end -->
-<div class="figure">
-<img src="https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/6c195491-eceb-447c-86c9-86d66b8ee63d" alt=""><p class="caption">hexIcon</p>
-</div>
-<p>ROMOPMappingTools provides the functions needed to maintain a repository with mappings of medical vocabularies to OMOP vocabularies.</p>
+<p><img src="https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/6c195491-eceb-447c-86c9-86d66b8ee63d"></p>
+<p>ROMOPMappingTools provides the functions needed to maintain a repository with mappings of local medical vocabularies to OMOP standard vocabularies.</p>
 <p>It allows to :</p>
 <ul>
-<li>Transforms mapping files in usagi-extended format to the OMOP vocabulary tables</li>
-<li>Append local OMOP vocabulary tables to OMOP vocabulary table downloaded from Athena</li>
+<li>Transform multipe mapping files in usagi-extended format to the OMOP vocabulary tables</li>
+<li>Append created OMOP vocabulary tables to OMOP vocabulary tables downloaded from Athena</li>
 <li>Run QC on the input an output files</li>
-<li>Calculate codes coverage in mutiple databases</li>
-<li>Builds a status dashboard</li>
+<li>Given the code’s frequency from one or more local databases calculates how well a OMOP vocabulary covers the medical events</li>
+<li>Creates a interactive dashboard to show the above resuls</li>
 </ul>
-<p>An example of a local mappings repository can be seen here: <a href="https://github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test" class="external-link">FinOMOP_OMOP_vocabulary_test</a></p>
+<p>This package contains only the functions to process the input files. How the files and repository are organised is independent of this package.</p>
+<p>As an example we show an demo version of the repo and folder structure we use for mataining the mapping files in FinOMOP: <a href="https://github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test" class="external-link">FinOMOP_OMOP_vocabulary_test</a>. Check also the documentation part: <a href="https://github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test/blob/development/DOCUMENTATION/README.md" class="external-link">FinOMOP_OMOP_vocabulary_test/DOCUMENTATION</a></p>
 <p>See vignettes for help.</p>
 </div>
   </div>

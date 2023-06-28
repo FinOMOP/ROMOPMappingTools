@@ -1,0 +1,67 @@
+---
+title: "Files description"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{files_description}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup, include = FALSE}
+#library(ROMOPMappingTools)
+devtools::load_all(".")
+```
+
+
+```{r , include = FALSE}
+
+.printFileDescription <- function(table) {
+
+  for(table_type in table$table_type){
+      row <- table |>  dplyr::filter(.data$table_type == {{table_type}})
+      
+      cat("\n### Table: ", table_type, "\n")
+      
+      cat("\n", row$table_description, "\n")
+      
+      col_type <- row$col_type[[1]]$cols
+      
+      col_description <- row$columns_description[[1]]
+      col_description_names <- names(col_description) |> stringr::str_remove_all("`")
+      col_description_values <- as.character(unlist(col_description))
+      
+      cat("\n#### Columns: \n")
+      
+      for (i in 1:length(col_description_names)) {
+        cat(paste0("- **", col_description_names[i], ":** ", col_description_values[i], "\n"))
+      }
+      
+      cat("\n#### Rules: \n")
+      
+      rules <- row$validation_rules[[1]]$exprs() |> names() |> 
+        stringr::str_replace_all("\\.", " ")
+      
+      for (rule in rules) {
+        cat(paste0("- ", rule, "\n"))
+      }
+      
+
+  }
+
+}
+```
+
+```{r results='asis', echo = FALSE}
+
+.printFileDescription(tables_valid_format)
+
+```
