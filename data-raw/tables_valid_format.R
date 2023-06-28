@@ -25,8 +25,16 @@ tables_valid_format <-  tibble::tribble(
     twobillionare_code.is.unique = is_unique(twobillionare_code),
     mapping_type.valid.values.are.CCR.or.STCM = mapping_type %in% c("CCR", "STCM")
   ),
-  "",
+  "List of local vocabularies and paths to the mapping files.",
   list(
+    source_vocabulary_id = "Vocabulary_id as it appears in the usagi and info tables.",
+    twobillionare_code = " First 6 digits of the concept_ids use in all the code in the vocabulary.",
+    path_to_usagi_file = "Relative path to the usagi file.",
+    path_to_usagi_file = "Relative path to the info file.",
+    mapping_version = "Latest version of the vocabulary.",
+    last_modify_date = "Date the vocabulary was last time modified.",
+    mapping_type = "'CCR' for Concept&ConceptRelationship mapping or 'STCM' for Source To Concept Map (no yet implemented).",
+    ignore = "If TRUE row is ignored in the processing."
   ),
   #
   "UsagiForCCR",
@@ -64,18 +72,18 @@ tables_valid_format <-  tibble::tribble(
     valid_start_date.is.lower.than.valid_end_date = `ADD_INFO:sourceValidStartDate`<=`ADD_INFO:sourceValidEndDate`,
     concept_id.is.not.0.for.ACCEPTED.mappingStatus = if (mappingStatus=="APPROVED") conceptId!=0
   ),
-  "Usagi file with few added columms neede to build the OMOP vocabulary tables",
+  "Usagi file with few added columms needed to build the OMOP vocabulary tables",
   list(
-    sourceCode = "Usagui column: code in the local vocabulary",
-    sourceName = "Usagui column: code's name in English as in the local vocabulary or traslated from",
-    sourceFrequency = "Usagui column: number of times the code appears in the reference database",
+    sourceCode = "Usagui column: code in the local vocabulary.",
+    sourceName = "Usagui column: code's name in English as in the local vocabulary or traslated from.",
+    sourceFrequency = "Usagui column: number of times the code appears in the reference database.",
     sourceAutoAssignedConceptIds = "Usagui column:",
-    `ADD_INFO:sourceConceptId` = "Usagui-extended column: over 2 billion unique concept_id",
-    `ADD_INFO:sourceName_fi` = "Usagui-extended column:  code's name in Finnish",
-    `ADD_INFO:sourceConceptClass` = "Usagui-extended column: text id of hierarchy with in the local vocabulary. This must be as it appears in the vocabulary_info file",
+    `ADD_INFO:sourceConceptId` = "Usagui-extended column: over 2 billion unique concept_id.",
+    `ADD_INFO:sourceName_fi` = "Usagui-extended column:  code's name in Finnish.",
+    `ADD_INFO:sourceConceptClass` = "Usagui-extended column: text id of hierarchy with in the local vocabulary. This must be as it appears in the vocabulary_info file.",
     `ADD_INFO:sourceDomain` = "Usagui-extended column: default domain for the code. If the code has a mapping the domain is infered from the standard code, if not, this value is used.",
-    `ADD_INFO:sourceValidStartDate` = "Usagui-extended column: code's start valididty date in dd-mm-yyyy format. If not available set to ",
-    `ADD_INFO:sourceValidEndDate` = "Usagui-extended column: code's end valididty date in dd-mm-yyyy format. If not available set to",
+    `ADD_INFO:sourceValidStartDate` = "Usagui-extended column: code's start valididty date in dd-mm-yyyy format. If not available set to 1970-01-01",
+    `ADD_INFO:sourceValidEndDate` = "Usagui-extended column: code's end valididty date in dd-mm-yyyy format. If not available set to 2099-12-31",
     matchScore = "Usagui column:",
     mappingStatus = "Usagui column:",
     equivalence = "Usagui column:",
@@ -102,8 +110,13 @@ tables_valid_format <-  tibble::tribble(
     concept_id.is.uniques = is_unique(concept_id),
     text_id.lessthan.20char = field_length(text_id , min=0, max=20)
   ),
-  "",
-  list(),
+  "Additional info to build the VOCABULARY and CONCEPT_CLASS tables.",
+  list(
+    concept_id = "Concept_id for the vocabulary or concept_class tag.",
+    type = "If the row is for info going to the 'Vocabulary' or 'Concep Class' tables.",
+    text_id = "For 'Vocabulary' type the text going to vocabulary_id column, for 'Concept Class' type the text going to concept_class_id.",
+    text_id = "For 'Vocabulary' type the test going to vocabulary_name column, for 'Concept Class' type the text going to concept_class_name."
+  ),
   #
   "VocabulariesCoverage",
   readr::cols(
@@ -117,8 +130,13 @@ tables_valid_format <-  tibble::tribble(
     target_vocabulary_ids.is.not.na = is_complete(target_vocabulary_ids),
     source_vocabulary_id.and.target_vocabulary_ids.is.uniques = is_unique(concept_id)
   ),
-  "",
-  list(),
+  "Rule to calculate the vocaburies coverage.",
+  list(
+    source_vocabulary_id = "Vocabulary id as it appears in the code_counts files.",
+    target_vocabulary_ids = "Vocabulary id as it appears in the concept table.",
+    mantained_by = "Maintainer of the vocabulary.",
+    ignore = "If TRUE row is ignored in the processing."
+  ),
   #
   "DatabasesCodeCounts",
   readr::cols(
@@ -130,8 +148,12 @@ tables_valid_format <-  tibble::tribble(
     database_name.is.not.na = is_complete(database_name),
     path_to_code_counts_file.is.not.na = is_complete(path_to_code_counts_file)
   ),
-  "",
-  list(),
+  "List of databases and links to their code_counts files.",
+  list(
+    database_name = "Name of the database.",
+    path_to_code_counts_file = "Relative path to the code_counts file for the database.",
+    ignore = "If TRUE row is ignored in the processing."
+  ),
   #
   "CodeCounts",
   readr::cols(
@@ -144,8 +166,12 @@ tables_valid_format <-  tibble::tribble(
     source_vocabulary_id.and.source_code.are.unique = is_unique(source_vocabulary_id, source_code),
     n_events.is.more.than.5.or.minus.one = n_events>5|n_events==-1
   ),
-  "",
-  list()
+  "Code counts from a database.",
+  list(
+    source_vocabulary_id= "Vocabulary_id the code belongs to.",
+    source_code = "Code value.",
+    n_events = "Number of time the code appears in the database (for privacy reasons n_events must be less than 5)."
+  )
 )
 
 usethis::use_data(tables_valid_format, overwrite = TRUE)

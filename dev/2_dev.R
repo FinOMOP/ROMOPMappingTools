@@ -74,3 +74,4 @@ usethis::use_r("buildStatusDashboard")
 
 ## VIGNETTES
 usethis::use_vignette("run_demo")
+usethis::use_vignette("files_description")

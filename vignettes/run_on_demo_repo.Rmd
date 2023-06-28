@@ -3,8 +3,10 @@ title: "Run steps on demo repo"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{run}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r, include = FALSE}
@@ -150,7 +152,7 @@ results_DQD$CheckResults |> as_tibble() |> filter(numViolatedRows!=0)
 
 # Calculate databases coverage
 ## Import databases code_counts
-databases_coverage.csv table contains the settings and links to the code_counts.csv files for each database.
+databases_coverage.csv table contains links to the code_counts.csv files for each database.
 `importDatabasesCodeCountsTables` reads all the code_counts.csv files defined in databases_coverage.csv (unless `ignore` column is TRUE) and combine them into one tibbles. 
 `validateTables` check the correctness of the code_counts tables. 
 
@@ -174,7 +176,7 @@ Optionally, you can use `autoFixDatabaseCodeCountTable` function to fix some of 
 
 ## Check coverage 
 Once the code_counts tables are valid they can be used to assess how the new merged vocabulary covers the event in each database. 
-For this we need a database_coverage.csv file that describes the vocabularies to assess. 
+For this we need a vocabularies_coverage.csv file that describes the vocabularies to assess. 
 
 The database_coverage.csv file has the following columns: 
 - source_vocabulary_id: vocabulary id as it appears in the code_counts files 
