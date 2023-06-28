@@ -25,126 +25,6 @@ mapping_status <- params$mapping_status
 ```
 
 
-
-USAGI Tables Validation
-===================================== 
-
-Sidebar {.sidebar data-width=300}
------------------------------------------------------------------------
-### Description 
-dasdas
-
-
-Column {.tabset}
------------------------------------------------------------------------
-
-### Summary
-```{r }
-if(!is.null(usagi_mapping_tables)){
-  .printSumary(usagi_mapping_tables)
-}
-```
-
-```{r results='asis'}
-if(!is.null(usagi_mapping_tables)){
-  .printValidationTables(usagi_mapping_tables)
-}
-```
-
-
-Vocabulary Info Tables Validation
-===================================== 
-
-Sidebar {.sidebar data-width=300}
------------------------------------------------------------------------
-### Description 
-dasdas
-
-
-Column {.tabset}
------------------------------------------------------------------------
-
-### Summary
-```{r }
-if(!is.null(vocabulary_info_mapping_tables)){
-  .printSumary(vocabulary_info_mapping_tables)
-}
-```
-
-```{r results='asis'}
-if(!is.null(vocabulary_info_mapping_tables)){
-  .printValidationTables(vocabulary_info_mapping_tables)
-}
-```
-
-
-
-OMOP Tables Validation
-=====================================
-
-Sidebar {.sidebar data-width=300}
------------------------------------------------------------------------
-### Description
-
-
-Column {.tabset}
------------------------------------------------------------------------
-
-### Summary
-```{r }
-if(!is.null(results_DQD)){
-  results_DQD$CheckResults |>  tibble::as_tibble() |> 
-    dplyr::transmute(
-      Status = dplyr::case_when(
-        isError==1 ~ "ERROR", 
-        failed==1 ~ "FAIL",
-        passed==1 ~ "PASS"
-      ), 
-      Table=cdmTableName, 
-      Field=cdmFieldName, 
-      Category=category, 
-      Subcategory=subcategory, 
-      Description=checkDescription, 
-      `% Records` = pctViolatedRows
-    ) |> 
-    reactable::reactable(
-      resizable = TRUE,
-      filterable = TRUE,
-      defaultPageSize = 20
-    )
-  
-}
-```
-
-
-
-
-Databases Counts Tables Validation
-=====================================
-
-Sidebar {.sidebar data-width=300}
------------------------------------------------------------------------
-### Description
-
-
-Column {.tabset}
------------------------------------------------------------------------
-
-### Summary
-```{r }
-if(!is.null(databases_code_counts_tables)){
-  .printSumary(databases_code_counts_tables)
-}
-```
-
-```{r results='asis'}
-if(!is.null(databases_code_counts_tables)){
-  .printValidationTables(databases_code_counts_tables)
-}
-```
-
-
-
 Databases Coverage
 =====================================
 
@@ -153,7 +33,7 @@ Sidebar {.sidebar data-width=300}
 -----------------------------------------------------------------------
 ### Description
 
-The table on the right summarizes the current status of the FimOMOP mapping repository.
+This table summarizes the current status of the FimOMOP mapping repository.
 
 Each row shows a `Vocabulary`. If it is `Maintaned by` OMOP, FinnOMOP, or OMOP+FinnOMOP for a combination of both.
 `Mapping progress` shows the proportion of codes in a vocabulary that have been mapped to one or more OMOP-standard concepts.
@@ -171,6 +51,8 @@ A code used in a clinical event may fall in one of the following categories:
 
 
 Exactly what events fall in each category can be explored by selecting the vocabulary's tab over the main table.
+
+Hover over the bars to see details.
 
 
 
@@ -214,6 +96,140 @@ if(!is.null(mapping_status)){
 }
 ```
 
+
+
+OMOP Tables Validation
+=====================================
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description
+
+This table shows the results from the DataQualityDashboard applied to the OMOP vocabulary tables. 
+It checks that the modified OMOP vocabulary tables maintain the conformance and plausibility rules defined by the CDM definitions.  
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(results_DQD)){
+  results_DQD$CheckResults |>  tibble::as_tibble() |> 
+    dplyr::transmute(
+      Status = dplyr::case_when(
+        isError==1 ~ "ERROR", 
+        failed==1 ~ "FAIL",
+        passed==1 ~ "PASS"
+      ), 
+      Table=cdmTableName, 
+      Field=cdmFieldName, 
+      Category=category, 
+      Subcategory=subcategory, 
+      Description=checkDescription, 
+      `% Records` = pctViolatedRows
+    ) |> 
+    reactable::reactable(
+      resizable = TRUE,
+      filterable = TRUE,
+      defaultPageSize = 20
+    )
+  
+}
+```
+
+
+
+USAGI Tables Validation
+===================================== 
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description 
+This table shows the quality checks done in the usagi mapping files. 
+This helps to the source of a possible error in the "OMOP Tables Validation"
+
+The Summary tab shows a summary of the input vocabularies and if they have any failed rules, `n_failed_rules` column. 
+
+Additionally, there is one tab per vocabulary showing the list of checks (Validation Summary) and the specific rows causing the error if any (Failed Rules).
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(usagi_mapping_tables)){
+  .printSumary(usagi_mapping_tables)
+}
+```
+
+```{r results='asis'}
+if(!is.null(usagi_mapping_tables)){
+  .printValidationTables(usagi_mapping_tables)
+}
+```
+
+
+Vocabulary Info Tables Validation
+===================================== 
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description 
+This table shows the quality checks done in the info mapping files. 
+This helps to the source of a possible error in the "OMOP Tables Validation"
+
+The Summary tab shows a summary of the input vocabularies and if they have any failed rules, `n_failed_rules` column. 
+
+Additionally, there is one tab per vocabulary showing the list of checks (Validation Summary) and the specific rows causing the error if any (Failed Rules).
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(vocabulary_info_mapping_tables)){
+  .printSumary(vocabulary_info_mapping_tables)
+}
+```
+
+```{r results='asis'}
+if(!is.null(vocabulary_info_mapping_tables)){
+  .printValidationTables(vocabulary_info_mapping_tables)
+}
+```
+
+
+
+Databases Counts Tables Validation
+=====================================
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Description 
+This table shows the quality checks done in the code_counts files. 
+
+The Summary tab shows a summary of the input databases and if they have any failed rules, `n_failed_rules` column. 
+
+Additionally, there is one tab per database showing the list of checks (Validation Summary) and the specific rows causing the error if any (Failed Rules).
+
+Column {.tabset}
+-----------------------------------------------------------------------
+
+### Summary
+```{r }
+if(!is.null(databases_code_counts_tables)){
+  .printSumary(databases_code_counts_tables)
+}
+```
+
+```{r results='asis'}
+if(!is.null(databases_code_counts_tables)){
+  .printValidationTables(databases_code_counts_tables)
+}
+```
 
 
 
