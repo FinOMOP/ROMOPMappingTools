@@ -16,7 +16,7 @@ It allows to :
 - Given the code's frequency from one or more local databases calculates how well a OMOP vocabulary covers the medical events
 - Create a interactive dashboard to show the above results
 
-See vignettes for details. 
+[See vignettes for details](https://finomop.github.io/ROMOPMappingTools/). 
 
 ## Example of a mapping repository
 
