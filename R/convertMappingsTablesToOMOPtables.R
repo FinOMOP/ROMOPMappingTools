@@ -253,6 +253,24 @@ convertMappingsTablesToOMOPtables <- function(
         invalid_reason = as.character(NA)
       )
 
+    #################################### FIX HERE
+    isa_concept_relationship <- code_mappings_for_CCR  |>
+      dplyr::filter(mappingStatus=="APPROVED" && !is.na(`ADD_INFO:sourceParents`)) |>
+      dplyr::mutate(parent=stringr::str_split(`ADD_INFO:sourceParents`, "\\|")) |>
+      dplyr::unnest(parent) |>
+      dplyr::transmute(
+        concept_id_1 = `ADD_INFO:sourceConceptId`,
+        concept_id_2 = conceptId,
+        relationship_id = "Is a",
+        valid_start_date = `ADD_INFO:sourceValidStartDate`,#pmax(valid_start_date, valid_start_date_2),
+        valid_end_date   = `ADD_INFO:sourceValidEndDate`,#pmin(valid_end_date, valid_end_date_2),
+        invalid_reason = as.character(NA)
+      )
+
+    subsumes_concept_relationship <- code_mappings_for_CCR  |>
+      dplyr::filter(mappingStatus=="APPROVED" && !is.na(`ADD_INFO:sourceParents`))
+    #################################### END HERE
+
     dplyr::bind_rows(
       mapsto_concept_relationship,
       mapsfrom_concept_relationship
