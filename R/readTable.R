@@ -30,7 +30,8 @@ readTable <- function(path_to_table_file, table_type, delim=",") {
   table <- readr::read_delim(
     path_to_table_file,
     col_types = table_info$col_type[[1]],
-    delim =  delim
+    delim =  delim,
+    na = c("")
   )
 
   # if it has an ignore column take only selected values
