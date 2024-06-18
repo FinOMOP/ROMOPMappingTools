@@ -72,8 +72,12 @@ tables_valid_format <-  tibble::tribble(
     sourceName.is.not.empty = is_complete(sourceName),
     sourceName.lessthan.255char = field_length(sourceName, min=0, max=255),
     valid_start_date.is.lower.than.valid_end_date = `ADD_INFO:sourceValidStartDate`<=`ADD_INFO:sourceValidEndDate`,
-    concept_id.is.not.0.for.ACCEPTED.mappingStatus = if (mappingStatus=="APPROVED") conceptId!=0
-    # ADD_INFO:sourceParents should have their value in soureCode column if the ADD_INFO:sourceParentVocabulary is NA or NULL
+    concept_id.is.not.0.for.ACCEPTED.mappingStatus = if (mappingStatus=="APPROVED") conceptId!=0,
+    ADD_INFO:sourceParents.should.be.in.soureCode.if.ADD_INFO:sourceParents.is.not.NA.and.ADD_INFO:sourceParentVocabulary.is.NA =
+      if (!is.na(`ADD_INFO:sourceParents`) & is.na(`ADD_INFO:sourceParentVocabulary`))
+        dplyr::mutate(parent = stringr::str_split(`ADD_INFO:sourceParents`,"\\|")) |>
+        tidyr::unnest(parent) |>
+        dplyr::summarise(all_present = all(parent %in% csourceCode)) == TRUE
   ),
   "Usagi file with few added columms needed to build the OMOP vocabulary tables",
   list(
