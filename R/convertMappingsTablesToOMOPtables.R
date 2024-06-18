@@ -287,7 +287,7 @@ convertMappingsTablesToOMOPtables <- function(
       dplyr::distinct() |>
       dplyr::transmute(
         concept_id_1 = `ADD_INFO:sourceConceptId`,
-        concept_id_2 = concept_id,
+        concept_id_2 = as.integer(concept_id),
         relationship_id = "Is a",
         valid_start_date = `ADD_INFO:sourceValidStartDate`,#pmax(valid_start_date, valid_start_date_2),
         valid_end_date   = `ADD_INFO:sourceValidEndDate`,#pmin(valid_end_date, valid_end_date_2),
@@ -313,7 +313,7 @@ convertMappingsTablesToOMOPtables <- function(
                     `ADD_INFO:sourceParents`, parentCode, parentVocab, concept_id) |>
       dplyr::distinct() |>
       dplyr::transmute(
-        concept_id_1 = concept_id,
+        concept_id_1 = as.integer(concept_id),
         concept_id_2 = `ADD_INFO:sourceConceptId`,
         relationship_id = "Subsumes",
         valid_start_date = `ADD_INFO:sourceValidStartDate`,#pmax(valid_start_date, valid_start_date_2),
