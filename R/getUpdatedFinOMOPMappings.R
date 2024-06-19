@@ -13,7 +13,7 @@
 #' @export
 
 
-getUpdateFinOMOPMappings <- function(path_to_omop_vocabulary_folder) {
+getUpdatedFinOMOPMappings <- function(path_to_omop_vocabulary_folder) {
 
 
   OMOP_vocabulary_table_names <- c(
@@ -77,7 +77,7 @@ getUpdateFinOMOPMappings <- function(path_to_omop_vocabulary_folder) {
   }
 
   # Check for deprecated and upgraded standard codes
-  sql <- SqlRender::readSql(system.file("sql/update_standard_concepts.sql", package = "ROMOPMappingTools", mustWork = TRUE))
+  sql <- SqlRender::readSql(system.file("sql/update_mapped_concepts.sql", package = "ROMOPMappingTools", mustWork = TRUE))
   sql <- SqlRender::render(
     sql = sql,
     cdmDatabaseSchema = "main"
