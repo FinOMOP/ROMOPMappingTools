@@ -67,10 +67,10 @@ SELECT fcss.concept_id AS source_concept_id,
        fcss.concept_name AS source_concept_name,
        fcss.vocabulary_id,
        fcss.current_mapped_concept AS obsolete_mapped_concept_id,
-       cvcr.relationship_id AS obselete_to_target_relation
+       cvcr.relationship_id AS obselete_to_target_relation,
        cvcr.concept_id_2 AS target_concept_id,
        cvc.concept_name AS target_concept_name,
-       cvc.domain_id AS target__domain_id
+       cvc.domain_id AS target_domain_id
 FROM finomop_concepts_standard_status AS fcss
 LEFT JOIN @cdmDatabaseSchema.concept_relationship AS cvcr
 ON cvcr.concept_id_1 = fcss.current_mapped_concept AND
