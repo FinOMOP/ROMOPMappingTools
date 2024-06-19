@@ -60,7 +60,7 @@ SELECT fcss.concept_id AS source_concept_id,
        cvc.domain_id AS target__domain_id
 FROM finomop_concepts_standard_status AS fcss
 LEFT JOIN @cdmDatabaseSchema.concept_relationship AS cvcr
-ON cvcr.concept_id_1 = fcs.current_mapped_concept AND
+ON cvcr.concept_id_1 = fcss.current_mapped_concept AND
    cvcr.relationship_id IN ('Maps to', 'Concept poss_eq to','Concept replaced by', 'Concept same_as to')
 LEFT JOIN @cdmDatabaseSchema.concept AS cvc
 ON cvcr.concept_id_2 = cvc.concept_id
