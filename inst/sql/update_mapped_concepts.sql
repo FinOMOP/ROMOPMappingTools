@@ -44,7 +44,7 @@ finomop_concepts_standard_status AS (
          cvc.invalid_reason AS new_invalid_reason,
          cvc.standard_concept AS new_standard_concept
   FROM finomop_concepts_standard AS fcs
-  LEFT JOIN cdm_vocabulary.concept AS cvc
+  LEFT JOIN @cdmDatabaseSchema.concept AS cvc
   ON cvc.concept_id = fcs.current_mapped_concept
   WHERE (t.current_mapped_concept_standard_concept IS NULL AND cvc.invalid_reason IS NOT NULL) OR
         (t.current_mapped_concept_standard_concept = 'S' AND cvc.invalid_reason IS NOT NULL)
