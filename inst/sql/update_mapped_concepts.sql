@@ -28,7 +28,12 @@ WITH finomop_concepts AS (
 ),
 -- Get the current mapped concept status through standard_concept and invalid_reason
 finomop_concepts_standard AS (
-  SELECT fc.*,
+  SELECT fc.concept_id,
+         fc.concept_code,
+         fc.concept_name,
+         fc.vocabulary_id,
+         fc.current_mapped_concept,
+         fc.relationship_id,
          c.invalid_reason AS current_mapped_concept_invalid_reason,
          c.standard_concept AS current_mapped_concept_standard_concept
   FROM finomop_concepts AS fc
@@ -40,7 +45,14 @@ finomop_concepts_standard AS (
 -- 1. Whether a current_mapped_concept is not standard but has been upgraded to Standard in the latest OHDSI release
 -- 2 Whether a current_mapped_concept is standard but has been upgraded/dicontinued in the latest OHDSI release
 finomop_concepts_standard_status AS (
-  SELECT fcs.*,
+  SELECT fcs.concept_id,
+         fcs.concept_code,
+         fcs.concept_name,
+         fcs.vocabulary_id,
+         fcs.current_mapped_concept,
+         fcs.relationship_id,
+         fcs.current_mapped_concept_invalid_reason,
+         fcs.current_mapped_concept_standard_concept,
          cvc.invalid_reason AS new_invalid_reason,
          cvc.standard_concept AS new_standard_concept
   FROM finomop_concepts_standard AS fcs
@@ -55,6 +67,7 @@ SELECT fcss.concept_id AS source_concept_id,
        fcss.concept_name AS source_concept_name,
        fcss.vocabulary_id,
        fcss.current_mapped_concept AS obsolete_mapped_concept_id,
+       cvcr.relationship_id AS obselete_to_target_relation
        cvcr.concept_id_2 AS target_concept_id,
        cvc.concept_name AS target_concept_name,
        cvc.domain_id AS target__domain_id
