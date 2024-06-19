@@ -46,10 +46,11 @@ finomop_concepts_standard_status AS (
   FROM finomop_concepts_standard AS fcs
   LEFT JOIN @cdmDatabaseSchema.concept AS cvc
   ON cvc.concept_id = fcs.current_mapped_concept
-  WHERE (t.current_mapped_concept_standard_concept IS NULL AND cvc.invalid_reason IS NOT NULL) OR
-        (t.current_mapped_concept_standard_concept = 'S' AND cvc.invalid_reason IS NOT NULL)
+  WHERE (fcs.current_mapped_concept_standard_concept IS NULL AND cvc.invalid_reason IS NOT NULL) OR
+        (fcs.current_mapped_concept_standard_concept = 'S' AND cvc.invalid_reason IS NOT NULL)
 )
--- Print out the results
+-- Get the latest mappings of these current_mapped_concept upgraded or discontinued
+-- Latest mappings through concept relationship which is 'Maps to', 'Concept poss_eq to','Concept replaced by', 'Concept same_as to'
 SELECT fcss.concept_id AS source_concept_id,
        fcss.concept_name AS source_concept_name,
        fcss.vocabulary_id,
