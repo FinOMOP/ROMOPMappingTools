@@ -296,29 +296,14 @@ convertMappingsTablesToOMOPtables <- function(
 
     # "Subsumes" relationship, non-standard concepts using `ADD_INFO:sourceParents` and `ADD_INFO:sourceParentVocabulary`
     # Same steps as "Is a" relationship just reverse concept_id_1 and concept_id_2 in the transmute
-    subsumes_concept_relationship <- code_mappings_for_CCR  |>
-      dplyr::filter(!is.na(`ADD_INFO:sourceParents`)) |>
-      dplyr::mutate(`ADD_INFO:sourceParentVocabulary` = dplyr::if_else(is.na(`ADD_INFO:sourceParentVocabulary`),vocabName,`ADD_INFO:sourceParentVocabulary`)) |>
-      dplyr::mutate(row = row_number(),
-                    parentCode = stringr::str_split(`ADD_INFO:sourceParents`, "\\|"),
-                    parentVocab = stringr::str_split(`ADD_INFO:sourceParentVocabulary`, "\\|")) |>
-      tidyr::unnest(cols = c(parentCode, parentVocab)) |>
-      dplyr::left_join(concept_vocab |> dplyr::select(concept_id,concept_code,vocabulary_id),
-                       by = c("parentCode" = "concept_code", "parentVocab" = "vocabulary_id")) |>
-      dplyr::left_join(concept_omop |> dplyr::select(concept_id,concept_code,vocabulary_id),
-                       by = c("parentCode" = "concept_code", "parentVocab" = "vocabulary_id")) |>
-      dplyr::mutate(concept_id = dplyr::coalesce(as.character(concept_id.x), as.character(concept_id.y))) |>
-      dplyr::select(sourceCode, `ADD_INFO:sourceConceptId`,
-                    `ADD_INFO:sourceValidStartDate`,`ADD_INFO:sourceValidEndDate`,
-                    `ADD_INFO:sourceParents`, parentCode, parentVocab, concept_id) |>
-      dplyr::distinct() |>
-      dplyr::transmute(
-        concept_id_1 = as.integer(concept_id),
-        concept_id_2 = `ADD_INFO:sourceConceptId`,
+    subsumes_concept_relationship <- isa_concept_relationship |>
+      dplyr::trasnmute(
+        concept_id_1 = concept_id_2,
+        concept_id_2 = concept_id_1,
         relationship_id = "Subsumes",
-        valid_start_date = `ADD_INFO:sourceValidStartDate`,#pmax(valid_start_date, valid_start_date_2),
-        valid_end_date   = `ADD_INFO:sourceValidEndDate`,#pmin(valid_end_date, valid_end_date_2),
-        invalid_reason = as.character(NA)
+        valid_start_date = valid_start_date,
+        valid_end_date = valid_end_date,
+        invalid_reason = invalid_reason
       )
 
     #################################### END HERE
