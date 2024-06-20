@@ -5,6 +5,7 @@
 #'
 #' @param usagi_mapping_tables Tibble containing the mapping tables imported from Usagi.csv files.
 #' @param vocabulary_info_mapping_tables Tibble containing the mapping tables imported from info.csv files.
+#' @param path_to_input_omop_vocabulary_folder Path to the input folder to read CONCEPT OMOP vocabulary table. This is necesary for building hierarchies in vocabularies that inherint from an other vocabulary, like some ICD10fi parents are in ICD10who.
 #' @param path_to_temp_omop_vocabulary_folder Path to the output folder where to write the OMOP vocabulary tables
 #' @param ignore_failed_rules Logical value indicating whether to ignore tables with failed rules.
 #'
@@ -20,6 +21,7 @@
 convertMappingsTablesToOMOPtables <- function(
     usagi_mapping_tables,
     vocabulary_info_mapping_tables = NULL,
+    path_to_input_omop_vocabulary_folder,
     path_to_temp_omop_vocabulary_folder,
     ignore_failed_rules = FALSE
 ) {
@@ -37,6 +39,7 @@ convertMappingsTablesToOMOPtables <- function(
     checkmate::assertSubset(c("name", "table", "n_failed_rules"), vocabulary_info_mapping_tables |> names())
   }
 
+  path_to_input_omop_vocabulary_folder |> checkmate::assertDirectoryExists()
   path_to_temp_omop_vocabulary_folder |> checkmate::assertDirectoryExists()
 
   ignore_failed_rules |>  checkmate::assertLogical()
@@ -65,6 +68,12 @@ convertMappingsTablesToOMOPtables <- function(
     }
   }
 
+  ##
+  # Read OMOP input CONCEPT table and get ICD10 codes
+  ##
+
+  concept_omop <- readr::read_tsv(file.path(path_to_input_omop_vocabulary_folder, "CONCEPT.csv"),na = c(""))
+  concept_omop <- concept_omop |> dplyr::filter(vocabulary_id == "ICD10")
 
   ##
   # CONCEPT & CONCEPT_RELATIONSHIP mode
@@ -253,9 +262,57 @@ convertMappingsTablesToOMOPtables <- function(
         invalid_reason = as.character(NA)
       )
 
+    # "Is a" relationship non-standard concepts using `ADD_INFO:sourceParents` and `ADD_INFO:sourceParentVocabulary`
+    # Filter out for all codes where parent is not parent that would include Chapters as well as some codes with no parent information
+    # If there is a parent code present and has vocabulary missing then change to sourceParentVocabulary is changed to vocabName
+    # Split the sourceParents and sourceParentVocabulary at | symbol
+    # Check if the combination of sourceParents and sourceParentVocabulary is present in concept_vocab then get concept_id
+    # If not in concept_vocab Check in concept_omop then get concept_id
+    # Filter out for unique rows and transmute them to concept relationship table columns
+    isa_concept_relationship <- code_mappings_for_CCR  |>
+      dplyr::filter(!is.na(`ADD_INFO:sourceParents`)) |>
+      dplyr::mutate(`ADD_INFO:sourceParentVocabulary` = dplyr::if_else(is.na(`ADD_INFO:sourceParentVocabulary`),vocabName,`ADD_INFO:sourceParentVocabulary`)) |>
+      dplyr::mutate(row = row_number(),
+             parentCode = stringr::str_split(`ADD_INFO:sourceParents`, "\\|"),
+             parentVocab = stringr::str_split(`ADD_INFO:sourceParentVocabulary`, "\\|")) |>
+      tidyr::unnest(cols = c(parentCode, parentVocab)) |>
+      dplyr::left_join(concept_vocab |> dplyr::select(concept_id,concept_code,vocabulary_id),
+                       by = c("parentCode" = "concept_code", "parentVocab" = "vocabulary_id")) |>
+      dplyr::left_join(concept_omop |> dplyr::select(concept_id,concept_code,vocabulary_id),
+                       by = c("parentCode" = "concept_code", "parentVocab" = "vocabulary_id")) |>
+      dplyr::mutate(concept_id = dplyr::coalesce(as.character(concept_id.x), as.character(concept_id.y))) |>
+      dplyr::select(sourceCode, `ADD_INFO:sourceConceptId`,
+                    `ADD_INFO:sourceValidStartDate`,`ADD_INFO:sourceValidEndDate`,
+                    `ADD_INFO:sourceParents`, parentCode, parentVocab, concept_id) |>
+      dplyr::distinct() |>
+      dplyr::transmute(
+        concept_id_1 = `ADD_INFO:sourceConceptId`,
+        concept_id_2 = as.integer(concept_id),
+        relationship_id = "Is a",
+        valid_start_date = `ADD_INFO:sourceValidStartDate`,#pmax(valid_start_date, valid_start_date_2),
+        valid_end_date   = `ADD_INFO:sourceValidEndDate`,#pmin(valid_end_date, valid_end_date_2),
+        invalid_reason = as.character(NA)
+      )
+
+    # "Subsumes" relationship, non-standard concepts using `ADD_INFO:sourceParents` and `ADD_INFO:sourceParentVocabulary`
+    # Same steps as "Is a" relationship just reverse concept_id_1 and concept_id_2 in the transmute
+    subsumes_concept_relationship <- isa_concept_relationship |>
+      dplyr::trasnmute(
+        concept_id_1 = concept_id_2,
+        concept_id_2 = concept_id_1,
+        relationship_id = "Subsumes",
+        valid_start_date = valid_start_date,
+        valid_end_date = valid_end_date,
+        invalid_reason = invalid_reason
+      )
+
+    #################################### END HERE
+
     dplyr::bind_rows(
       mapsto_concept_relationship,
-      mapsfrom_concept_relationship
+      mapsfrom_concept_relationship,
+      isa_concept_relationship,
+      subsumes_concept_relationship
     )|>
       dplyr::mutate(
         valid_start_date =  .date_to_character(valid_start_date),
