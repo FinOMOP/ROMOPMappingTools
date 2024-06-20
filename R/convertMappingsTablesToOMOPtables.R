@@ -5,7 +5,7 @@
 #'
 #' @param usagi_mapping_tables Tibble containing the mapping tables imported from Usagi.csv files.
 #' @param vocabulary_info_mapping_tables Tibble containing the mapping tables imported from info.csv files.
-#' @param path_to_input_omop_vocabulary_folder Path to the input folder to read CONCEPT OMOP vocabulary table.
+#' @param path_to_input_omop_vocabulary_folder Path to the input folder to read CONCEPT OMOP vocabulary table. This is necesary for building hierarchies in vocabularies that inherint from an other vocabulary, like some ICD10fi parents are in ICD10who.
 #' @param path_to_temp_omop_vocabulary_folder Path to the output folder where to write the OMOP vocabulary tables
 #' @param ignore_failed_rules Logical value indicating whether to ignore tables with failed rules.
 #'
