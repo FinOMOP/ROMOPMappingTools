@@ -297,9 +297,11 @@ convertMappingsTablesToOMOPtables <- function(
     # "Subsumes" relationship, non-standard concepts using `ADD_INFO:sourceParents` and `ADD_INFO:sourceParentVocabulary`
     # Same steps as "Is a" relationship just reverse concept_id_1 and concept_id_2 in the transmute
     subsumes_concept_relationship <- isa_concept_relationship |>
+      dplyr::mutate(new_concept_id_1 = concept_id_2,
+                    new_concetp_id_2 = concept_id_1) |>
       dplyr::transmute(
-        concept_id_1 = concept_id_2,
-        concept_id_2 = concept_id_1,
+        concept_id_1 = new_concept_id_1,
+        concept_id_2 = new_concetp_id_2,
         relationship_id = "Subsumes",
         valid_start_date = valid_start_date,
         valid_end_date = valid_end_date,
