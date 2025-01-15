@@ -83,5 +83,5 @@ vocabularyICD10 |>
 # test files are correct
 omopVocabularyCSVsToDuckDB(
     pathToOMOPVocabularyCSVsFolder = pathToTestDataFolder,
-    pathToOMOPVocabularyDuckDBfile = tempfile()
+    pathToOMOPVocabularyDuckDBfile = paste0(pathToTestDataFolder, "/OMOPVocabularyICD10only.duckdb")
 )
