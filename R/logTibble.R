@@ -42,7 +42,7 @@ LogTibble <- R6::R6Class(
     addLog = function(type, step, message, ...) {
       private$log <- private$log |>
         dplyr::add_row(
-          type = factor(type, levels = c("INFO", "WARNING", "ERROR", "SUCCESS")),
+          type = factor(type, levels = c("INFO", "WARNING", "ERROR", "SUCCESS", "FATAL")),
           step = step,
           message = paste(message, ...)
         )
@@ -90,6 +90,17 @@ LogTibble <- R6::R6Class(
     #' @param ...      Additional parameters for message formatting
     SUCCESS = function(step, message, ...) {
       self$addLog("SUCCESS", step, message, ...)
+    },
+
+    #' FATAL
+    #' @description
+    #' Adds a fatal log message to the log tibble.
+    #'
+    #' @param step     Step or description associated with the log message
+    #' @param message  Log message content
+    #' @param ...      Additional parameters for message formatting
+    FATAL = function(step, message, ...) {
+      self$addLog("FATAL", step, message, ...)
     },
 
     #' print
