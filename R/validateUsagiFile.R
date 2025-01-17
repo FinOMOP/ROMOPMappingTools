@@ -14,31 +14,34 @@
 #' - Check if ADD_INFO:sourceParents is a valid concept code in the ADD_INFO:sourceParentVocabulary
 #'
 #' @param pathToUsagiFile Path to the Usagi mapping file to validate
-#' @param pathToOMOPVocabularyDuckDBfile Path to the DuckDB file containing OMOP vocabulary
+#' @param connection A DatabaseConnector connection object
+#' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
 #' @param pathToValidatedUsagiFile Path where to save the validated Usagi file
 #'
 #' @importFrom checkmate assertFileExists assertSubset
 #' @importFrom DBI dbConnect dbListTables
-#' @importFrom duckdb duckdb
-#' @importFrom readr read_csv cols col_character col_integer col_double col_date
 #' @importFrom dplyr mutate
 #' @importFrom readr write_csv
 #'
 #' @export
 validateUsagiFile <- function(
     pathToUsagiFile,
-    pathToOMOPVocabularyDuckDBfile,
+    connection,
+    vocabularyDatabaseSchema,
     pathToValidatedUsagiFile) {
     #
     # Parameter validation
     #
     checkmate::assertFileExists(pathToUsagiFile)
-    checkmate::assertFileExists(pathToOMOPVocabularyDuckDBfile)
+    # vocabularyDatabaseSchema exists in the connection
+    checkmate::assertCharacter(vocabularyDatabaseSchema, len = 1, any.missing = FALSE)
 
-    con <- DBI::dbConnect(duckdb::duckdb(), pathToOMOPVocabularyDuckDBfile)
-    listTables <- DBI::dbListTables(con)
+    # Check if required tables exist
+    #tables <- DatabaseConnector::getTableNames(connection, vocabularyDatabaseSchema)
+    # TEMP untill solved https://github.com/OHDSI/DatabaseConnector/issues/299
+    tableNames <- DBI::dbListTables(conn = connection, databaseSchema = vocabularyDatabaseSchema)
     c("CONCEPT", "CONCEPT_RELATIONSHIP", "DOMAIN") |>
-        checkmate::assertSubset(listTables)
+        checkmate::assertSubset(tableNames)
 
     # Read the usagi file
     usagiTibble <- readUsagiFile(pathToUsagiFile)
@@ -127,7 +130,7 @@ validateUsagiFile <- function(
             validationLogTibble$SUCCESS("Missing C&CR columns", "")
         }
 
-        validDomains <- con |>
+        validDomains <- connection |>
             DBI::dbGetQuery("SELECT domain_id FROM DOMAIN") |>
             dplyr::pull(domain_id)
         validationRules <- validate::validator(
@@ -246,7 +249,7 @@ validateUsagiFile <- function(
             purrr::flatten_chr() |>
             unique()
         if (length(usedParentVocabularies) > 0) {
-            parentVocabularyConceptCodes <- dplyr::tbl(con, "CONCEPT") |>
+            parentVocabularyConceptCodes <- dplyr::tbl(connection, "CONCEPT") |>
                 dplyr::filter(vocabulary_id %in% usedParentVocabularies) |>
                 dplyr::select(vocabulary_id, concept_code) |>
                 dplyr::collect()
@@ -317,8 +320,6 @@ validateUsagiFile <- function(
         dplyr::rename(`ADD_INFO:validationMessages` = tmpvalidationMessages) |>
         readr::write_csv(pathToValidatedUsagiFile, na = "")
 
-
-    DBI::dbDisconnect(con)
     return(validationLogTibble$logTibble)
 }
 

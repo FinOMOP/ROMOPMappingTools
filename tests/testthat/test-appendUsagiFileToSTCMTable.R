@@ -1,0 +1,71 @@
+test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceToConceptMapTable for a non-extended sourceToConceptMapTable", {
+    pathToUsagiFile <- testthat::test_path("testdata/ICD10fi/ICD10fi.usagi.csv")
+    nrowUsagiFile <- readr::read_csv(pathToUsagiFile, show_col_types = FALSE) |> nrow()
+    pathToOMOPVocabularyDuckDBfile <- testthat::test_path("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
+    vocabularyDatabaseSchema <- "main"
+    sourceToConceptMapTable <- "source_to_concept_map"
+
+    connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+    on.exit(DatabaseConnector::disconnect(connection))
+
+    appendUsagiFileToSTCMtable(
+        vocabularyId = "ICD10fi",
+        pathToUsagiFile = pathToUsagiFile,
+        connection = connection,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+        sourceToConceptMapTable = sourceToConceptMapTable
+    ) |>
+        expect_warning("The usagi file is extended but the sourceToConceptMapTable is not extended.")
+
+    stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> as_tibble()
+    stcmTable |>
+        nrow() |>
+        expect_equal(nrowUsagiFile)
+
+    stcmTable |>
+        names() |>
+        stringr::str_to_lower() |>
+        expect_equal(c(
+            "source_code", "source_concept_id", "source_vocabulary_id", "source_code_description", "target_concept_id",
+             "target_vocabulary_id", "valid_start_date", "valid_end_date", "invalid_reason"))
+})
+
+test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceToConceptMapTable for an extended sourceToConceptMapTable", {
+    pathToUsagiFile <- testthat::test_path("testdata/ICD10fi/ICD10fi.usagi.csv")
+    nrowUsagiFile <- readr::read_csv(pathToUsagiFile, show_col_types = FALSE) |> nrow()
+    pathToOMOPVocabularyDuckDBfile <- testthat::test_path("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
+    vocabularyDatabaseSchema <- "main"
+
+    # create an extended sourceToConceptMapTable
+    sourceToConceptMapTable <- "source_to_concept_map_extended"
+    createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
+
+    connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+    on.exit(DatabaseConnector::disconnect(connection))
+
+    appendUsagiFileToSTCMtable(
+        vocabularyId = "ICD10fi",
+        pathToUsagiFile = pathToUsagiFile,
+        connection = connection,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+        sourceToConceptMapTable = sourceToConceptMapTable
+    ) 
+
+    stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> as_tibble()
+    stcmTable |>
+        nrow() |>
+        expect_equal(nrowUsagiFile)
+    stcmTable |>
+        names() |> 
+        stringr::str_to_lower() |>
+        expect_equal(c(
+            "source_code", "source_concept_id", "source_vocabulary_id", "source_code_description", "target_concept_id",
+             "target_vocabulary_id", "valid_start_date", "valid_end_date", "invalid_reason", "source_concept_class", 
+             "source_domain", "source_parents_concept_ids"))
+})

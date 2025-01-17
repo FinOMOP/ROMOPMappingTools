@@ -2,10 +2,19 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   
   pathToUsagiFile <- testthat::test_path("testdata/ICD10fi/ICD10fi.usagi.csv")
   pathToOMOPVocabularyDuckDBfile <- testthat::test_path("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
+  vocabularyDatabaseSchema = "main"
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
 
+  # Create connection to test database
+  connection <- DBI::dbConnect(duckdb::duckdb(), pathToOMOPVocabularyDuckDBfile)
+  on.exit(DBI::dbDisconnect(connection, shutdown = TRUE))
 
-  validationsSummary <- validateUsagiFile(pathToUsagiFile, pathToOMOPVocabularyDuckDBfile, pathToValidatedUsagiFile)
+  validationsSummary <- validateUsagiFile(
+    pathToUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToValidatedUsagiFile
+  )
 
   # all validations must be successful
   validationsSummary |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(0)
@@ -14,20 +23,25 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
 
   validatedUsagiFile |> dplyr::filter(!is.na(`ADD_INFO:validationMessages`)) |> nrow() |> expect_equal(0)
-
-  # it opens with Usagi
-  #file.copy(pathToValidatedUsagiFile, "~/Downloads/ICD10fi.usagi.csv", overwrite = TRUE)
 })
-
-
 
 test_that("test validateUsagiFile returns errors with the errored usagi file", {
   
   pathToUsagiFile <- testthat::test_path("testdata/ICD10fi/ICD10fi_with_errors.usagi.csv")
   pathToOMOPVocabularyDuckDBfile <- testthat::test_path("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
+  vocabularyDatabaseSchema = "main"
+  # Create connection to test database
+  connection <- DBI::dbConnect(duckdb::duckdb(), pathToOMOPVocabularyDuckDBfile)
+  on.exit(DBI::dbDisconnect(connection, shutdown = TRUE))
 
-  validationsSummary <- validateUsagiFile(pathToUsagiFile, pathToOMOPVocabularyDuckDBfile, pathToValidatedUsagiFile)
+  validationsSummary <- validateUsagiFile(
+    pathToUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToValidatedUsagiFile
+  )
+  
   validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
 
   # SourceCode is empty

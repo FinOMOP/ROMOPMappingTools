@@ -1,10 +1,10 @@
-#' Convert OMOP Vocabulary CSVs to DuckDB
+#' Convert OMOP Vocabulary CSVs to Database
 #'
-#' This function converts OMOP vocabulary CSV files to a DuckDB database file.
+#' This function converts OMOP vocabulary CSV files to a Database.
 #'
 #' @param pathToOMOPVocabularyCSVsFolder Path to folder containing OMOP vocabulary CSV files
-#' @param pathToOMOPVocabularyDuckDBfile Path where the DuckDB file should be created
-#'
+#' @param connection A DatabaseConnector connection object
+#' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
 #' @importFrom DatabaseConnector createConnectionDetails connect dbExecute disconnect
 #' @importFrom SqlRender readSql render translate
 #' @importFrom checkmate assertDirectoryExists assertSubset
@@ -15,7 +15,9 @@
 
 omopVocabularyCSVsToDuckDB <- function(
     pathToOMOPVocabularyCSVsFolder,
-    pathToOMOPVocabularyDuckDBfile) {
+    connection,
+    vocabularyDatabaseSchema
+    ) {
     OMOPVocabularyTableNames <- c(
         "CONCEPT",
         "CONCEPT_ANCESTOR",
@@ -42,19 +44,13 @@ omopVocabularyCSVsToDuckDB <- function(
 
     ###
     ## function
-    ###
-    connection_details <- DatabaseConnector::createConnectionDetails(
-        dbms = "duckdb",
-        server = pathToOMOPVocabularyDuckDBfile
-    )
-
-    connection <- DatabaseConnector::connect(connection_details)
+    ##
 
     # create cdm tables
     sql <- SqlRender::readSql(system.file("ddl/5.4/sql_server/OMOPCDM_sql_server_5.4_ddl.sql", package = "ROMOPMappingTools", mustWork = TRUE))
     sql <- SqlRender::render(
         sql = sql,
-        cdmDatabaseSchema = "main"
+        cdmDatabaseSchema = vocabularyDatabaseSchema
     )
     sql <- SqlRender::translate(
         sql = sql,
@@ -75,8 +71,4 @@ omopVocabularyCSVsToDuckDB <- function(
     # DQD needs the cdm_source table
     DatabaseConnector::dbExecute(connection, "INSERT INTO main.cdm_source VALUES ('tmp_vocab_table', 'tmp_vocab_table', 'tmp_vocab_table', '', '', '', DATE '1992-09-20' , DATE '1992-09-20', '', 1, 'test')")
 
-    #
-    DatabaseConnector::disconnect(connection)
-
-    return(pathToOMOPVocabularyDuckDBfile)
 }

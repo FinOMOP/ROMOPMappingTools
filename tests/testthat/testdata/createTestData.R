@@ -3,18 +3,19 @@ pathToFullOMOPVocabularyCSVsFolder <- "~/Documents/Repos/FinOMOP/FinOMOP_OMOP_vo
 # convert to duckdb
 pathToFullOMOPVocabularyDuckDBfile <- tempfile()
 
-omopVocabularyCSVsToDuckDB(
-    pathToOMOPVocabularyCSVsFolder = pathToFullOMOPVocabularyCSVsFolder,
-    pathToOMOPVocabularyDuckDBfile = pathToFullOMOPVocabularyDuckDBfile
-)
-
 connection <- DatabaseConnector::connect(
     dbms = "duckdb",
     server = pathToFullOMOPVocabularyDuckDBfile
 )
 
+omopVocabularyCSVsToDuckDB(
+    pathToOMOPVocabularyCSVsFolder = pathToFullOMOPVocabularyCSVsFolder,
+    connection = connection,
+    vocabularyDatabaseSchema = vocabularyDatabaseSchema
+)
+
 # filter for ICD10
-concept <- dplyr::tbl(connection, "CONCEPT")
+concept <- dplyr::tbl(connection, "CONCEPT")   
 concept_ancestor <- dplyr::tbl(connection, "CONCEPT_ANCESTOR")
 conceptClass <- dplyr::tbl(connection, "CONCEPT_CLASS")
 conceptRelationship <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")
@@ -48,7 +49,6 @@ vocabularyICD10 <- vocabulary |>
         by = c("vocabulary_id" = "vocabulary_id")
     )
 
-
 # write to csv
 pathToTestDataFolder <- "tests/testthat/testdata/OMOPVocabularyICD10only"
 
@@ -79,9 +79,18 @@ vocabularyICD10 |>
     dplyr::collect() |>
     readr::write_tsv(file.path(pathToTestDataFolder, "VOCABULARY.csv"), na = "")
 
+DatabaseConnector::disconnect(connection)
 
 # test files are correct
+pathToFullOMOPVocabularyDuckDBfile <- testthat::test_path("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
+
+connection <- DatabaseConnector::connect(
+    dbms = "duckdb",
+    server = pathToFullOMOPVocabularyDuckDBfile
+)
+
 omopVocabularyCSVsToDuckDB(
     pathToOMOPVocabularyCSVsFolder = pathToTestDataFolder,
-    pathToOMOPVocabularyDuckDBfile = paste0(pathToTestDataFolder, "/OMOPVocabularyICD10only.duckdb")
+    connection = connection,
+    vocabularyDatabaseSchema = vocabularyDatabaseSchema
 )
