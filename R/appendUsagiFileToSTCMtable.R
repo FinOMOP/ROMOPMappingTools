@@ -126,7 +126,7 @@ appendUsagiFileToSTCMtable <- function(vocabularyId, pathToUsagiFile, connection
                 dplyr::pull(`ADD_INFO:sourceParentVocabulary`) |>
                 stringr::str_split("\\|") |>
                 purrr::flatten_chr() |>
-                unique()
+                unique()                                                                                
             if (length(usedParentVocabularies) > 0) {
                 parentVocabularyConceptCodes <- dplyr::tbl(connection, "CONCEPT") |>
                     dplyr::filter(vocabulary_id %in% usedParentVocabularies) |>
@@ -171,7 +171,7 @@ appendUsagiFileToSTCMtable <- function(vocabularyId, pathToUsagiFile, connection
                 dplyr::left_join(notValidParentConceptCodes, by = "row") |>
                 dplyr::select(-row)
         } else {
-            usagiTibble <- usagiTibble |> dplyr::mutate(sourceParentsConceptIds = NA_character_)
+            usagiTibble <- usagiTibble |> dplyr::mutate(sourceParentConceptIds = NA_character_)
         }
 
         STCMTableToInsert <- usagiTibble |>

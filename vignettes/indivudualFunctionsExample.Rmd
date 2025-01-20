@@ -128,7 +128,7 @@ appendUsagiFileToSTCMtable(
 
 # Multiple Usagi files to STCM table
 
-
+## Validate all the Usagi files in the vocabulary folder
 ```{r}
 pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
 pathToValidatedUsagiFolder <- tempdir()
@@ -138,5 +138,11 @@ validationsLogTibble <- validateVocabularyFolder(pathToVocabularyFolder, connect
 
 ```{r}
 knitr::kable(validationsLogTibble)
+```
+
+## Upload all the Usagi files to the STCM table
+
+```{r}
+vocabularyFolderToSTCMtable(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 ```
 
