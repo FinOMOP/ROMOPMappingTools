@@ -1,0 +1,3 @@
+source_vocabulary_id,source_concept_id_offset,path_to_usagi_file,path_to_news_file,ignore
+ICD10fi,20005,./ICD10fi/ICD10fi.usagi.csv,./ICD10fi/NEWS.md,FALSE
+UNITfi,20025,./UNITfi/UNITfi.usagi.csv,./UNITfi/NEWS.md,FALSE

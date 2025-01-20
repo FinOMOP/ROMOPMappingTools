@@ -1,0 +1,142 @@
+---
+title: "Step by step example using individual functions"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{run}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ROMOPMappingTools)
+```
+
+
+# Intro
+
+
+# Singel Usagi file to STCM table
+
+## Reading the Usagi file
+
+For reading the Usagi file, we can use the `readUsagiFile` function, which returns a tibble with the correct columns formated.
+It can read a standard Usagi file or an extended Usagi file.
+
+```{r}
+pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+
+usagiTibble <- readUsagiFile(pathToUsagiFile)
+```
+
+## Validating the Usagi file
+
+For validating the Usagi file, we can use the `validateUsagiFile` function. 
+This function needs a connection to the OMOP vocabulary database and schema to where the vocabulary tables are stored in order to make some of the validations.
+The function also needs a path to a file where, if errors are found, a new Usagi file with the errors will be created.
+The function returns a tibble with a summary of the validations conducted.
+
+For this example, we will use the test database in DuckDB format.
+
+```{r}
+pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
+vocabularyDatabaseSchema <- "main"
+pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
+
+connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+```
+
+```{r}
+validationsSummary <- validateUsagiFile(
+  pathToUsagiFile,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile
+)
+```
+
+```{r}
+knitr::kable(validationsSummary)
+```
+
+In this case the Usagi file is valid and no errors are found. Hence, the new validated Usagi file remains unchanged.
+
+However, we can see what happens with a usagi file with errors.
+
+```{r}
+pathToUsagiFileWithErrors <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
+
+usagiTibbleWithErrors <- readUsagiFile(pathToUsagiFileWithErrors)
+```
+
+```{r}
+validationsSummaryWithErrors <- validateUsagiFile(
+  pathToUsagiFileWithErrors,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile
+)
+```
+
+```{r}
+knitr::kable(validationsSummaryWithErrors)
+```
+
+In this case, if we open the new validate Usagi with the Usagi software these mapping with errors will appear as FLAGED
+Additionaly, the `ADD_INFO:validationMessages` column will indicate the exact error or errors found.
+
+![Usagi with errors](./images/Usagi_with_errors.png)
+
+
+## Uploading the Usagi file into the SourceToConceptMap table in a database
+
+For uploading the validated Usagi file into the SourceToConceptMap table in a database, we can use the `appendUsagiFileToSTCMtable` function. 
+This function needs a connection to the database and schema where the vocabulary is stored and the name of the SourceToConceptMap table.
+Most CDM database have a standard SourceToConceptMap table named `source_to_concept_map`. 
+This table can be used if we wish to process the Usagi file as a standard Usagi file.
+
+However, if we wish to process the Usagi file as an extended Usagi file, we need to create an extended SourceToConceptMap table.
+This can be done using the `createSourceToConceptMapExtended` function.
+
+```{r}
+sourceToConceptMapTable <- "source_to_concept_map_extended"
+createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
+```
+
+```{r}
+appendUsagiFileToSTCMtable(
+  vocabularyId = "ICD10",
+  pathToUsagiFile,
+  connection,
+  vocabularyDatabaseSchema,
+  sourceToConceptMapTable
+)
+```
+
+# Multiple Usagi files to STCM table
+
+
+```{r}
+pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
+pathToValidatedUsagiFolder <- tempdir()
+
+validationsLogTibble <- validateVocabularyFolder(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFolder)
+```
+
+```{r}
+knitr::kable(validationsLogTibble)
+```
+

@@ -1,13 +1,16 @@
 test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   
-  pathToUsagiFile <- testthat::test_path("testdata/ICD10fi/ICD10fi.usagi.csv")
-  pathToOMOPVocabularyDuckDBfile <- testthat::test_path("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
   vocabularyDatabaseSchema = "main"
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
 
   # Create connection to test database
-  connection <- DBI::dbConnect(duckdb::duckdb(), pathToOMOPVocabularyDuckDBfile)
-  on.exit(DBI::dbDisconnect(connection, shutdown = TRUE))
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
 
   validationsSummary <- validateUsagiFile(
     pathToUsagiFile, 
@@ -27,13 +30,16 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
 
 test_that("test validateUsagiFile returns errors with the errored usagi file", {
   
-  pathToUsagiFile <- testthat::test_path("testdata/ICD10fi/ICD10fi_with_errors.usagi.csv")
-  pathToOMOPVocabularyDuckDBfile <- testthat::test_path("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
   vocabularyDatabaseSchema = "main"
   # Create connection to test database
-  connection <- DBI::dbConnect(duckdb::duckdb(), pathToOMOPVocabularyDuckDBfile)
-  on.exit(DBI::dbDisconnect(connection, shutdown = TRUE))
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
 
   validationsSummary <- validateUsagiFile(
     pathToUsagiFile, 

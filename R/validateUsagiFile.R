@@ -39,8 +39,8 @@ validateUsagiFile <- function(
     # Check if required tables exist
     #tables <- DatabaseConnector::getTableNames(connection, vocabularyDatabaseSchema)
     # TEMP untill solved https://github.com/OHDSI/DatabaseConnector/issues/299
-    tableNames <- DBI::dbListTables(conn = connection, databaseSchema = vocabularyDatabaseSchema)
-    c("CONCEPT", "CONCEPT_RELATIONSHIP", "DOMAIN") |>
+    tableNames <- DatabaseConnector::dbListTables(connection, vocabularyDatabaseSchema)
+    c("concept", "concept_relationship", "domain") |>
         checkmate::assertSubset(tableNames)
 
     # Read the usagi file
@@ -243,6 +243,7 @@ validateUsagiFile <- function(
 
         usedParentVocabularies <- usagiTibble |>
             dplyr::select(`ADD_INFO:sourceParentVocabulary`) |>
+            dplyr::mutate(`ADD_INFO:sourceParentVocabulary` = dplyr::if_else(is.na(`ADD_INFO:sourceParentVocabulary`), "", `ADD_INFO:sourceParentVocabulary`)) |>
             dplyr::distinct() |>
             dplyr::pull(`ADD_INFO:sourceParentVocabulary`) |>
             stringr::str_split("\\|") |>
@@ -281,6 +282,7 @@ validateUsagiFile <- function(
             dplyr::select(-`ADD_INFO:sourceParentVocabulary`, -`ADD_INFO:sourceParents`)
 
         notValidParentConceptCodes <- parentConceptCodes |>
+            dplyr::filter(!is.na(vocabulary_id) & !is.na(concept_code)) |>
             dplyr::mutate(vocabulary_id = dplyr::if_else(vocabulary_id == "", NA_character_, vocabulary_id)) |>
             dplyr::anti_join(validVocabularyConceptCodes, by = c("vocabulary_id", "concept_code")) |>
             dplyr::mutate(errorMessage = if_else(is.na(vocabulary_id),
