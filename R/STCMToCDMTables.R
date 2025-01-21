@@ -25,7 +25,7 @@ STCMToCDMTables <- function(connection,
   # Get SQL script path
   sqlPath <- system.file(
     "sql", "sql_server", 
-    "STCMToCDM.sql", 
+    "STCMExtendedToCDM.sql", 
     package = "ROMOPMappingTools"
   )
   

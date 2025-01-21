@@ -11,7 +11,7 @@ connection <- DatabaseConnector::connect(
 omopVocabularyCSVsToDuckDB(
     pathToOMOPVocabularyCSVsFolder = pathToFullOMOPVocabularyCSVsFolder,
     connection = connection,
-    vocabularyDatabaseSchema = vocabularyDatabaseSchema
+    vocabularyDatabaseSchema = "main"
 )
 
 # filter for ICD10
@@ -48,12 +48,19 @@ vocabularyICD10 <- vocabulary |>
         conceptICD10,
         by = c("vocabulary_id" = "vocabulary_id")
     )
+# secondary concepts
+conceptStandardConceptICD10 <- concept |>
+    dplyr::semi_join(conceptRelationshipICD10, by = c("concept_id" = "concept_id_2"))
 
 # write to csv
 pathToTestDataFolder <- "inst/testdata/OMOPVocabularyICD10only"
 
-conceptICD10 |>
-    dplyr::collect() |>
+dplyr::bind_rows(
+    conceptICD10 |>
+        dplyr::collect(),
+    conceptStandardConceptICD10 |>
+        dplyr::collect() 
+) |>
     dplyr::mutate(across(where(lubridate::is.Date), ~ format(., "%Y%m%d"))) |>
     readr::write_tsv(file.path(pathToTestDataFolder, "CONCEPT.csv"), na = "")
 conceptICD10Ancestor |>
@@ -82,7 +89,7 @@ vocabularyICD10 |>
 DatabaseConnector::disconnect(connection)
 
 # test files are correct
-pathToFullOMOPVocabularyDuckDBfile <- "inst/testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb"
+pathToFullOMOPVocabularyDuckDBfile <- here::here("inst/testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
 
 connection <- DatabaseConnector::connect(
     dbms = "duckdb",
@@ -92,5 +99,6 @@ connection <- DatabaseConnector::connect(
 omopVocabularyCSVsToDuckDB(
     pathToOMOPVocabularyCSVsFolder = pathToTestDataFolder,
     connection = connection,
-    vocabularyDatabaseSchema = vocabularyDatabaseSchema
+    vocabularyDatabaseSchema = "main"
 )
+DatabaseConnector::disconnect(connection)

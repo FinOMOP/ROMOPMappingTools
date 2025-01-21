@@ -11,3 +11,8 @@ errorReportSql.txt
 
 renv/
 renv.lock
+
+# DuckDB files
+*.duckdb.wal
+
+

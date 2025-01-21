@@ -1,11 +1,32 @@
-test_that("STCMToCDMTables creates vocabulary entries from STCM", {
+test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with correct domain recalculation", {
     # Setup test paths and parameters
     pathToOMOPVocabularyDuckDBfile <- system.file(
-        "testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", 
+        "testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb",
         package = "ROMOPMappingTools"
     )
     vocabularyDatabaseSchema <- "main"
     sourceToConceptMapTable <- "source_to_concept_map_extended"
+
+    # Create test data
+    testData <- tibble::tribble(
+        ~source_code, ~source_concept_id, ~source_vocabulary_id, ~source_code_description, ~target_concept_id, ~target_vocabulary_id, ~valid_start_date, ~valid_end_date, ~invalid_reason, ~source_concept_class, ~source_domain, ~source_parents_concept_ids,
+        # domain recalculation
+        "code1", 2000000001, "TestVocab", "Test Code 1 ConditionCondition", 141797, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        "code1", 2000000001, "TestVocab", "Test Code 1 ConditionCondition", 141797, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        "code2", 2000000002, "TestVocab", "Test Code 2 ConditionObservation", 141797, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        "code2", 2000000002, "TestVocab", "Test Code 2 ConditionObservation", 36713461, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        "code3", 2000000003, "TestVocab", "Test Code 3 ObservationCondition", 36713461, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        "code3", 2000000003, "TestVocab", "Test Code 3 ObservationCondition", 141797, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        "code4", 2000000004, "TestVocab", "Test Code 4 Observation", 36713461, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        "code5", 2000000005, "TestVocab", "Test Code 5 unmapped", 0, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
+        # no dates
+        "code6", 2000000006, "TestVocab", "Test Code 6 no start date", 0, "SNOMED", as.Date(NA), as.Date("2099-12-31"), NA_character_, "Test concept class 2", "Condition", NA_character_,
+        "code7", 2000000007, "TestVocab", "Test Code 7 no end date", 0, "SNOMED", as.Date("2023-01-01"), as.Date(NA), NA_character_, "Test concept class 2", "Condition", NA_character_, 
+        # parent concept ids
+        "code8", 2000000008, "TestVocab", "Test Code 8 parent concept ids", 0, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class 3", "Condition", "2000000001",
+        "code9", 2000000009, "TestVocab", "Test Code 9 parent concept ids", 0, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class 3", "Condition", "2000000001|2000000002",
+        "code10", 2000000010, "TestVocab", "Test Code 10 parent concept ids", 0, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class 3", "Condition", "2000000001|2000000002|2000000003"
+    )
 
     # Create connection to test database
     connection <- DatabaseConnector::connect(
@@ -22,111 +43,84 @@ test_that("STCMToCDMTables creates vocabulary entries from STCM", {
         overwrite = TRUE
     )
 
-    # Add test data to STCM
-    testData <- data.frame(
-        source_code = c("TEST1", "TEST2"),
-        source_concept_id = c(2000000001, 2000000002),
-        source_vocabulary_id = c("TestVocab", "TestVocab"),
-        source_code_description = c("Test Code 1", "Test Code 2"),
-        target_concept_id = c(4000001, 4000002),
-        target_vocabulary_id = c("SNOMED", "SNOMED"),
-        valid_start_date = as.Date(c("2023-01-01", "2023-01-01")),
-        valid_end_date = as.Date(c("2099-12-31", "2099-12-31")),
-        invalid_reason = NA_character_,
-        source_concept_class = c("Test", "Test"),
-        source_domain = c("Condition", "Condition"),
-        source_parents_concept_ids = NA_character_
-    )
-    
     DatabaseConnector::insertTable(
         connection = connection,
-        tableName = sourceToConceptMapTable,
         databaseSchema = vocabularyDatabaseSchema,
-        data = testData,
-        dropTableIfExists = FALSE,
-        createTable = FALSE,
-        tempTable = FALSE
+        tableName = sourceToConceptMapTable,
+        data = testData
     )
 
-    on.exit(DatabaseConnector::dbRemoveTable(connection, sourceToConceptMapTable))
-
-    # Run function
+    # Execute the SQL
     STCMToCDMTables(
         connection = connection,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         sourceToConceptMapTable = sourceToConceptMapTable
     )
- 
-    # Check VOCABULARY table
-    vocabularyData <- DatabaseConnector::dbGetQuery(
-        connection,
-        sprintf("SELECT * FROM %s.VOCABULARY WHERE vocabulary_id = 'TestVocab'", 
-                vocabularyDatabaseSchema)
-    )
 
-    expect_equal(nrow(vocabularyData), 1)
-    expect_equal(vocabularyData$vocabulary_id, "TestVocab")
-    expect_equal(vocabularyData$vocabulary_name, "TestVocab")
-    expect_equal(vocabularyData$vocabulary_concept_id, 0)
+    # CONCEPT_CLASS 
+    res <- dplyr::tbl(connection, "CONCEPT_CLASS") |> 
+        dplyr::filter(concept_class_concept_id == 0)  |> 
+        dplyr::arrange(concept_class_id) |> 
+        dplyr::collect()
 
-    # Check that old vocabulary entries were removed
-    oldVocabCount <- DatabaseConnector::dbGetQuery(
-        connection,
-        sprintf("
-            SELECT COUNT(*) as count 
-            FROM %s.VOCABULARY 
-            WHERE vocabulary_id = 'TestVocab' 
-            AND vocabulary_concept_id != 0", 
-            vocabularyDatabaseSchema)
-    )
-    expect_equal(oldVocabCount$count, 0)
+    res  |> dplyr::pull(concept_class_id) |> expect_equal(c("Test concept class", "Test concept class 2", "Test concept class 3"))
+    res  |> dplyr::pull(concept_class_name) |> expect_equal(c("Test concept class", "Test concept class 2", "Test concept class 3"))
+    res  |> dplyr::pull(concept_class_concept_id) |> expect_equal(c(0, 0, 0))
 
-    # Check CONCEPT table
-    conceptData <- DatabaseConnector::dbGetQuery(
-        connection,
-        sprintf("SELECT * FROM %s.CONCEPT WHERE vocabulary_id = 'TestVocab'", 
-                vocabularyDatabaseSchema)
-    )
+    # CONCEPT
+    res <- dplyr::tbl(connection, "CONCEPT") |> 
+        dplyr::filter(vocabulary_id == "TestVocab") |> 
+        dplyr::arrange(concept_id) |> 
+        dplyr::collect()
+
+    # general
+    res  |> nrow() |> expect_equal(10)
+    res  |> dplyr::pull(concept_id) |> expect_equal(c(2000000001, 2000000002, 2000000003, 2000000004, 2000000005, 2000000006, 2000000007, 2000000008, 2000000009, 2000000010))
+    # domain_id
+    res  |> dplyr::pull(domain_id) |> expect_equal(c("Condition", "Condition/Obs", "Condition/Obs", "Observation", "Condition", "Condition", "Condition", "Condition", "Condition", "Condition"))
+    # dates
+    res  |> dplyr::pull(valid_start_date) |> expect_equal(c(as.Date("2023-01-01"), as.Date("2023-01-01"), as.Date("2023-01-01"), as.Date("2023-01-01"), as.Date("2023-01-01"), as.Date('1970-01-01'), as.Date("2023-01-01"), as.Date("2023-01-01"), as.Date("2023-01-01"), as.Date("2023-01-01")))
+    res  |> dplyr::pull(valid_end_date) |> expect_equal(c(as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31"), as.Date("2099-12-31")))
+
+    # CONCEPT_RELATIONSHIP
+    # maps to
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
+        dplyr::filter(relationship_id == "Maps to") |> 
+        dplyr::filter(concept_id_1 > 2000000000) |> 
+        dplyr::arrange(concept_id_1, concept_id_2) |> 
+        dplyr::collect()
+    res |> nrow() |> expect_equal(6)
+    res  |> dplyr::pull(relationship_id) |> expect_equal(rep("Maps to", 6))
+    res  |> dplyr::pull(concept_id_2) |> expect_equal(c( 141797, 141797, 36713461, 141797, 36713461, 36713461))
+
+    # maps from
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
+        dplyr::filter(relationship_id == "Maps from") |> 
+        dplyr::filter(concept_id_2 > 2000000000) |> 
+        dplyr::arrange(concept_id_2, concept_id_1) |> 
+        dplyr::collect()
+    res |> nrow() |> expect_equal(6)
+    res  |> dplyr::pull(relationship_id) |> expect_equal(rep("Maps from", 6))
+    res  |> dplyr::pull(concept_id_1) |> expect_equal(c( 141797, 141797, 36713461, 141797, 36713461, 36713461))
+
+    # subsumes
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
+        dplyr::filter(relationship_id == "Subsumes") |> 
+        dplyr::filter(concept_id_1 > 2000000000) |> 
+        dplyr::arrange(concept_id_1, concept_id_2) |> 
+        dplyr::collect()
+    res |> nrow() |> expect_equal(6)
+    res  |> dplyr::pull(concept_id_1) |> expect_equal(c(2000000008, 2000000009, 2000000009, 2000000010, 2000000010, 2000000010))
+    res  |> dplyr::pull(concept_id_2) |> expect_equal(c(2000000001, 2000000001, 2000000002, 2000000001, 2000000002, 2000000003))
+
+    # is a
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
+        dplyr::filter(relationship_id == "Is a") |> 
+        dplyr::filter(concept_id_1 > 2000000000) |> 
+        dplyr::arrange(concept_id_1, concept_id_2) |> 
+        dplyr::collect()
+    res |> nrow() |> expect_equal(6)
+    res  |> dplyr::pull(concept_id_1) |> expect_equal(c(2000000001, 2000000001, 2000000002, 2000000001, 2000000002, 2000000003))
+    res  |> dplyr::pull(concept_id_2) |> expect_equal(c(2000000008, 2000000009, 2000000009, 2000000010, 2000000010, 2000000010))
+
 })
-
-test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with correct domain recalculation", {
-  # Create test data
-    testData <- tibble::tribble(
-        ~source_code, ~source_concept_id, ~source_vocabulary_id, ~source_code_description, ~target_concept_id, ~target_vocabulary_id, ~valid_start_date, ~valid_end_date, ~invalid_reason, ~source_concept_class, ~domain_id, ~source_parents_concept_ids,
-        "code1", 2000000001, "TestVocab", "Test Code 1 ConditionCondition", 257581, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test", "Condition", NA_character_,
-        "code1", 2000000001, "TestVocab", "Test Code 1 ConditionCondition", 257581, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test", "Condition", NA_character_,
-        "code2", 2000000002, "TestVocab", "Test Code 2 ConditionObservation", 257581, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test", "Condition", NA_character_,
-        "code2", 2000000002, "TestVocab", "Test Code 2 ConditionObservation", 4235703 465, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test", "Condition", NA_character_,
-        "code3", 2000000003, "TestVocab", "Test Code 3", 4000005, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test", "Condition", NA_character_,
-        "code3", 2000000003, "TestVocab", "Test Code 3", 4000006, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test", "Condition", NA_character_,
-        "code4", 2000000004, "TestVocab", "Test Code 4", 4000007, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test", "Condition", NA_character_
-    )
-  
-  # Write test data to temp database
-  DBI::dbWriteTable(connection, "#temp_stcm", testData, temporary = TRUE)
-  
-  # Execute the SQL
-  DatabaseConnector::executeSql(connection, SqlRender::render(
-    readSql("inst/sql/sql_server/STCMExtendedToCDM.sql"),
-    vocabularyDatabaseSchema = "vocab",
-    sourceToConceptMapTable = "#temp_stcm"
-  ))
-  
-  # Get results
-  results <- DBI::dbGetQuery(connection, "
-    SELECT source_code, final_domain_id 
-    FROM #temp_results 
-    ORDER BY source_code
-  ")
-  
-  # Check expectations
-  expected_results <- tibble::tribble(
-    ~source_code, ~final_domain_id,
-    "code1", "Condition/Device",
-    "code2", "Condition/Meas",
-    "code3", "Drug/Procedure",
-    "code4", "Observation"
-  )
-  
-  expect_equal(results, expected_results)
-}) 
