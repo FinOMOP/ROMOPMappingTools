@@ -8,7 +8,8 @@ validateUsagiFile(
   pathToUsagiFile,
   connection,
   vocabularyDatabaseSchema,
-  pathToValidatedUsagiFile
+  pathToValidatedUsagiFile,
+  sourceConceptIdOffset
 )
 }
 \arguments{

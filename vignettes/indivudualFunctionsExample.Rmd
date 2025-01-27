@@ -25,13 +25,21 @@ library(ROMOPMappingTools)
 
 # Intro
 
+# Populating the STCM table
 
-# Singel Usagi file to STCM table
+The SourceToConceptMap (STCM) table is a table in the OMOP vocabulary database that contains the mappings between source codes and concept ids. 
+The STCM table is used to store the mappings for the vocabularies.
 
-## Reading the Usagi file
+We can populate the STCM table from a Usagi file or from a folder with Usagi files.
+
+## Singel Usagi file to STCM table
+
+### Reading the Usagi file
 
 For reading the Usagi file, we can use the `readUsagiFile` function, which returns a tibble with the correct columns formated.
 It can read a standard Usagi file or an extended Usagi file.
+In example we will read a extended Usagi file, from the test data.
+This file contains the mappings for the ICD10fi vocabulary.
 
 ```{r}
 pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
@@ -39,7 +47,7 @@ pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv"
 usagiTibble <- readUsagiFile(pathToUsagiFile)
 ```
 
-## Validating the Usagi file
+### Validating the Usagi file
 
 For validating the Usagi file, we can use the `validateUsagiFile` function. 
 This function needs a connection to the OMOP vocabulary database and schema to where the vocabulary tables are stored in order to make some of the validations.
@@ -47,6 +55,7 @@ The function also needs a path to a file where, if errors are found, a new Usagi
 The function returns a tibble with a summary of the validations conducted.
 
 For this example, we will use the test database in DuckDB format.
+This test database contains only the ICD10 vocabulary with all the keys in other tables (see `inst/testdata/createTestData.R` for more details).
 
 ```{r}
 pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
@@ -101,7 +110,7 @@ Additionaly, the `ADD_INFO:validationMessages` column will indicate the exact er
 ![Usagi with errors](./images/Usagi_with_errors.png)
 
 
-## Uploading the Usagi file into the SourceToConceptMap table in a database
+### Uploading the Usagi file into the SourceToConceptMap table in a database
 
 For uploading the validated Usagi file into the SourceToConceptMap table in a database, we can use the `appendUsagiFileToSTCMtable` function. 
 This function needs a connection to the database and schema where the vocabulary is stored and the name of the SourceToConceptMap table.
@@ -126,9 +135,27 @@ appendUsagiFileToSTCMtable(
 )
 ```
 
-# Multiple Usagi files to STCM table
+We can see that the Usagi file has been uploaded into the SourceToConceptMap table.
 
-## Validate all the Usagi files in the vocabulary folder
+```{r}
+dplyr::tbl(connection, "source_to_concept_map_extended") |>
+    dplyr::filter(source_vocabulary_id == "ICD10") |>
+    dplyr::collect()
+```
+
+## Multiple Usagi files to STCM table
+
+More often than not, we will have multiple Usagi files to upload to the STCM table.
+In this case, we can use the `validateVocabularyFolder` and `vocabularyFolderToSTCMAndVocabularyTables` functions.
+The `validateVocabularyFolder` function will validate all the Usagi files in the vocabulary folder and return a tibble with the validations.
+The `vocabularyFolderToSTCMAndVocabularyTables` function will upload all the Usagi files to the STCM table and add the vocabularies to the VOCABULARY table.
+
+### Validate all the Usagi files in the vocabulary folder
+
+This function nees as an input a path to a folder with a `vocabularies.csv` file, a connection to the database, the schema with the vocabulary tables and a folder where to store the validated Usagi files if they are not valid.
+The format of the `vocabularies.csv` is described in the [Tables description and rules](usagiFileFormat.html) vignette.
+
+
 ```{r}
 pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
 pathToValidatedUsagiFolder <- tempdir()
@@ -136,13 +163,111 @@ pathToValidatedUsagiFolder <- tempdir()
 validationsLogTibble <- validateVocabularyFolder(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFolder)
 ```
 
+The function will return a tibble with the validations on the `vocabularies.csv` file and all the Usagi files.
+
 ```{r}
 knitr::kable(validationsLogTibble)
 ```
 
-## Upload all the Usagi files to the STCM table
 
+### Upload all the Usagi files to the STCM table
+
+Similary we can use the `vocabularyFolderToSTCMAndVocabularyTables` function to upload all the Usagi files to the STCM table.
+This function will also upload the vocabularies.csv file to the VOCABULARY table.
 ```{r}
-vocabularyFolderToSTCMtable(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
+vocabularyFolderToSTCMAndVocabularyTables(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 ```
 
+```{r}
+dplyr::tbl(connection, "VOCABULARY") |>
+    dplyr::collect()
+```
+
+```{r}
+dplyr::tbl(connection, "source_to_concept_map_extended") |>
+    dplyr::collect()
+```
+
+
+# Copying the STCM table to the CDM tables 
+
+The STCM table can be copied to the CDM tables using the `STCMToCDM` function.
+This function needs a connection to the database and schema where the vocabulary tables are stored, the schema with the vocabulary tables and the name of the SourceToConceptMap table.
+
+This function solely call to the SQL code in the `inst/sql/STCMToCDM.sql` file.
+This SQL code can be translated to any other database supported by DatabaseConnector, and be applied directly. 
+
+```{r}
+STCMToCDMTables(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
+```
+
+This populates the CONCEPT table:
+```{r}
+dplyr::tbl(connection, "CONCEPT") |>
+    dplyr::filter(vocabulary_id == "ICD10fi") |>
+    dplyr::collect()
+```
+
+The CONCEPT_RELATIONSHIP table with 
+
+- the 'Maps to' relationships:
+```{r}
+dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
+    dplyr::filter(relationship_id == "Maps to") |>
+    dplyr::filter(concept_id_1 > 2000500101) |>
+    dplyr::collect()
+```
+
+- the 'Maps from' relationships:
+```{r}
+dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
+    dplyr::filter(relationship_id == "Maps from") |>
+    dplyr::filter(concept_id_2 > 2000500101) |>
+    dplyr::collect()
+```
+ 
+And if the columns `sourceConceptCode` and `sourceConceptVocabularyId` are present in the STCM table, they will be used to populate the CONCEPT_RELATIONSHIP table with
+
+- the 'Is a' relationships:
+```{r}
+dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
+    dplyr::filter(relationship_id == "Is a") |>
+    dplyr::filter(concept_id_1 > 2000500101) |>
+    dplyr::collect()
+```
+
+- the `Subsumes` relationships:
+```{r}
+dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
+    dplyr::filter(relationship_id == "Subsumes") |>
+    dplyr::filter(concept_id_1 > 2000500101) |>
+    dplyr::collect()
+```
+
+# Populating the CONCEPT_ANCESTOR table
+
+
+# Validate the CDM tables with Data Quality Dashboard
+
+```{r}
+connectionDetails <- DatabaseConnector::createConnectionDetails(
+  dbms = "duckdb",
+  server = pathToOMOPVocabularyDuckDBfile
+)
+
+resultsDQD <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema)
+```
+
+```{r}
+resultsDQDjson <- tempfile(fileext = ".json")
+jsonlite::write_json(resultsDQD, resultsDQDjson)
+DataQualityDashboard::viewDqDashboard(resultsDQDjson)
+```
+
+
+
+```{r}
+dplyr::tbl(connection, "RELATIONSHIP") |>
+    dplyr::collect()
+
+```

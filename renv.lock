@@ -20,16 +20,43 @@
       ],
       "Hash": "065ae649b05f1ff66bb0c793107508f5"
     },
-    "DatabaseConnector": {
-      "Package": "DatabaseConnector",
-      "Version": "6.3.2",
+    "DataQualityDashboard": {
+      "Package": "DataQualityDashboard",
+      "Version": "2.6.3",
       "Source": "GitHub",
       "RemoteType": "github",
       "RemoteHost": "api.github.com",
-      "RemoteUsername": "javier-gracia-tabuenca-tuni",
+      "RemoteUsername": "OHDSI",
+      "RemoteRepo": "DataQualityDashboard",
+      "RemoteRef": "main",
+      "RemoteSha": "9e85106eff9f6af1fa0951118047b421e37e8578",
+      "Requirements": [
+        "DatabaseConnector",
+        "ParallelLogger",
+        "R",
+        "SqlRender",
+        "dplyr",
+        "jsonlite",
+        "magrittr",
+        "plyr",
+        "rJava",
+        "readr",
+        "rlang",
+        "stringr",
+        "tidyselect"
+      ],
+      "Hash": "e92f21fb29e2eb8804316db3fca60537"
+    },
+    "DatabaseConnector": {
+      "Package": "DatabaseConnector",
+      "Version": "6.3.3",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteUsername": "OHDSI",
       "RemoteRepo": "DatabaseConnector",
-      "RemoteRef": "BQ-DBI",
-      "RemoteSha": "666ca70a16402a5a4c4b3b2da0499c39b278a7bd",
+      "RemoteRef": "main",
+      "RemoteSha": "ff12112d8f81d65385565fd3c1b882e1290b6f1f",
       "Requirements": [
         "DBI",
         "R",
@@ -46,7 +73,7 @@
         "urltools",
         "utils"
       ],
-      "Hash": "c44f0f9e7fa24d32ce222ddd2c5ac3ae"
+      "Hash": "3837b30799542928a179307ea22be8fc"
     },
     "MASS": {
       "Package": "MASS",
@@ -79,6 +106,21 @@
         "utils"
       ],
       "Hash": "5122bb14d8736372411f955e1b16bc8a"
+    },
+    "ParallelLogger": {
+      "Package": "ParallelLogger",
+      "Version": "3.3.1",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "jsonlite",
+        "methods",
+        "snow",
+        "utils",
+        "xml2"
+      ],
+      "Hash": "062731c28e80ccf47134ed5e8efbd019"
     },
     "R6": {
       "Package": "R6",
@@ -498,7 +540,7 @@
     },
     "duckdb": {
       "Package": "duckdb",
-      "Version": "1.1.3",
+      "Version": "1.1.3-1",
       "Source": "Repository",
       "Repository": "CRAN",
       "Requirements": [
@@ -507,7 +549,7 @@
         "methods",
         "utils"
       ],
-      "Hash": "beb1e14711d97990855bd94b7d51f56b"
+      "Hash": "6a1393b058eee1e542833a0d073ce0ff"
     },
     "ellipsis": {
       "Package": "ellipsis",
@@ -706,6 +748,16 @@
         "stats"
       ],
       "Hash": "de949855009e2d4d0e52a844e30617ae"
+    },
+    "here": {
+      "Package": "here",
+      "Version": "1.0.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "rprojroot"
+      ],
+      "Hash": "24b224366f9c2e7534d2344d10d59211"
     },
     "highr": {
       "Package": "highr",
@@ -1104,6 +1156,17 @@
         "withr"
       ],
       "Hash": "2ec30ffbeec83da57655b850cf2d3e0e"
+    },
+    "plyr": {
+      "Package": "plyr",
+      "Version": "1.8.9",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp"
+      ],
+      "Hash": "6b8177fd19982f0020743fadbfdbd933"
     },
     "praise": {
       "Package": "praise",
@@ -1533,6 +1596,17 @@
         "xtable"
       ],
       "Hash": "6a293995a66e12c48d13aa1f957d09c7"
+    },
+    "snow": {
+      "Package": "snow",
+      "Version": "0.4-4",
+      "Source": "Repository",
+      "Repository": "RSPM",
+      "Requirements": [
+        "R",
+        "utils"
+      ],
+      "Hash": "40b74690debd20c57d93d8c246b305d4"
     },
     "sourcetools": {
       "Package": "sourcetools",

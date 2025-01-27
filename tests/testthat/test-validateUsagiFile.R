@@ -3,6 +3,7 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
   pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
   vocabularyDatabaseSchema = "main"
+  sourceConceptIdOffset = 2000500000
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
 
   # Create connection to test database
@@ -16,7 +17,8 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
     pathToUsagiFile, 
     connection,
     vocabularyDatabaseSchema,
-    pathToValidatedUsagiFile
+    pathToValidatedUsagiFile,
+    sourceConceptIdOffset
   )
 
   # all validations must be successful
@@ -34,6 +36,7 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
   vocabularyDatabaseSchema = "main"
+  sourceConceptIdOffset = 2000500000
   # Create connection to test database
   connection <- DatabaseConnector::connect(
         dbms = "duckdb",
@@ -45,7 +48,8 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
     pathToUsagiFile, 
     connection,
     vocabularyDatabaseSchema,
-    pathToValidatedUsagiFile
+    pathToValidatedUsagiFile,
+    sourceConceptIdOffset
   )
   
   validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
@@ -96,11 +100,11 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is empty")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal("ERROR: SourceConceptId is empty")
 
-  # SourceConceptId is not a number over 2 billion
-  validationsSummary |> dplyr::filter(step == "SourceConceptId is not a number over 2 billion") |> nrow() |> expect_equal(1)
-  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not a number over 2 billion"))  |> nrow() |> expect_equal(1)
-  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not a number over 2 billion")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
-  expect_equal("ERROR: SourceConceptId is not a number over 2 billion")
+  # SourceConceptId is not a number on the range
+  validationsSummary |> dplyr::filter(step == "SourceConceptId is not a number on the range") |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not a number on the range"))  |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not a number on the range")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
+  expect_equal("ERROR: SourceConceptId is not a number on the range")
 
   # SourceConceptClass is empty
   validationsSummary |> dplyr::filter(step == "SourceConceptClass is empty") |> nrow() |> expect_equal(1)

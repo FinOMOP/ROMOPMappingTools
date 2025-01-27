@@ -1,4 +1,4 @@
-validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFolder) {
+validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, pathToValidatedVocabularyFolder) {
     #
     # Parameter validation
     #
@@ -11,9 +11,42 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
 
     vocabulariesTibble <- readr::read_csv(pathToVocabularyInfoFile, show_col_types = FALSE)
 
-    vocabulariesTibble |>
-        names() |>
-        checkmate::assertSubset(c("source_vocabulary_id", "source_concept_id_offset", "path_to_usagi_file", "path_to_news_file", "ignore"))
+    # Add tmpvalidationMessages message column
+    vocabulariesTibble <- vocabulariesTibble |>
+        dplyr::mutate(tmpvalidationMessages = "")
+
+    #
+    # Checks
+    #
+    validationLogTibble <- LogTibble$new()
+
+    # check the vocabularies.csv file has the correct columns
+    missingColumns <- c("source_vocabulary_id", "source_vocabulary_name", "source_concept_id_offset", "path_to_usagi_file", "path_to_news_file", "ignore") |>
+        setdiff(names(vocabulariesTibble))
+    if (length(missingColumns) > 0) {
+        validationLogTibble$ERROR("Missing columns", paste0("Missing columns: ", paste(missingColumns, collapse = ", ")))
+        return(validationLogTibble$logTibble)
+    }
+
+    # check the vocabularies.csv file has correct values
+    validationRules <- validate::validator(
+        source_vocabulary_id.is.not.empty = !is.na(source_vocabulary_id) & source_vocabulary_id != "",
+        source_vocabulary_id.is.less.than.20.characters = nchar(source_vocabulary_id) < 20,
+        source_vocabulary_name.is.not.empty = !is.na(source_vocabulary_name) & source_vocabulary_name != "",
+        source_vocabulary_name.is.less.than.255.characters = nchar(source_vocabulary_name) < 255,
+        source_concept_id_offset.is.a.number.over.2.billion = source_concept_id_offset > 2000000000,
+        source_concept_id_offset.is.unique = is_unique(source_concept_id_offset)
+    )
+    validations <- validate::confront(vocabulariesTibble, validationRules)
+    result <- .applyValidationRules(fileTibble = vocabulariesTibble, validations, validationLogTibble)
+    vocabulariesTibble <- result$fileTibble
+    validationLogTibble <- result$validationLogTibble
+
+    if (validationLogTibble$logTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
+        vocabulariesTibble |>
+            readr::write_csv(file.path(pathToValidatedVocabularyFolder, "vocabularies.csv"), na = "")
+        return(validationLogTibble$logTibble)
+    }
 
     vocabulariesTibble <- vocabulariesTibble |>
         dplyr::filter(ignore == FALSE)
@@ -48,28 +81,30 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
     #
 
     # Validate each Usagi file
-    validationsLogTibble <- tibble::tibble()
+    validationsLogTibble <- validationLogTibble$logTibble |>
+        dplyr::mutate(vocabulary_id = "vocabulary.csv")
     for (i in 1:nrow(vocabulariesTibble)) {
         message(paste0("Validating Usagi file ", vocabulariesTibble$path_to_usagi_file[i]))
-        
+
         pathToUsagiFile <- file.path(pathToVocabularyFolder, vocabulariesTibble$path_to_usagi_file[i])
         pathToValidatedUsagiFile <- file.path(pathToValidatedUsagiFolder, vocabulariesTibble$path_to_usagi_file[i])
+        sourceConceptIdOffset <- vocabulariesTibble$source_concept_id_offset[i]
         dir.create(dirname(pathToValidatedUsagiFile), showWarnings = FALSE, recursive = TRUE)
-       
+
         validationLogTibble <- validateUsagiFile(
             pathToUsagiFile = pathToUsagiFile,
             connection = connection,
             vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-            pathToValidatedUsagiFile = pathToValidatedUsagiFile
+            pathToValidatedUsagiFile = pathToValidatedUsagiFile,
+            sourceConceptIdOffset = sourceConceptIdOffset
         )
 
-        validationLogTibble  <- validationLogTibble |> 
-        dplyr::mutate(vocabulary_id = vocabulariesTibble$source_vocabulary_id[i]) |> 
-        dplyr::select(vocabulary_id, dplyr::everything())
+        validationLogTibble <- validationLogTibble |>
+            dplyr::mutate(vocabulary_id = vocabulariesTibble$source_vocabulary_id[i]) |>
+            dplyr::select(vocabulary_id, dplyr::everything())
 
         validationsLogTibble <- validationsLogTibble |> dplyr::bind_rows(validationLogTibble)
     }
 
     return(validationsLogTibble)
-
 }

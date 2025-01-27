@@ -28,7 +28,9 @@ validateUsagiFile <- function(
     pathToUsagiFile,
     connection,
     vocabularyDatabaseSchema,
-    pathToValidatedUsagiFile) {
+    pathToValidatedUsagiFile, 
+    sourceConceptIdOffset
+    ) {
     #
     # Parameter validation
     #
@@ -37,7 +39,7 @@ validateUsagiFile <- function(
     checkmate::assertCharacter(vocabularyDatabaseSchema, len = 1, any.missing = FALSE)
 
     # Check if required tables exist
-    #tables <- DatabaseConnector::getTableNames(connection, vocabularyDatabaseSchema)
+    #tables <- DatabaseConnector::getTableNames(condlnection, vocabularyDatabaseSchema)
     # TEMP untill solved https://github.com/OHDSI/DatabaseConnector/issues/299
     tableNames <- DatabaseConnector::dbListTables(connection, vocabularyDatabaseSchema)
     c("concept", "concept_relationship", "domain") |>
@@ -85,7 +87,7 @@ validateUsagiFile <- function(
             "Missing default columns",
             paste0("Missing columns: ", paste(missingColumns, collapse = ", "))
         )
-        return(validationLogTibble)
+        return(validationLogTibble$logTibble)
     } else {
         validationLogTibble$SUCCESS("Missing default columns", "")
     }
@@ -104,7 +106,7 @@ validateUsagiFile <- function(
     validations <- validate::confront(usagiTibble, validationRules)
 
     result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
-    usagiTibble <- result$usagiTibble
+    usagiTibble <- result$fileTibble
     validationLogTibble <- result$validationLogTibble
 
     # if it has the ADD_INFO:sourceConceptId and ADD_INFO:sourceConceptClass and ADD_INFO:sourceDomain will be used as C&CR
@@ -125,7 +127,7 @@ validateUsagiFile <- function(
                 "Missing C&CR columns",
                 paste0("Missing columns: ", paste(missingColumns, collapse = ", "))
             )
-            return(validationLogTibble)
+            return(validationLogTibble$logTibble)
         } else {
             validationLogTibble$SUCCESS("Missing C&CR columns", "")
         }
@@ -135,16 +137,17 @@ validateUsagiFile <- function(
             dplyr::pull(domain_id)
         validationRules <- validate::validator(
             SourceConceptId.is.empty = is_complete(`ADD_INFO:sourceConceptId`),
-            SourceConceptId.is.not.a.number.over.2.billion = `ADD_INFO:sourceConceptId` > 2000000000,
+            SourceConceptId.is.not.a.number.on.the.range = `ADD_INFO:sourceConceptId` > sourceConceptIdOffset & `ADD_INFO:sourceConceptId` < sourceConceptIdOffset + 100000,
             SourceConceptClass.is.empty = is_complete(`ADD_INFO:sourceConceptClass`),
             SourceConceptClass.is.more.than.20.characters = field_length(`ADD_INFO:sourceConceptClass`, min = 0, max = 20),
             SourceDomain.is.empty = is_complete(`ADD_INFO:sourceDomain`),
             SourceDomain.is.not.a.valid.domain = `ADD_INFO:sourceDomain` %in% validDomains
         )
-        validations <- validate::confront(usagiTibble, validationRules, ref = list(validDomains = validDomains))
+       
+        validations <- validate::confront(usagiTibble, validationRules, ref = list(validDomains = validDomains, sourceConceptIdOffset = sourceConceptIdOffset))
 
         result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
-        usagiTibble <- result$usagiTibble
+        usagiTibble <- result$fileTibble
         validationLogTibble <- result$validationLogTibble
 
         # check if when the code maps to more than one concept the combined domain is valid
@@ -214,7 +217,7 @@ validateUsagiFile <- function(
         validations <- validate::confront(usagiTibble, validationRules)
 
         result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
-        usagiTibble <- result$usagiTibble
+        usagiTibble <- result$fileTibble
         validationLogTibble <- result$validationLogTibble
     }
 
@@ -327,7 +330,7 @@ validateUsagiFile <- function(
 
 
 
-.applyValidationRules <- function(usagiTibble, validations, validationLogTibble) {
+.applyValidationRules <- function(fileTibble, validations, validationLogTibble) {
     validationSummary <- validate::summary(validations) |> tibble::as_tibble()
     if ("name" %in% names(validationSummary)) {
         validationSummary <- validationSummary |>
@@ -368,7 +371,7 @@ validateUsagiFile <- function(
             dplyr::ungroup()
 
         if (nrow(failedRulesRows) > 0) {
-            usagiTibble <- usagiTibble |>
+            fileTibble <- fileTibble |>
                 dplyr::mutate(row = dplyr::row_number()) |>
                 dplyr::left_join(failedRulesRows, by = "row") |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
@@ -376,5 +379,5 @@ validateUsagiFile <- function(
         }
     }
 
-    return(list(usagiTibble = usagiTibble, validationLogTibble = validationLogTibble))
+    return(list(fileTibble = fileTibble, validationLogTibble = validationLogTibble))
 }

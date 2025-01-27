@@ -14,7 +14,7 @@ omopVocabularyCSVsToDuckDB(
     vocabularyDatabaseSchema = "main"
 )
 
-# filter for ICD10
+# filter for ICD10 
 concept <- dplyr::tbl(connection, "CONCEPT")   
 concept_ancestor <- dplyr::tbl(connection, "CONCEPT_ANCESTOR")
 conceptClass <- dplyr::tbl(connection, "CONCEPT_CLASS")
@@ -41,8 +41,8 @@ conceptRelationshipICD10 <- conceptRelationship |>
 conceptSynonymICD10 <- conceptSynonym |>
     dplyr::filter(FALSE)
 domainICD10 <- domain
-relationshipICD10 <- relationship |>
-    dplyr::filter(FALSE)
+relationshipICD10 <- relationship  |> 
+    dplyr::filter(relationship_id %in% c("Maps to", "Maps from", "Is a", "Subsumes"))
 vocabularyICD10 <- vocabulary |>
     dplyr::semi_join(
         conceptICD10,

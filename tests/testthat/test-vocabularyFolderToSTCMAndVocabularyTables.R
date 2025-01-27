@@ -21,7 +21,7 @@ test_that("vocabularyFolderToSTCM creates STCM table from valid vocabulary folde
     )
 
     # Run the function
-    vocabularyFolderToSTCMtable(
+    vocabularyFolderToSTCMAndVocabularyTables(
         pathToVocabularyFolder = pathToVocabularyFolder,
         connection = connection,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
@@ -29,11 +29,12 @@ test_that("vocabularyFolderToSTCM creates STCM table from valid vocabulary folde
     )
 
     # Check that data was inserted correctly
-    stcmData <- DatabaseConnector::dbGetQuery(
-        connection,
-        sprintf("SELECT * FROM %s.%s", vocabularyDatabaseSchema, sourceToConceptMapTable)
-    )
+    stcmData <- connection |> dplyr::tbl(sourceToConceptMapTable) |> dplyr::collect()
+    vocabularyData <- connection |> dplyr::tbl("VOCABULARY")|> dplyr::collect()
 
+    vocabularyData |> dplyr::filter(vocabulary_id == "ICD10fi") |> dplyr::pull(vocabulary_version) |> expect_equal("v1.1.2")
+    vocabularyData |> dplyr::filter(vocabulary_id == "UNITfi") |> dplyr::pull(vocabulary_version) |> expect_equal("v1.0.1")
+    
     # Verify table has data
     expect_true(nrow(stcmData) > 0)
 
@@ -47,6 +48,5 @@ test_that("vocabularyFolderToSTCM creates STCM table from valid vocabulary folde
     expect_true(all(!is.na(stcmData$target_concept_id)))
     expect_true(all(!is.na(stcmData$valid_start_date)))
     expect_true(all(!is.na(stcmData$valid_end_date)))
-
     
 }) 

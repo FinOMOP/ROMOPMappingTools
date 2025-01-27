@@ -1,4 +1,4 @@
-# ICD10fi 1.1.2
+# ICD10fi v1.1.2
 
 - Updated mappings of 91 sourceCodes
 - Obsolete mappings can be found in `ADD_INFO:obsolete_conceptId` column of Usagi file

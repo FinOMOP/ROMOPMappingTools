@@ -1,5 +1,5 @@
 ---
-title: "Usagi file format"
+title: "Tables description and rules"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{usagiFileFormat}
@@ -61,7 +61,7 @@ The ADD_INFO:validationMessages column is added by validateUsagiFile and contain
 
 | Name                            | Type      | Description                        | Rules    |
 | ------------------------------- | --------- | ---------------------------------- | -------- |
-| ADD_INFO:sourceConceptId        | double    | Source vocabulary concept ID       | not empty, number over 2 billion, must be unique per each sourceCode |
+| ADD_INFO:sourceConceptId        | double    | Source vocabulary concept ID       | not empty, number on the range given by sourceConceptIdOffset, must be unique per each sourceCode |
 | ADD_INFO:sourceConceptClass     | character | Concept class in source vocabulary | not empty, less than 20 characters |
 | ADD_INFO:sourceDomain           | character | Domain in source vocabulary        | not empty, value exist in the DOMAIN table, when the code maps to more than one concept the combined domain is valid|
 | ADD_INFO:sourceValidStartDate   | date      | Start date of validity in source   | if empty, the default value is 1900-01-01, the value must be before ADD_INFO:sourceValidEndDate |
@@ -69,3 +69,18 @@ The ADD_INFO:validationMessages column is added by validateUsagiFile and contain
 | ADD_INFO:sourceParents          | character | Parent codes in source vocabulary  | not empty, if more that one parent, separated by, combination of sourceParents and sourceParentVocabulary must exits in the CDM or in the usagi file |
 | ADD_INFO:sourceParentVocabulary | character | Vocabularies of parent codes       | if empty, the vocabulary is itself, if more that one parent, separated by |
 | ADD_INFO:validationMessages      | character | Column added by validateUsagiFile   | Optional |
+
+
+# vocabularies.csv file format
+
+The `vocabularies.csv` file is used to describe the vocabularies to be processed.
+It is a csv file with the following columns:
+
+| Name                     | Type      | Description                                                | Rules    |
+| ------------------------ | --------- | ---------------------------------------------------------- | -------- |
+| source_vocabulary_id     | character | The id of the vocabulary                                   | not empty, less than 20 characters |
+| source_vocabulary_name   | character | A description of the vocabulary                            | not empty, less than 255 characters |
+| source_concept_id_offset | integer   | The offset of the source concept id                        | not empty, number over 2 billion |
+| path_to_usagi_file      | character | The path to the vocabulary's Usagi file                    | not empty, file must exist |
+| path_to_news_file       | character | The path to the vocabulary's news file                     | not empty, file must exist |
+| ignore                  | boolean   | Indicates if the vocabulary should be ignored in processing | not empty |
