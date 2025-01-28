@@ -234,7 +234,7 @@ INSERT INTO
 SELECT DISTINCT
     stcm.target_concept_id AS concept_id_1,
     stcm.source_concept_id AS concept_id_2,
-    'Maps from' AS relationship_id,
+    'Mapped from' AS relationship_id,
     CAST(
         COALESCE(stcm.valid_start_date, '1970-01-01') AS DATE
     ) AS valid_start_date,

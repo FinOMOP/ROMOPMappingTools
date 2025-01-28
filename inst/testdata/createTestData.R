@@ -3,10 +3,12 @@ pathToFullOMOPVocabularyCSVsFolder <- "~/Documents/Repos/FinOMOP/FinOMOP_OMOP_vo
 # convert to duckdb
 pathToFullOMOPVocabularyDuckDBfile <- tempfile()
 
-connection <- DatabaseConnector::connect(
+connectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "duckdb",
     server = pathToFullOMOPVocabularyDuckDBfile
 )
+
+connection <- DatabaseConnector::connect(connectionDetails)
 
 omopVocabularyCSVsToDuckDB(
     pathToOMOPVocabularyCSVsFolder = pathToFullOMOPVocabularyCSVsFolder,
@@ -14,9 +16,9 @@ omopVocabularyCSVsToDuckDB(
     vocabularyDatabaseSchema = "main"
 )
 
-# filter for ICD10 
-concept <- dplyr::tbl(connection, "CONCEPT")   
-concept_ancestor <- dplyr::tbl(connection, "CONCEPT_ANCESTOR")
+# filter for ICD10
+concept <- dplyr::tbl(connection, "CONCEPT")
+conceptAncestor <- dplyr::tbl(connection, "CONCEPT_ANCESTOR")
 conceptClass <- dplyr::tbl(connection, "CONCEPT_CLASS")
 conceptRelationship <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")
 conceptSynonym <- dplyr::tbl(connection, "CONCEPT_SYNONYM")
@@ -24,65 +26,122 @@ domain <- dplyr::tbl(connection, "DOMAIN")
 relationship <- dplyr::tbl(connection, "RELATIONSHIP")
 vocabulary <- dplyr::tbl(connection, "VOCABULARY")
 
-conceptICD10 <- concept |> dplyr::filter(vocabulary_id == "ICD10")
-conceptICD10Ancestor <- concept_ancestor |>
-    dplyr::filter(FALSE)
-conceptClassICD10 <- conceptClass |>
-    dplyr::semi_join(
-        conceptICD10,
-        by = c("concept_class_id" = "concept_class_id")
-    )
-conceptRelationshipICD10 <- conceptRelationship |>
+
+# For each table we have to add also the concepts to the concept table
+# Concept
+concept_codes <- concept |> dplyr::filter(vocabulary_id == "ICD10")
+
+# Concept relationship
+conceptRelationship_new <- conceptRelationship |>
     dplyr::filter(relationship_id == "Maps to") |>
     dplyr::semi_join(
-        conceptICD10,
+        concept_codes,
         by = c("concept_id_1" = "concept_id")
     )
-conceptSynonymICD10 <- conceptSynonym |>
-    dplyr::filter(FALSE)
-domainICD10 <- domain
-relationshipICD10 <- relationship  |> 
-    dplyr::filter(relationship_id %in% c("Maps to", "Maps from", "Is a", "Subsumes"))
-vocabularyICD10 <- vocabulary |>
-    dplyr::semi_join(
-        conceptICD10,
-        by = c("vocabulary_id" = "vocabulary_id")
+
+concept_codes <- concept_codes |>
+    dplyr::union_all(
+        concept |>
+            dplyr::semi_join(conceptRelationship_new, by = c("concept_id" = "concept_id_2"))
     )
+
+# Concept ancestor
+conceptAncestor_new <- conceptAncestor |>
+    dplyr::filter(FALSE)
+
+# Concept class
+conceptClass_new <- conceptClass |>
+    dplyr::filter(concept_class_id %in% c("Domain", "Vocabulary", "Concept Class", "Relationship")) |>
+    dplyr::union_all(
+        conceptClass |>
+            dplyr::semi_join(
+                concept_codes,
+                by = c("concept_class_id" = "concept_class_id")
+            )
+    )
+
+concept_conceptClass <- concept |>
+    dplyr::semi_join(
+        conceptClass_new,
+        by = c("concept_id" = "concept_class_concept_id")
+    )
+
+# Concept synonym
+conceptSynonym_empty <- conceptSynonym |>
+    dplyr::filter(FALSE)
+
+# Domain
+domain <- domain
+
+concept_domain <- concept |>
+    dplyr::semi_join(
+        domain,
+        by = c("concept_id" = "domain_concept_id")
+    )
+
+# Relationship
+relationship_new <- relationship |>
+    dplyr::filter(relationship_id %in% c("Maps to", "Mapped from", "Is a", "Subsumes"))
+
+concept_relationship <- concept |>
+    dplyr::semi_join(
+        relationship_new,
+        by = c("concept_id" = "relationship_concept_id")
+    )
+
+# Vocabulary
+vocabulary_new <- vocabulary |>
+    dplyr::filter(vocabulary_id %in% c("Domain", "Vocabulary", "Concept Class", "Relationship")) |>
+    dplyr::union_all(
+        vocabulary |>
+            dplyr::semi_join(
+                concept_codes,
+                by = c("vocabulary_id" = "vocabulary_id")
+            )
+    )
+
+concept_vocabulary <- concept |>
+    dplyr::semi_join(
+        vocabulary_new,
+        by = c("concept_id" = "vocabulary_concept_id")
+    )
+
 # secondary concepts
-conceptStandardConceptICD10 <- concept |>
-    dplyr::semi_join(conceptRelationshipICD10, by = c("concept_id" = "concept_id_2"))
+concept_all <- concept_codes |>
+    dplyr::union_all(concept_conceptClass) |>
+    dplyr::union_all(concept_domain) |>
+    dplyr::union_all(concept_relationship) |>
+    dplyr::union_all(concept_vocabulary)
+
+
 
 # write to csv
 pathToTestDataFolder <- "inst/testdata/OMOPVocabularyICD10only"
 
-dplyr::bind_rows(
-    conceptICD10 |>
-        dplyr::collect(),
-    conceptStandardConceptICD10 |>
-        dplyr::collect() 
-) |>
+concept_all |>
+    dplyr::collect() |>
     dplyr::mutate(across(where(lubridate::is.Date), ~ format(., "%Y%m%d"))) |>
     readr::write_tsv(file.path(pathToTestDataFolder, "CONCEPT.csv"), na = "")
-conceptICD10Ancestor |>
+conceptAncestor_new |>
     dplyr::collect() |>
     readr::write_tsv(file.path(pathToTestDataFolder, "CONCEPT_ANCESTOR.csv"), na = "")
-conceptClassICD10 |>
+conceptClass_new |>
     dplyr::collect() |>
     readr::write_tsv(file.path(pathToTestDataFolder, "CONCEPT_CLASS.csv"), na = "")
-conceptRelationshipICD10 |>
+conceptRelationship_new |>
     dplyr::collect() |>
     dplyr::mutate(across(where(lubridate::is.Date), ~ format(., "%Y%m%d"))) |>
     readr::write_tsv(file.path(pathToTestDataFolder, "CONCEPT_RELATIONSHIP.csv"), na = "")
-conceptSynonymICD10 |>
+conceptSynonym_empty |>
     dplyr::collect() |>
     readr::write_tsv(file.path(pathToTestDataFolder, "CONCEPT_SYNONYM.csv"), na = "")
-domainICD10 |>
+domain |>
     dplyr::collect() |>
     readr::write_tsv(file.path(pathToTestDataFolder, "DOMAIN.csv"), na = "")
-relationshipICD10 |>
+relationship_new |>
     dplyr::collect() |>
     readr::write_tsv(file.path(pathToTestDataFolder, "RELATIONSHIP.csv"), na = "")
-vocabularyICD10 |>
+vocabulary_new |>
     dplyr::collect() |>
     readr::write_tsv(file.path(pathToTestDataFolder, "VOCABULARY.csv"), na = "")
 
@@ -94,10 +153,12 @@ pathToFullOMOPVocabularyDuckDBfile <- here::here("inst/testdata/OMOPVocabularyIC
 file.remove(pathToFullOMOPVocabularyDuckDBfile)
 file.remove(paste0(pathToFullOMOPVocabularyDuckDBfile, ".wal"))
 
-connection <- DatabaseConnector::connect(
+connectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "duckdb",
     server = pathToFullOMOPVocabularyDuckDBfile
 )
+
+connection <- DatabaseConnector::connect(connectionDetails)
 
 omopVocabularyCSVsToDuckDB(
     pathToOMOPVocabularyCSVsFolder = pathToTestDataFolder,
@@ -105,3 +166,13 @@ omopVocabularyCSVsToDuckDB(
     vocabularyDatabaseSchema = "main"
 )
 DatabaseConnector::disconnect(connection)
+
+
+# test if the data is correct
+validationLogTibble <- validateCDMtablesWithDQD(
+    connectionDetails = connectionDetails,
+    vocabularyDatabaseSchema = "main",
+    validationResultsFolder = tempdir()
+)
+
+validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() |> testthat::expect_equal(0)

@@ -12,7 +12,7 @@
 #' Invisible TRUE if successful
 #'
 #' @export
-CONCEPT_RELATIONSHIPToANCESTORTables <- function(connection,
+ConceptRelationshipToAncestorTables <- function(connection,
                            vocabularyDatabaseSchema,
                            sourceToConceptMapTable
                            ) {

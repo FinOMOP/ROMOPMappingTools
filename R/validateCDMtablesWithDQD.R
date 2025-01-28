@@ -63,7 +63,7 @@ validateCDMtablesWithDQD <- function(connectionDetails, vocabularyDatabaseSchema
         TRUE ~ "SUCCESS"
       ),
       step = paste0(cdmTableName, dplyr::if_else(is.na(cdmFieldName), "", paste0(".", cdmFieldName)), ": ", checkDescription),
-      message = paste0("Number of violated rows: ", pctViolatedRows)
+      message = paste0("Number of violated rows: ", numViolatedRows)
     )
 
 

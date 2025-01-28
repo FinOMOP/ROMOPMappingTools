@@ -23,11 +23,33 @@ test_that("runAll works", {
     )
     
     # Check results
-    # validationLogTibble  |> dplyr::filter(type == "ERROR") |> View()
+    validationLogTibble  |> dplyr::filter(type == "ERROR") |> View()
     validationLogTibble |> expect_s3_class("tbl_df")
     validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() |> expect_equal(0)
 
     # check the validation results folder
     expect_true(file.exists(file.path(validationResultsFolder, "validationLogTibble.csv")))
     expect_true(file.exists(file.path(validationResultsFolder, "resultsDQD.json")))
+
+    resultsDQD <- jsonlite::read_json(file.path(validationResultsFolder, "resultsDQD.json"), simplifyVector = TRUE)
+    resultsDQD$CheckResults |> dplyr::as_tibble()  |> dplyr::filter(failed==1) |> View()
 })  
+
+
+
+
+pathToOMOPVocabularyDuckDBfile
+
+connection <- DatabaseConnector::connect(connectionDetails)
+
+concept <- dplyr::tbl(connection, "CONCEPT")   
+conceptAncestor <- dplyr::tbl(connection, "CONCEPT_ANCESTOR")
+conceptClass <- dplyr::tbl(connection, "CONCEPT_CLASS")
+conceptRelationship <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")
+conceptSynonym <- dplyr::tbl(connection, "CONCEPT_SYNONYM")
+domain <- dplyr::tbl(connection, "DOMAIN")
+relationship <- dplyr::tbl(connection, "RELATIONSHIP")
+vocabulary <- dplyr::tbl(connection, "VOCABULARY")
+
+vocabulary |> dplyr::anti_join(concept, by = c("vocabulary_concept_id" = "concept_id")) |> dplyr::collect()
+conceptClass |> dplyr::anti_join(concept, by = c("concept_class_concept_id" = "concept_id")) |> dplyr::collect()
