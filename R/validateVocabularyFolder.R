@@ -1,4 +1,4 @@
-validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, pathToValidatedVocabularyFolder) {
+validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, validationResultsFolder) {
     #
     # Parameter validation
     #
@@ -44,7 +44,7 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
 
     if (validationLogTibble$logTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
         vocabulariesTibble |>
-            readr::write_csv(file.path(pathToValidatedVocabularyFolder, "vocabularies.csv"), na = "")
+            readr::write_csv(file.path(validationResultsFolder, "vocabularies.csv"), na = "")
         return(validationLogTibble$logTibble)
     }
 
@@ -82,12 +82,12 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
 
     # Validate each Usagi file
     validationsLogTibble <- validationLogTibble$logTibble |>
-        dplyr::mutate(vocabulary_id = "vocabulary.csv")
+        dplyr::mutate(context = "vocabulary.csv")
     for (i in 1:nrow(vocabulariesTibble)) {
         message(paste0("Validating Usagi file ", vocabulariesTibble$path_to_usagi_file[i]))
 
         pathToUsagiFile <- file.path(pathToVocabularyFolder, vocabulariesTibble$path_to_usagi_file[i])
-        pathToValidatedUsagiFile <- file.path(pathToValidatedUsagiFolder, vocabulariesTibble$path_to_usagi_file[i])
+        pathToValidatedUsagiFile <- file.path(validationResultsFolder, vocabulariesTibble$path_to_usagi_file[i])
         sourceConceptIdOffset <- vocabulariesTibble$source_concept_id_offset[i]
         dir.create(dirname(pathToValidatedUsagiFile), showWarnings = FALSE, recursive = TRUE)
 
@@ -100,8 +100,8 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
         )
 
         validationLogTibble <- validationLogTibble |>
-            dplyr::mutate(vocabulary_id = vocabulariesTibble$source_vocabulary_id[i]) |>
-            dplyr::select(vocabulary_id, dplyr::everything())
+            dplyr::mutate(context = vocabulariesTibble$source_vocabulary_id[i]) |>
+            dplyr::select(context, dplyr::everything())
 
         validationsLogTibble <- validationsLogTibble |> dplyr::bind_rows(validationLogTibble)
     }

@@ -1,1 +1,4 @@
 relationship_id	relationship_name	is_hierarchical	defines_ancestry	reverse_relationship_id	relationship_concept_id
+Maps to	Non-standard to Standard map (OMOP)	0	0	Mapped from	44818977
+Is a	Is a	0	0	Subsumes	44818821
+Subsumes	Subsumes	1	1	Is a	44818723

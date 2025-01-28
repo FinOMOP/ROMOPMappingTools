@@ -247,15 +247,15 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 # Populating the CONCEPT_ANCESTOR table
 
 
-# Validate the CDM tables with Data Quality Dashboard
+# Validate the CDM tables with DataQualityDashboard
 
 ```{r}
 connectionDetails <- DatabaseConnector::createConnectionDetails(
   dbms = "duckdb",
   server = pathToOMOPVocabularyDuckDBfile
 )
-
-resultsDQD <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema)
+validationResultsFolder <- tempdir()
+resultsDQD <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
 ```
 
 ```{r}

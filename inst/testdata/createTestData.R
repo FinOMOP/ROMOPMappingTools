@@ -91,6 +91,9 @@ DatabaseConnector::disconnect(connection)
 # test files are correct
 pathToFullOMOPVocabularyDuckDBfile <- here::here("inst/testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
 
+file.remove(pathToFullOMOPVocabularyDuckDBfile)
+file.remove(paste0(pathToFullOMOPVocabularyDuckDBfile, ".wal"))
+
 connection <- DatabaseConnector::connect(
     dbms = "duckdb",
     server = pathToFullOMOPVocabularyDuckDBfile
