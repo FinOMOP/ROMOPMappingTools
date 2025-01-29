@@ -1,9 +1,7 @@
 test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with correct domain recalculation", {
     # Setup test paths and parameters
-    pathToOMOPVocabularyDuckDBfile <- system.file(
-        "testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb",
-        package = "ROMOPMappingTools"
-    )
+    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+    withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
     sourceToConceptMapTable <- "source_to_concept_map_extended"
 
@@ -57,16 +55,6 @@ test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with corre
         sourceToConceptMapTable = sourceToConceptMapTable
     )
 
-    # CONCEPT_CLASS 
-    res <- dplyr::tbl(connection, "CONCEPT_CLASS") |> 
-        dplyr::filter(concept_class_concept_id == 0)  |> 
-        dplyr::arrange(concept_class_id) |> 
-        dplyr::collect()
-
-    res  |> dplyr::pull(concept_class_id) |> expect_equal(c("Test concept class", "Test concept class 2", "Test concept class 3"))
-    res  |> dplyr::pull(concept_class_name) |> expect_equal(c("Test concept class", "Test concept class 2", "Test concept class 3"))
-    res  |> dplyr::pull(concept_class_concept_id) |> expect_equal(c(0, 0, 0))
-
     # CONCEPT
     res <- dplyr::tbl(connection, "CONCEPT") |> 
         dplyr::filter(vocabulary_id == "TestVocab") |> 
@@ -95,12 +83,12 @@ test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with corre
 
     # maps from
     res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
-        dplyr::filter(relationship_id == "Maps from") |> 
+        dplyr::filter(relationship_id == "Mapped from") |> 
         dplyr::filter(concept_id_2 > 2000000000) |> 
         dplyr::arrange(concept_id_2, concept_id_1) |> 
         dplyr::collect()
     res |> nrow() |> expect_equal(6)
-    res  |> dplyr::pull(relationship_id) |> expect_equal(rep("Maps from", 6))
+    res  |> dplyr::pull(relationship_id) |> expect_equal(rep("Mapped from", 6))
     res  |> dplyr::pull(concept_id_1) |> expect_equal(c( 141797, 141797, 36713461, 141797, 36713461, 36713461))
 
     # subsumes

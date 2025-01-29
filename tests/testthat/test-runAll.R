@@ -1,7 +1,7 @@
 test_that("runAll works", {
     # Set up test data
     pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
-    pathToOMOPVocabularyDuckDBfile <-createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
     withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
     validationResultsFolder <- file.path(tempdir(), "validationResults")
@@ -53,3 +53,5 @@ vocabulary <- dplyr::tbl(connection, "VOCABULARY")
 
 vocabulary |> dplyr::anti_join(concept, by = c("vocabulary_concept_id" = "concept_id")) |> dplyr::collect()
 conceptClass |> dplyr::anti_join(concept, by = c("concept_class_concept_id" = "concept_id")) |> dplyr::collect()
+
+conceptRelationship  |> dplyr::anti_join(concept, by = c("concept_id_1" = "concept_id")) |> dplyr::collect()

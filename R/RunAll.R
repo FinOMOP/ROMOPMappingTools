@@ -63,7 +63,7 @@ runAll <- function(
     errorMessage <- ""
     tryCatch(
         {
-            vocabularyFolderToSTCMAndVocabularyTables(
+            vocabularyFolderToSTCMVocabularyConcepClassTables(
                 pathToVocabularyFolder = pathToVocabularyFolder,
                 connection = connection,
                 vocabularyDatabaseSchema = vocabularyDatabaseSchema,

@@ -1,7 +1,8 @@
 test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceToConceptMapTable for a non-extended sourceToConceptMapTable", {
     pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
     nrowUsagiFile <- readr::read_csv(pathToUsagiFile, show_col_types = FALSE) |> nrow()
-    pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
+    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+    withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
     sourceToConceptMapTable <- "source_to_concept_map"
 

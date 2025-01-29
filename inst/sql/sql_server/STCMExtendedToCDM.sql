@@ -1,39 +1,8 @@
 -- 1. VOCABULARY table
--- Done separately in order to add version and description
+-- Done separately in vocabularyFolderToSTCMVocabularyConcepClassTables
 
 -- 2. CONCEPT_CLASS table
--- Delete previous rows with the same vocabulary_id as in the source_to_concept_map table
--- Insert one row for each source_concept_class in the source_to_concept_map table
---  - concept_class_id = source_concept_map_table.source_concept_class
---  - concept_class_name = source_concept_map_table.source_concept_class
---  - concept_class_concept_id = 0
---
-DELETE FROM
-    @vocabularyDatabaseSchema.CONCEPT_CLASS
-WHERE
-    concept_class_id IN (
-        SELECT
-            DISTINCT stcm.source_concept_class
-        FROM
-            @vocabularyDatabaseSchema.@sourceToConceptMapTable AS stcm
-        WHERE
-            stcm.source_vocabulary_id IS NOT NULL
-    );
-
-INSERT INTO
-    @vocabularyDatabaseSchema.CONCEPT_CLASS (
-        concept_class_id,
-        concept_class_name,
-        concept_class_concept_id
-    )
-SELECT
-    DISTINCT stcm.source_concept_class AS concept_class_id,
-    stcm.source_concept_class AS concept_class_name,
-    0 AS concept_class_concept_id
-FROM
-    @vocabularyDatabaseSchema.@sourceToConceptMapTable AS stcm
-WHERE
-    stcm.source_concept_class IS NOT NULL;
+-- Done separately in vocabularyFolderToSTCMVocabularyConcepClassTables
 
 -- 3. CONCEPT table
 -- Delete previous rows with the same vocabulary_id as in the source_to_concept_map table
