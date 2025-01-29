@@ -55,3 +55,5 @@ vocabulary |> dplyr::anti_join(concept, by = c("vocabulary_concept_id" = "concep
 conceptClass |> dplyr::anti_join(concept, by = c("concept_class_concept_id" = "concept_id")) |> dplyr::collect()
 
 conceptRelationship  |> dplyr::anti_join(concept, by = c("concept_id_1" = "concept_id")) |> dplyr::collect()
+
+concept  |> dplyr::anti_join(domain, by = c("domain_id" = "domain_id")) |> dplyr::collect()

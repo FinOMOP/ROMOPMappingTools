@@ -152,7 +152,7 @@ validateUsagiFile <- function(
 
         # check if when the code maps to more than one concept the combined domain is valid
         invalidDomainCombinations <- usagiTibble |>
-            dplyr::select(sourceCode, domainId) |>
+            dplyr::select(sourceCode, domainId) |> 
             dplyr::group_by(sourceCode) |>
             dplyr::summarise(
                 recalcualted_domainId = stringr::str_c(sort(unique(domainId)), collapse = " "),

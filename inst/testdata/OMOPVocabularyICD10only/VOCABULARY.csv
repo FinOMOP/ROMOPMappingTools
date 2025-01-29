@@ -4,7 +4,10 @@ Vocabulary	OMOP Vocabulary	OMOP generated		44819232
 Concept Class	OMOP Concept Class	OMOP generated		44819233
 Relationship	OMOP Relationship	OMOP generated		44819235
 OMOP Extension	OMOP Extension (OHDSI)	OMOP generated	OMOP Extension 20240716	32758
+ICDO3	International Classification of Diseases for Oncology, Third Edition (WHO)	https://seer.cancer.gov/icd-o-3/	ICDO3 SEER Site/Histology Released 06/2020	581426
 ICD10	International Classification of Diseases, Tenth Revision (WHO)	http://www.who.int/classifications/icd/icdonlineversions/en/	2021 Release	44819124
 LOINC	Logical Observation Identifiers Names and Codes (Regenstrief Institute)	http://loinc.org/downloads/loinc	LOINC 2.77	44819102
 Cancer Modifier	Diagnostic Modifiers of Cancer (OMOP)	OMOP generated	Cancer Modifier 20220909	32929
 SNOMED	Systematic Nomenclature of Medicine - Clinical Terms (IHTSDO)	http://www.nlm.nih.gov/research/umls/licensedcontent/umlsknowledgesources.html	2024-02-01 SNOMED CT International Edition; 2024-03-01 SNOMED CT US Edition; 2024-04-10 SNOMED CT UK Edition	44819097
+None	OMOP Standardized Vocabularies	OMOP generated	v5.0 30-AUG-24	44819096
+UCUM	Unified Code for Units of Measure (Regenstrief Institute)	http://aurora.regenstrief.org/~ucum/ucum.html#section-Alphabetic-Index	Version 1.8.2	44819107

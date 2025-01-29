@@ -26,10 +26,26 @@ domain <- dplyr::tbl(connection, "DOMAIN")
 relationship <- dplyr::tbl(connection, "RELATIONSHIP")
 vocabulary <- dplyr::tbl(connection, "VOCABULARY")
 
+# Vocabularies to include
+vocabulariesToInclude <- c("ICD10")
+
+# Vocabularies to map
+# we need also all the concepts that will be mapped by the usagi files
+pathToICD10fiUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+ICD10fiUsagiFile <- readUsagiFile(pathToICD10fiUsagiFile)
+pathToUNITfiUsagiFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
+UNITfiUsagiFile <- readUsagiFile(pathToUNITfiUsagiFile)
+
+conceptIdsToMap <- c(ICD10fiUsagiFile$conceptId, UNITfiUsagiFile$conceptId)
+
 
 # For each table we have to add also the concepts to the concept table
 # Concept
-concept_codes <- concept |> dplyr::filter(vocabulary_id == "ICD10")
+concept_codes <- concept |> 
+dplyr::filter(
+    vocabulary_id %in% vocabulariesToInclude |
+    concept_id %in% conceptIdsToMap
+)
 
 # Concept relationship
 conceptRelationship_new <- conceptRelationship |>
@@ -43,7 +59,7 @@ concept_codes <- concept_codes |>
     dplyr::union_all(
         concept |>
             dplyr::semi_join(conceptRelationship_new, by = c("concept_id" = "concept_id_2"))
-    )
+    ) |> dplyr::distinct()
 
 # Concept ancestor
 conceptAncestor_new <- conceptAncestor |>

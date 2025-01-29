@@ -3,16 +3,26 @@ Domain	Domain	44819025
 Vocabulary	OMOP Vocabulary	44819279
 Concept Class	OMOP Concept Class	44819247
 Relationship	OMOP Relationship	44819274
+Location	Environment or Geographical Location	44819011
+Substance	Substance	44819050
+Attribute	Attribute	44819070
 Procedure	Procedure	44819080
 Disorder	Disorder	33099
+Unit	Unit	44819072
 ICD10 SubChapter	ICD10 SubChapter	32743
+Social Context	Social Context	44819022
 Clinical Finding	Clinical Finding	44818997
 ICD10 Chapter	ICD10 Chapter	32742
+ICDO Condition	ICDO Condition	581435
 Context-dependent	Situation with explicit context	44819051
 Observable Entity	Observable Entity	44819029
+Undefined	Undefined	44819044
 Event	Event	44819056
+Organism	Organism	44819043
 Nodes	Lymph node metastases	32932
 ICD10 Hierarchy	ICD10 Hierarchy	45754906
+Qualifier Value	Qualifier Value	44819021
 Lab Test	Laboratory Class	45754678
 Metastasis	Distant metastases	32937
 ICD10 code	ICD10 code	44819258
+Morph Abnormality	Morphologic Abnormality	44819008
