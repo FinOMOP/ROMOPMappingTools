@@ -197,15 +197,20 @@ convertMappingsTablesToOMOPtables <- function(
       )|>
       # recalculate domains
       dplyr::mutate(recalcualted_domainId = dplyr::case_when(
-        recalcualted_domainId == "Condition Device" ~      "Condition/Device",
-        recalcualted_domainId == "Condition Measurement" ~ "Condition/Meas",
-        recalcualted_domainId == "Condition Observation" ~ "Condition/Obs",
-        recalcualted_domainId == "Condition Procedure" ~   "Condition/Procedure",
-        recalcualted_domainId == "Device Drug" ~           "Device/Drug",
-        recalcualted_domainId == "Device Procedure" ~      "Device/Procedure",
-        recalcualted_domainId == "Drug Procedure" ~        "Drug/Procedure",
-        recalcualted_domainId == "Measurement Procedure" ~ "Meas/Procedure",
-        recalcualted_domainId == "Observation Procedure" ~ "Obs/Procedure",
+        recalcualted_domainId == "Condition Device" ~        "Condition/Device",
+        recalcualted_domainId == "Condition Drug" ~          "Condition/Drug",
+        recalcualted_domainId == "Condition Measurement" ~   "Condition/Meas",
+        recalcualted_domainId == "Condition Observation" ~   "Condition/Obs",
+        recalcualted_domainId == "Condition Procedure" ~     "Condition/Procedure",
+        recalcualted_domainId == "Device Drug" ~             "Device/Drug",
+        recalcualted_domainId == "Device Observation" ~      "Device/Obs",
+        recalcualted_domainId == "Device Procedure" ~        "Device/Procedure",
+        recalcualted_domainId == "Drug Measurement" ~        "Drug/Measurement",
+        recalcualted_domainId == "Drug Observation" ~        "Drug/Obs",
+        recalcualted_domainId == "Drug Procedure" ~          "Drug/Procedure",
+        recalcualted_domainId == "Measurement Observation" ~ "Measurement/Obs",
+        recalcualted_domainId == "Measurement Procedure" ~   "Meas/Procedure",
+        recalcualted_domainId == "Observation Procedure" ~   "Obs/Procedure",
         recalcualted_domainId == "" ~ `ADD_INFO:sourceDomain`,
         TRUE ~ recalcualted_domainId
       )) |>
