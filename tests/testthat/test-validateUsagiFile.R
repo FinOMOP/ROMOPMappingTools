@@ -1,7 +1,7 @@
 test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   
   pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
-  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
   withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
   
   vocabularyDatabaseSchema = "main"
@@ -35,7 +35,7 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
 test_that("test validateUsagiFile returns errors with the errored usagi file", {
   
   pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
-  pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
   vocabularyDatabaseSchema = "main"
   sourceConceptIdOffset = 2000500000
@@ -55,6 +55,9 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   )
   
   validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
+
+  # Missing default columns
+  # not implemented as Usagi wont open this file
 
   # SourceCode is empty
   validationsSummary |> dplyr::filter(step == "SourceCode is empty") |> nrow() |> expect_equal(1)
@@ -95,6 +98,9 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Concept_id is 0 for APPROVED mappingStatus"))  |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Concept_id is 0 for APPROVED mappingStatus")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal("ERROR: Concept_id is 0 for APPROVED mappingStatus")
+
+  # Missing C&CR columns
+  # 
 
   # SourceConceptId is empty
   validationsSummary |> dplyr::filter(step == "SourceConceptId is empty") |> nrow() |> expect_equal(1)
@@ -138,12 +144,13 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid domain combination")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal(rep("ERROR: this code is mapped to more than one domains that are not compatible: Condition noDomain", 2))
 
+  # Missing date columns
+
   # SourceValidStartDate is after SourceValidEndDate
   validationsSummary |> dplyr::filter(step == "SourceValidStartDate is after SourceValidEndDate") |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceValidStartDate is after SourceValidEndDate"))  |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceValidStartDate is after SourceValidEndDate")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal("ERROR: SourceValidStartDate is after SourceValidEndDate")
-
 
   # Invalid parent concept code
   validationsSummary |> dplyr::filter(step == "Invalid parent concept code") |> nrow() |> expect_equal(1)
@@ -156,6 +163,8 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid parent concept code in other vocabulary")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal("ERROR: WWW is not a valid concept code in vocabulary ICD10 | ERROR: OOO is not a valid concept code in vocabulary ICD10")
 
+  # Missing parent columns
+
   # Invalid parent vocabulary
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid parent vocabulary"))  |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid parent vocabulary")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
@@ -166,6 +175,36 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 })
 
 
+test_that("test validateUsagiFile detects if the mappings are out of date", {
+  
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
+  pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
+  vocabularyDatabaseSchema = "main"
+  sourceConceptIdOffset = 2000500000
+  # Create connection to test database
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  validationsSummary <- validateUsagiFile(
+    pathToUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToValidatedUsagiFile,
+    sourceConceptIdOffset
+  )
+  
+  validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
+
+  # Outdated concepts
+  validationsSummary |> dplyr::filter(step == "Outdated concepts") |> nrow() |> expect_equal(1)
+
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(`ADD_INFO:validationMessages`, "OUTDATED"))  |> nrow() |> expect_equal(177)
+
+})
 
 
 

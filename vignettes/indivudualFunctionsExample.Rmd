@@ -52,20 +52,23 @@ usagiTibble <- readUsagiFile(pathToUsagiFile)
 For validating the Usagi file, we can use the `validateUsagiFile` function. 
 This function needs a connection to the OMOP vocabulary database and schema to where the vocabulary tables are stored in order to make some of the validations.
 The function also needs a path to a file where, if errors are found, a new Usagi file with the errors will be created.
+The function also need the number used to offset the source concept ids in the Usagi file.
 The function returns a tibble with a summary of the validations conducted.
 
 For this example, we will use the test database in DuckDB format.
 This test database contains only the ICD10 vocabulary with all the keys in other tables (see `inst/testdata/createTestData.R` for more details).
 
 ```{r}
-pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
+pathToOMOPVocabularyDuckDBfile <-  helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
 vocabularyDatabaseSchema <- "main"
-pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
+c <- tempfile(fileext = ".csv")
 
 connection <- DatabaseConnector::connect(
         dbms = "duckdb",
         server = pathToOMOPVocabularyDuckDBfile
     )
+
+pathToValidatedUsagiFile  <- tempfile(fileext = "usagi_validated.csv")
 ```
 
 ```{r}
@@ -73,7 +76,8 @@ validationsSummary <- validateUsagiFile(
   pathToUsagiFile,
   connection,
   vocabularyDatabaseSchema,
-  pathToValidatedUsagiFile
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile, 
+  sourceConceptIdOffset = 2000500000
 )
 ```
 
@@ -96,7 +100,8 @@ validationsSummaryWithErrors <- validateUsagiFile(
   pathToUsagiFileWithErrors,
   connection,
   vocabularyDatabaseSchema,
-  pathToValidatedUsagiFile
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile,
+  sourceConceptIdOffset = 2000500000
 )
 ```
 
@@ -108,6 +113,7 @@ In this case, if we open the new validate Usagi with the Usagi software these ma
 Additionaly, the `ADD_INFO:validationMessages` column will indicate the exact error or errors found.
 
 ![Usagi with errors](./images/Usagi_with_errors.png)
+
 
 
 ### Uploading the Usagi file into the SourceToConceptMap table in a database
@@ -143,12 +149,30 @@ dplyr::tbl(connection, "source_to_concept_map_extended") |>
     dplyr::collect()
 ```
 
+Close the connection to the database.
+```{r}
+DatabaseConnector::disconnect(connection)
+```
+
 ## Multiple Usagi files to STCM table
 
 More often than not, we will have multiple Usagi files to upload to the STCM table.
 In this case, we can use the `validateVocabularyFolder` and `vocabularyFolderToSTCMAndVocabularyTables` functions.
 The `validateVocabularyFolder` function will validate all the Usagi files in the vocabulary folder and return a tibble with the validations.
 The `vocabularyFolderToSTCMAndVocabularyTables` function will upload all the Usagi files to the STCM table and add the vocabularies to the VOCABULARY table.
+
+Create a new database :
+
+```{r}
+pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
+vocabularyDatabaseSchema <- "main"
+c <- tempfile(fileext = ".csv")
+
+connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+```
 
 ### Validate all the Usagi files in the vocabulary folder
 
@@ -175,7 +199,7 @@ knitr::kable(validationsLogTibble)
 Similary we can use the `vocabularyFolderToSTCMAndVocabularyTables` function to upload all the Usagi files to the STCM table.
 This function will also upload the vocabularies.csv file to the VOCABULARY table.
 ```{r}
-vocabularyFolderToSTCMAndVocabularyTables(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
+vocabularyFolderToSTCMVocabularyConcepClassTables(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 ```
 
 ```{r}
@@ -221,7 +245,7 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 - the 'Maps from' relationships:
 ```{r}
 dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
-    dplyr::filter(relationship_id == "Maps from") |>
+    dplyr::filter(relationship_id == "Mapped from") |>
     dplyr::filter(concept_id_2 > 2000500101) |>
     dplyr::collect()
 ```
@@ -250,24 +274,10 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 # Validate the CDM tables with DataQualityDashboard
 
 ```{r}
-connectionDetails <- DatabaseConnector::createConnectionDetails(
-  dbms = "duckdb",
-  server = pathToOMOPVocabularyDuckDBfile
-)
-validationResultsFolder <- tempdir()
-resultsDQD <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
+validationLogTibble <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
 ```
 
 ```{r}
-resultsDQDjson <- tempfile(fileext = ".json")
-jsonlite::write_json(resultsDQD, resultsDQDjson)
-DataQualityDashboard::viewDqDashboard(resultsDQDjson)
+knitr::kable(validationLogTibble)
 ```
 
-
-
-```{r}
-dplyr::tbl(connection, "RELATIONSHIP") |>
-    dplyr::collect()
-
-```

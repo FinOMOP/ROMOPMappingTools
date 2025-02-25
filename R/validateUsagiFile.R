@@ -28,9 +28,8 @@ validateUsagiFile <- function(
     pathToUsagiFile,
     connection,
     vocabularyDatabaseSchema,
-    pathToValidatedUsagiFile, 
-    sourceConceptIdOffset
-    ) {
+    pathToValidatedUsagiFile,
+    sourceConceptIdOffset) {
     #
     # Parameter validation
     #
@@ -39,7 +38,7 @@ validateUsagiFile <- function(
     checkmate::assertCharacter(vocabularyDatabaseSchema, len = 1, any.missing = FALSE)
 
     # Check if required tables exist
-    #tables <- DatabaseConnector::getTableNames(condlnection, vocabularyDatabaseSchema)
+    # tables <- DatabaseConnector::getTableNames(condlnection, vocabularyDatabaseSchema)
     # TEMP untill solved https://github.com/OHDSI/DatabaseConnector/issues/299
     tableNames <- DatabaseConnector::dbListTables(connection, vocabularyDatabaseSchema)
     c("concept", "concept_relationship", "domain") |>
@@ -99,7 +98,7 @@ validateUsagiFile <- function(
         SourceName.is.more.than.255.characters = field_length(sourceName, min = 0, max = 255),
         SourceFrequency.is.not.empty = is_complete(sourceFrequency),
         MappingStatus.is.empty = is_complete(mappingStatus),
-        MappingStatus.is.one.of.the.following = mappingStatus %in% c("APPROVED", "UNCHECKED", "FLAGGED", "INEXACT"),
+        MappingStatus.is.one.of.the.following = mappingStatus %in% c("APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"),
         Concept_id.is.0.for.APPROVED.mappingStatus = if (mappingStatus == "APPROVED") conceptId != 0
     )
 
@@ -108,6 +107,55 @@ validateUsagiFile <- function(
     result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
     usagiTibble <- result$fileTibble
     validationLogTibble <- result$validationLogTibble
+
+    # - check if the mappings are up to date
+    # domain, name, concept class or standard is different than in the concept table of the database
+
+    mappedConceptIds <- usagiTibble |>
+        dplyr::filter(conceptId != 0) |>
+        dplyr::distinct(conceptId) |>
+        dplyr::pull(conceptId)
+
+    mappedConcepts <- dplyr::tbl(connection, "CONCEPT") |>
+        dplyr::filter(concept_id %in% mappedConceptIds) |>
+        dplyr::select(concept_id, domain_id, concept_name, standard_concept) |>
+        dplyr::collect() |>
+        SqlRender::snakeCaseToCamelCaseNames()
+
+    outdatedConcepts <- usagiTibble |>
+        dplyr::filter(conceptId != 0) |>
+        dplyr::distinct(conceptId, domainId, conceptName) |>
+        dplyr::left_join(mappedConcepts, by = c("conceptId")) |>
+        dplyr::mutate(
+            errorMessage = dplyr::case_when(
+                is.na(domainId.y) | is.na(conceptName.y) ~ paste0("ERROR: OUTDATED: conceptId ", conceptId, " does not exist on the database"),
+                domainId.x != domainId.y ~ paste0("ERROR: OUTDATED: domainId for conceptId ", conceptId, " is different in the database"),
+                conceptName.x != conceptName.y ~ paste0("ERROR: OUTDATED: conceptName for conceptId ", conceptId, " is different in the database"),
+                is.na(standardConcept) ~ paste0("ERROR: OUTDATED: standard_concept for conceptId ", conceptId, " has changed to non-standard"),
+                TRUE ~ ""
+            )
+        ) |>
+        dplyr::filter(errorMessage != "") |> 
+        dplyr::select(conceptId, errorMessage)
+
+    if (nrow(outdatedConcepts) > 0) {
+        validationLogTibble$ERROR(
+            "Outdated concepts",
+            paste0("Found ", nrow(outdatedConcepts), " outdated concepts, use ROMOPMappingTool::updateUsagiFile() to update them")
+        )
+
+        usagiTibble <- usagiTibble |>
+            dplyr::left_join(outdatedConcepts, by = c("conceptId")) |>
+            dplyr::group_by(sourceCode) |>
+            dplyr::mutate(errorMessage = purrr::map_chr(errorMessage, ~{.x |> setdiff(NA_character_) |> paste(collapse = " | ")})) |>
+            dplyr::ungroup() |>
+            dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
+            dplyr::select(-errorMessage)
+
+    } else {
+        validationLogTibble$SUCCESS("Invalid domain combination", "")
+    }
+
 
     # if it has the ADD_INFO:sourceConceptId and ADD_INFO:sourceConceptClass and ADD_INFO:sourceDomain will be used as C&CR
     # if it has any of the 3 columns it must have the other 2
@@ -143,7 +191,7 @@ validateUsagiFile <- function(
             SourceDomain.is.empty = is_complete(`ADD_INFO:sourceDomain`),
             SourceDomain.is.not.a.valid.domain = `ADD_INFO:sourceDomain` %in% validDomains
         )
-       
+
         validations <- validate::confront(usagiTibble, validationRules, ref = list(validDomains = validDomains, sourceConceptIdOffset = sourceConceptIdOffset))
 
         result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
@@ -152,7 +200,7 @@ validateUsagiFile <- function(
 
         # check if when the code maps to more than one concept the combined domain is valid
         invalidDomainCombinations <- usagiTibble |>
-            dplyr::select(sourceCode, domainId) |> 
+            dplyr::select(sourceCode, domainId) |>
             dplyr::group_by(sourceCode) |>
             dplyr::summarise(
                 recalcualted_domainId = stringr::str_c(sort(unique(domainId)), collapse = " "),
@@ -182,10 +230,10 @@ validateUsagiFile <- function(
                 "Invalid domain combination",
                 paste0("Found ", nrow(invalidDomainCombinations), " codes with invalid domain combinations")
             )
-            
+
             usagiTibble <- usagiTibble |>
                 dplyr::left_join(invalidDomainCombinations, by = c("sourceCode")) |>
-                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |> 
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
                 dplyr::select(-errorMessage)
         } else {
             validationLogTibble$SUCCESS("Invalid domain combination", "")
@@ -251,7 +299,8 @@ validateUsagiFile <- function(
             dplyr::pull(`ADD_INFO:sourceParentVocabulary`) |>
             stringr::str_split("\\|") |>
             purrr::flatten_chr() |>
-            unique()
+            unique() |>
+            setdiff("")
         if (length(usedParentVocabularies) > 0) {
             parentVocabularyConceptCodes <- dplyr::tbl(connection, "CONCEPT") |>
                 dplyr::filter(vocabulary_id %in% usedParentVocabularies) |>
@@ -301,7 +350,7 @@ validateUsagiFile <- function(
                 "Invalid parent concept code",
                 paste0("Found ", nrow(notValidParentConceptCodes), " codes with invalid parent concept codes")
             )
-            
+
             usagiTibble <- usagiTibble |>
                 dplyr::mutate(row = dplyr::row_number()) |>
                 dplyr::left_join(notValidParentConceptCodes, by = "row") |>
