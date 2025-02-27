@@ -35,8 +35,12 @@ pathToICD10fiUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usa
 ICD10fiUsagiFile <- readUsagiFile(pathToICD10fiUsagiFile)
 pathToUNITfiUsagiFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
 UNITfiUsagiFile <- readUsagiFile(pathToUNITfiUsagiFile)
+pathToICD10fiUsagiFileWithErrors <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
+ICD10fiUsagiFileWithErrors <- readUsagiFile(pathToICD10fiUsagiFileWithErrors)
 
-conceptIdsToMap <- c(ICD10fiUsagiFile$conceptId, UNITfiUsagiFile$conceptId)
+allUsagiFiles <- dplyr::bind_rows(ICD10fiUsagiFile, UNITfiUsagiFile, ICD10fiUsagiFileWithErrors)
+
+conceptIdsToMap <- allUsagiFiles |> dplyr::pull(conceptId) |> unique()
 
 
 # For each table we have to add also the concepts to the concept table
@@ -48,10 +52,17 @@ dplyr::filter(
 )
 
 # Concept relationship
-conceptRelationship_new <- conceptRelationship |>
-    dplyr::filter(relationship_id == "Maps to") |>
+# conceptRelationship_new <- conceptRelationship |>
+#     dplyr::filter(relationship_id == "Maps to") |>
+#     dplyr::semi_join(
+#         concept_codes,
+#         by = c("concept_id_1" = "concept_id")
+#     )
+
+conceptRelationship_new <- conceptRelationship |> 
+    dplyr::filter(relationship_id %in% c("Maps to", "Concept replaced by", "Concept same_as to", "Concept poss_eq to")) |>
     dplyr::semi_join(
-        concept_codes,
+        concept_codes |> dplyr::filter(is.na(standard_concept)),
         by = c("concept_id_1" = "concept_id")
     )
 
@@ -97,7 +108,7 @@ concept_domain <- concept |>
 
 # Relationship
 relationship_new <- relationship |>
-    dplyr::filter(relationship_id %in% c("Maps to", "Mapped from", "Is a", "Subsumes"))
+    dplyr::filter(relationship_id %in% c("Maps to", "Mapped from", "Is a", "Subsumes", "Concept replaced by", "Concept same_as to", "Concept poss_eq to"))
 
 concept_relationship <- concept |>
     dplyr::semi_join(

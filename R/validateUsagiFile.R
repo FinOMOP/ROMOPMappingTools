@@ -108,6 +108,7 @@ validateUsagiFile <- function(
     usagiTibble <- result$fileTibble
     validationLogTibble <- result$validationLogTibble
 
+    # - check if conceptIds exists in the database
     # - check if the mappings are up to date
     # domain, name, concept class or standard is different than in the concept table of the database
 
@@ -128,32 +129,45 @@ validateUsagiFile <- function(
         dplyr::left_join(mappedConcepts, by = c("conceptId")) |>
         dplyr::mutate(
             errorMessage = dplyr::case_when(
-                is.na(domainId.y) | is.na(conceptName.y) ~ paste0("ERROR: OUTDATED: conceptId ", conceptId, " does not exist on the database"),
-                domainId.x != domainId.y ~ paste0("ERROR: OUTDATED: domainId for conceptId ", conceptId, " is different in the database"),
-                conceptName.x != conceptName.y ~ paste0("ERROR: OUTDATED: conceptName for conceptId ", conceptId, " is different in the database"),
+                is.na(domainId.y) | is.na(conceptName.y) ~ paste0("ERROR: conceptId ", conceptId, " does not exist on the target vocabularies"),
+                domainId.x != domainId.y ~ paste0("ERROR: OUTDATED: domainId for conceptId ", conceptId, " is different in the target vocabularies"),
+                conceptName.x != conceptName.y ~ paste0("ERROR: OUTDATED: conceptName for conceptId ", conceptId, " is different in the target vocabularies"),
                 is.na(standardConcept) ~ paste0("ERROR: OUTDATED: standard_concept for conceptId ", conceptId, " has changed to non-standard"),
                 TRUE ~ ""
             )
         ) |>
         dplyr::filter(errorMessage != "") |> 
-        dplyr::select(conceptId, errorMessage)
+        dplyr::distinct(conceptId, errorMessage)
 
     if (nrow(outdatedConcepts) > 0) {
-        validationLogTibble$ERROR(
-            "Outdated concepts",
-            paste0("Found ", nrow(outdatedConcepts), " outdated concepts, use ROMOPMappingTool::updateUsagiFile() to update them")
-        )
-
+        n <- outdatedConcepts |> dplyr::filter(stringr::str_detect(errorMessage, "does not exist on the target vocabularies")) |> nrow()
+        if (n > 0) {
+            validationLogTibble$ERROR(
+                "ConceptIds not in vocabularies",
+                paste0("Found ", n, " conceptIds that do not exist on the target vocabularies")
+            )
+        } else {
+            validationLogTibble$SUCCESS("ConceptIds not in vocabularies", "")
+        }
+        
+        n <- outdatedConcepts |> dplyr::filter(!stringr::str_detect(errorMessage, "does not exist on the target vocabularies")) |> nrow()
+        if (n > 0) {
+            validationLogTibble$ERROR(
+                "ConceptIds outdated",
+                paste0("Found ", n, " conceptIds that are outdated. Use ROMOPMappingTool::updateUsagiFile() to update the usagi file")
+            )
+        } else {
+            validationLogTibble$SUCCESS("ConceptIds outdated", "")
+        }
+    
         usagiTibble <- usagiTibble |>
             dplyr::left_join(outdatedConcepts, by = c("conceptId")) |>
             dplyr::group_by(sourceCode) |>
-            dplyr::mutate(errorMessage = purrr::map_chr(errorMessage, ~{.x |> setdiff(NA_character_) |> paste(collapse = " | ")})) |>
+            dplyr::mutate(errorMessage = paste(na.omit(errorMessage), collapse = ", ")) |>
             dplyr::ungroup() |>
-            dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
+            dplyr::mutate(tmpvalidationMessages = dplyr::if_else(errorMessage != "", paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
             dplyr::select(-errorMessage)
 
-    } else {
-        validationLogTibble$SUCCESS("Invalid domain combination", "")
     }
 
 

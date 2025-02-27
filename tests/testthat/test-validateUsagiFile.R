@@ -99,6 +99,27 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Concept_id is 0 for APPROVED mappingStatus")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal("ERROR: Concept_id is 0 for APPROVED mappingStatus")
 
+  # ConceptIds not in vocabularies
+  validationsSummary |> dplyr::filter(step == "ConceptIds not in vocabularies") |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds not in vocabularies"))  |> nrow() |> expect_equal(3)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds not in vocabularies")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
+  expect_equal(rep("ERROR: conceptId 1234 does not exist on the target vocabularies", 3))
+
+  # ConceptIds outdated
+  validationsSummary |> dplyr::filter(step == "ConceptIds outdated") |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds outdated"))  |> nrow() |> expect_equal(8)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds outdated")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
+  expect_equal(
+    c("ERROR: OUTDATED: domainId for conceptId 4150516 is different in the target vocabularies",
+      "ERROR: OUTDATED: conceptName for conceptId 4130374 is different in the target vocabularies", 
+      "ERROR: OUTDATED: standard_concept for conceptId 320073 has changed to non-standard",
+      "ERROR: OUTDATED: standard_concept for conceptId 320073 has changed to non-standard",
+      "ERROR: OUTDATED: standard_concept for conceptId 3085666 has changed to non-standard",
+      "ERROR: OUTDATED: standard_concept for conceptId 3079174 has changed to non-standard", 
+      "ERROR: OUTDATED: standard_concept for conceptId 30258 has changed to non-standard",
+      "ERROR: OUTDATED: standard_concept for conceptId 4071477 has changed to non-standard")
+  )
+
   # Missing C&CR columns
   # 
 
@@ -142,7 +163,7 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validationsSummary |> dplyr::filter(step == "Invalid domain combination") |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid domain combination"))  |> nrow() |> expect_equal(2)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid domain combination")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
-  expect_equal(rep("ERROR: this code is mapped to more than one domains that are not compatible: Condition noDomain", 2))
+  expect_equal(rep("ERROR: OUTDATED: domainId for conceptId 4109415 is different in the target vocabularies | ERROR: this code is mapped to more than one domains that are not compatible: Condition noDomain", 2))
 
   # Missing date columns
 
@@ -173,39 +194,6 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   # it opens with Usagi
   #file.copy(pathToValidatedUsagiFile, "~/Downloads/ICD10fi.usagi.csv", overwrite = TRUE)
 })
-
-
-test_that("test validateUsagiFile detects if the mappings are out of date", {
-  
-  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
-  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
-  pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
-  vocabularyDatabaseSchema = "main"
-  sourceConceptIdOffset = 2000500000
-  # Create connection to test database
-  connection <- DatabaseConnector::connect(
-        dbms = "duckdb",
-        server = pathToOMOPVocabularyDuckDBfile
-    )
-  on.exit(DatabaseConnector::disconnect(connection))
-
-  validationsSummary <- validateUsagiFile(
-    pathToUsagiFile, 
-    connection,
-    vocabularyDatabaseSchema,
-    pathToValidatedUsagiFile,
-    sourceConceptIdOffset
-  )
-  
-  validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
-
-  # Outdated concepts
-  validationsSummary |> dplyr::filter(step == "Outdated concepts") |> nrow() |> expect_equal(1)
-
-  validatedUsagiFile |> dplyr::filter(stringr::str_detect(`ADD_INFO:validationMessages`, "OUTDATED"))  |> nrow() |> expect_equal(177)
-
-})
-
 
 
 

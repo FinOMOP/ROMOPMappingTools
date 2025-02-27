@@ -29,6 +29,7 @@ updateUsagiFile <- function(
     connection,
     vocabularyDatabaseSchema,
     pathToUpdatedUsagiFile,
+    updateLevelTibble = NULL,
     skipValidation = FALSE) {
     #
     # Parameter validation
@@ -44,6 +45,16 @@ updateUsagiFile <- function(
     c("concept", "concept_relationship", "domain") |>
         checkmate::assertSubset(tableNames)
 
+    if (is.null(updateLevelTibble)) {
+        updateLevelTibble <- tibble::tribble(
+            ~relationshipId, ~level, ~needsReview,
+            "Maps to", 1, FALSE,
+            "Concept replaced by", 2, TRUE,
+            "Concept same_as to", 3, TRUE,
+            "Concept poss_eq to", 4, TRUE
+        )
+    }
+
     # Read the usagi file
     usagiTibble <- readUsagiFile(pathToUsagiFile)
     usagiTibbleColumns <- usagiTibble |> names()
@@ -56,14 +67,12 @@ updateUsagiFile <- function(
         }
     }
 
+
     #
     # Function
     #
 
     updateLogTibble <- LogTibble$new()
-
-    # - check if the mappings are up to date
-    # domain, name, concept class or standard is different than in the concept table of the database
 
     mappedConceptIds <- usagiTibble |>
         dplyr::filter(conceptId != 0) |>
@@ -76,115 +85,126 @@ updateUsagiFile <- function(
         dplyr::collect() |>
         SqlRender::snakeCaseToCamelCaseNames()
 
-    outdatedConcepts <- usagiTibble |>
-        dplyr::filter(conceptId != 0) |>
-        dplyr::distinct(conceptId, domainId, conceptName) |>
-        dplyr::left_join(mappedConcepts, by = c("conceptId")) |>
-        dplyr::filter(is.na(domainId.y) | is.na(conceptName.y) | domainId.x != domainId.y | conceptName.x != conceptName.y | is.na(standardConcept))
-
-    missingConcepts <- outdatedConcepts |>
-        dplyr::filter(is.na(domainId.y) | is.na(conceptName.y))
-
-    if (nrow(missingConcepts) > 0) {
-        updateLogTibble$ERROR("Missing concepts", paste0("Found ", nrow(missingConcepts), " missing concepts, the database needs to be updated. List of missing concepts: ", missingConcepts |> dplyr::pull(conceptId) |> paste(collapse = ", ")))
-       # return(updateLogTibble$logTibble)
-    }
-
     #
     # update
     #
-    updatedConcepts <- outdatedConcepts |>
+    usagiTibble <- usagiTibble |>
         dplyr::mutate(
-            autoUpdatingInfo = lubridate::now() |> as.character()
+            autoUpdatingInfo = lubridate::today() |> as.character()
         )
 
-    # update domains
-    updatedConcepts <- updatedConcepts |>
-        dplyr::mutate(
-            newDomainId = dplyr::if_else(domainId.x != domainId.y, domainId.y, domainId.x),
-            autoUpdatingInfo = dplyr::if_else(domainId.x != domainId.y, paste0(autoUpdatingInfo, " | domainId changed from ", domainId.x, " to ", domainId.y), autoUpdatingInfo)
-        )
+    # - update domains
+    outdatedDomains <- usagiTibble |>
+        dplyr::inner_join(mappedConcepts, by = c("conceptId")) |> 
+        dplyr::rename(oldDomainId = domainId.x, newDomainId = domainId.y) |> 
+        dplyr::filter(oldDomainId != newDomainId) |> 
+        dplyr::distinct(sourceCode, oldDomainId, newDomainId)
 
-    if (updatedConcepts |> dplyr::filter(domainId.x != domainId.y) |> nrow() > 0) {
-        updateLogTibble$INFO("Updated domains", paste0("Updated ", updatedConcepts |> dplyr::filter(domainId.x != domainId.y) |> nrow(), " domains"))
+    if (outdatedDomains |> nrow() > 0) {
+        updateLogTibble$INFO("Updated domains", paste0("Updated ", outdatedDomains |> nrow(), " domains"))
+
+        usagiTibble <- usagiTibble |> 
+            # join to sourceCode, modify only the affected domain, but modify all the autoUpdatingInfo
+            dplyr::left_join(outdatedDomains, by = c("sourceCode")) |>
+            dplyr::mutate(
+                domainId = dplyr::if_else(!is.na(oldDomainId) & domainId == oldDomainId, newDomainId, domainId),
+                autoUpdatingInfo = dplyr::if_else(!is.na(oldDomainId), paste0(autoUpdatingInfo," | domainId updated from ", oldDomainId, " to ", newDomainId), autoUpdatingInfo)
+            ) |> 
+            dplyr::select(-oldDomainId, -newDomainId)
+            
     }
 
-    # update concept names
-    updatedConcepts <- updatedConcepts |>
-        dplyr::mutate(
-            newConceptName = dplyr::if_else(conceptName.x != conceptName.y, conceptName.y, conceptName.x),
-            autoUpdatingInfo = dplyr::if_else(conceptName.x != conceptName.y, paste0(autoUpdatingInfo, " | conceptName changed from ", conceptName.x, " to ", conceptName.y), autoUpdatingInfo)
-        )
+    # - update concept names
+    outdatedNames <- usagiTibble |>
+        dplyr::inner_join(mappedConcepts, by = c("conceptId")) |> 
+        dplyr::rename(oldConceptName = conceptName.x, newConceptName = conceptName.y) |> 
+        dplyr::filter(oldConceptName != newConceptName) |> 
+        dplyr::distinct(sourceCode, oldConceptName, newConceptName)
+        
+    if (outdatedNames |> nrow() > 0) {
+        updateLogTibble$INFO("Updated concept names", paste0("Updated ", outdatedNames |> nrow(), " concept names"))
 
-    if (updatedConcepts |> dplyr::filter(conceptName.x != conceptName.y) |> nrow() > 0) {
-        updateLogTibble$INFO("Updated concept names", paste0("Updated ", updatedConcepts |> dplyr::filter(conceptName.x != conceptName.y) |> nrow(), " concept names"))
+        usagiTibble <- usagiTibble |> 
+            # join to sourceCode, modify only the affected conceptName, but modify all the autoUpdatingInfo
+            dplyr::left_join(outdatedNames, by = c("sourceCode")) |>
+            dplyr::mutate(
+                conceptName = dplyr::if_else(!is.na(oldConceptName), newConceptName, conceptName),
+                autoUpdatingInfo = dplyr::if_else(!is.na(oldConceptName), paste0(autoUpdatingInfo, " | conceptName changed from ", oldConceptName, " to ", newConceptName), autoUpdatingInfo)
+            ) |> 
+            dplyr::select(-oldConceptName, -newConceptName)
     }
 
-    browser()
-    # update conceptIds
+    # - update conceptIds
     # Find possible updates for the conceps that became non-standard
-    nonStandardConceptIds <- outdatedConcepts |>
-        dplyr::filter(is.na(standardConcept)) |>
-        dplyr::pull(conceptId)
+    outdatedStandardConcepts <- usagiTibble |>
+        dplyr::inner_join(mappedConcepts, by = c("conceptId")) |> 
+        dplyr::filter(is.na(standardConcept)) |> 
+        dplyr::distinct(sourceCode, conceptId)
 
-    mappedConcepts <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
-        dplyr::filter(concept_id_1 %in% nonStandardConceptIds) |>
+    relationshipsToUse <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
+        dplyr::filter(concept_id_1 %in% outdatedStandardConcepts$conceptId) |>
         dplyr::filter(relationship_id %in% c("Maps to", "Concept replaced by", "Concept same_as to", "Concept poss_eq to")) |>
-        dplyr::select(concept_id_1, concept_id_2, relationship_id) |>
-        dplyr::collect() |>
-        SqlRender::snakeCaseToCamelCaseNames() |>
+        dplyr::collect()  |>
+        dplyr::select(oldConceptId = concept_id_1, newConceptId = concept_id_2, relationshipId = relationship_id) |>
         dplyr::left_join(
-            tibble::tribble(
-                ~relationshipId, ~level, ~needsReview,
-                "Maps to", 1, FALSE,
-                "Concept replaced by", 2, TRUE,
-                "Concept same_as to", 3, TRUE,
-                "Concept poss_eq to", 4, TRUE
-            ),
+            updateLevelTibble,
             by = "relationshipId"
         ) |>
-        dplyr::group_by(conceptId1) |>
+        dplyr::group_by(oldConceptId) |>
         dplyr::arrange(level) |>
         dplyr::slice(1) |>
-        dplyr::ungroup() |>
-        dplyr::select(conceptId = conceptId1, newConceptId = conceptId2, newRelationshipId = relationshipId, needsReview)
+        dplyr::ungroup() |> 
+        dplyr::select(-level)
 
-    updatedConcepts <- updatedConcepts |>
-        dplyr::left_join(mappedConcepts, by = c("conceptId"))
+    outdatedStandardConcepts <- outdatedStandardConcepts |> 
+        dplyr::rename(oldConceptId = conceptId) |> 
+        dplyr::left_join(
+            relationshipsToUse, 
+            by = c("oldConceptId")
+        ) 
 
-    updatedConcepts <- updatedConcepts |>
+    n <- outdatedStandardConcepts |> dplyr::filter(!needsReview) |> nrow()
+    if (n > 0) {
+        updateLogTibble$INFO("Updated conceptIds", paste0("Updated ", n, " conceptIds that don't need review"))
+    }
+
+    n <- outdatedStandardConcepts |> dplyr::filter(needsReview) |> nrow()
+    if (n > 0) {
+        updateLogTibble$WARNING("Updated conceptIds", paste0("Updated ", n, " conceptIds that need review"))
+    }
+
+    n <- outdatedStandardConcepts |> dplyr::filter(is.na(needsReview)) |> nrow()
+    if (n > 0) {
+        updateLogTibble$WARNING("Updated conceptIds", paste0(n, " conceptIds could not be updated automatically, remapping needed"))
+    }
+    
+    # if there is not mapping, it also needs review
+    outdatedStandardConcepts <- outdatedStandardConcepts |> 
         dplyr::mutate(
-            autoUpdatingInfo = dplyr::if_else(is.na(standardConcept) & !is.na(newConceptId),
-                paste0(autoUpdatingInfo, " | conceptId changed from ", conceptId, " to ", newConceptId, " based on new relationship :", newRelationshipId),
-                autoUpdatingInfo
-            )
+            needsReview = dplyr::if_else(is.na(newConceptId), TRUE, needsReview)
         )
 
-    if (updatedConcepts |> dplyr::filter(!needsReview) |> nrow() > 0) {
-        updateLogTibble$INFO("Updated conceptIds", paste0("Updated ", updatedConcepts |> dplyr::filter(!needsReview) |> nrow(), " that don't need review"))
-    }
-
-    if (updatedConcepts |> dplyr::filter(needsReview) |> nrow() > 0) {
-        updateLogTibble$WARNING("Updated conceptIds", paste0("Updated ", updatedConcepts |> dplyr::filter(needsReview) |> nrow(), " that need review"))
-    }
-
-
     # update the usagi file
-    usagiTibble <- usagiTibble |>
+    usagiTibble <- usagiTibble |> 
+        # join to sourceCode, modify only the affected conceptName, but modify all the autoUpdatingInfo
+        dplyr::left_join(outdatedStandardConcepts, by = c("sourceCode")) |> 
+        dplyr::mutate(
+            conceptId = dplyr::if_else(!is.na(newConceptId), newConceptId, conceptId),
+            mappingStatus = dplyr::if_else(needsReview, "UNCHECKED", mappingStatus),
+            autoUpdatingInfo = dplyr::case_when(
+                is.na(oldConceptId) ~ autoUpdatingInfo,
+                !is.na(oldConceptId) & is.na(newConceptId) ~ paste0(autoUpdatingInfo, " | conceptId ", oldConceptId, " could not be updated automatically, remapping needed"),
+                !needsReview ~ paste0(autoUpdatingInfo, " | conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", does not need reviewing"),
+                needsReview ~ paste0(autoUpdatingInfo, " | conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", needs reviewing")
+            )
+        ) |> 
+        dplyr::select(-oldConceptId, -newConceptId, -relationshipId, -needsReview)
         
-
     # end
     usagiTibble |>
-        dplyr::mutate(
-            tmpvalidationMessages = stringr::str_replace(tmpvalidationMessages, "^\\s*\\|\\s*", ""),
-            mappingStatus = case_when(
-                tmpvalidationMessages != "" ~ "FLAGGED",
-                TRUE ~ mappingStatus
-            )
-        ) |>
-        dplyr::rename(`ADD_INFO:validationMessages` = tmpvalidationMessages) |>
-        readr::write_csv(pathToValidatedUsagiFile, na = "")
+        dplyr::mutate(autoUpdatingInfo = ifelse(!stringr::str_detect(autoUpdatingInfo, "\\|"), "", autoUpdatingInfo)) |>
+        dplyr::rename(`ADD_INFO:autoUpdatingInfo` = autoUpdatingInfo) |>
+        readr::write_csv(pathToUpdatedUsagiFile, na = "")
 
     return(updateLogTibble$logTibble)
-
 }
