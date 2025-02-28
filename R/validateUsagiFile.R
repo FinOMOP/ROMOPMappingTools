@@ -101,7 +101,6 @@ validateUsagiFile <- function(
         MappingStatus.is.one.of.the.following = mappingStatus %in% c("APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"),
         Concept_id.is.0.for.APPROVED.mappingStatus = if (mappingStatus == "APPROVED") conceptId != 0
     )
-
     validations <- validate::confront(usagiTibble, validationRules)
 
     result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)

@@ -105,7 +105,7 @@ updateUsagiFile <- function(
 
         usagiTibble <- usagiTibble |> 
             # join to sourceCode, modify only the affected domain, but modify all the autoUpdatingInfo
-            dplyr::left_join(outdatedDomains, by = c("sourceCode")) |>
+            dplyr::left_join(outdatedDomains  |> dplyr::mutate(domainId = oldDomainId), by = c("sourceCode", "domainId")) |>
             dplyr::mutate(
                 domainId = dplyr::if_else(!is.na(oldDomainId) & domainId == oldDomainId, newDomainId, domainId),
                 autoUpdatingInfo = dplyr::if_else(!is.na(oldDomainId), paste0(autoUpdatingInfo," | domainId updated from ", oldDomainId, " to ", newDomainId), autoUpdatingInfo)
@@ -126,7 +126,7 @@ updateUsagiFile <- function(
 
         usagiTibble <- usagiTibble |> 
             # join to sourceCode, modify only the affected conceptName, but modify all the autoUpdatingInfo
-            dplyr::left_join(outdatedNames, by = c("sourceCode")) |>
+            dplyr::left_join(outdatedNames |> dplyr::mutate(conceptName = oldConceptName), by = c("sourceCode", "conceptName")) |>
             dplyr::mutate(
                 conceptName = dplyr::if_else(!is.na(oldConceptName), newConceptName, conceptName),
                 autoUpdatingInfo = dplyr::if_else(!is.na(oldConceptName), paste0(autoUpdatingInfo, " | conceptName changed from ", oldConceptName, " to ", newConceptName), autoUpdatingInfo)
@@ -187,18 +187,22 @@ updateUsagiFile <- function(
     # update the usagi file
     usagiTibble <- usagiTibble |> 
         # join to sourceCode, modify only the affected conceptName, but modify all the autoUpdatingInfo
-        dplyr::left_join(outdatedStandardConcepts, by = c("sourceCode")) |> 
+        dplyr::left_join(outdatedStandardConcepts |> dplyr::mutate(conceptId = oldConceptId), by = c("sourceCode", "conceptId")) |> 
         dplyr::mutate(
             conceptId = dplyr::if_else(!is.na(newConceptId), newConceptId, conceptId),
-            mappingStatus = dplyr::if_else(needsReview, "UNCHECKED", mappingStatus),
-            autoUpdatingInfo = dplyr::case_when(
-                is.na(oldConceptId) ~ autoUpdatingInfo,
-                !is.na(oldConceptId) & is.na(newConceptId) ~ paste0(autoUpdatingInfo, " | conceptId ", oldConceptId, " could not be updated automatically, remapping needed"),
-                !needsReview ~ paste0(autoUpdatingInfo, " | conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", does not need reviewing"),
-                needsReview ~ paste0(autoUpdatingInfo, " | conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", needs reviewing")
+            mappingStatus = dplyr::if_else(!is.na(needsReview) & needsReview, "UNCHECKED", mappingStatus),
+            infoTmp = dplyr::case_when(
+                !is.na(oldConceptId) & is.na(newConceptId) ~ paste0("conceptId ", oldConceptId, " could not be updated automatically, remapping needed"),
+                !needsReview ~ paste0("conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", does not need reviewing"),
+                needsReview ~ paste0("conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", needs reviewing"),
+                TRUE ~ NA_character_
             )
         ) |> 
-        dplyr::select(-oldConceptId, -newConceptId, -relationshipId, -needsReview)
+        dplyr::group_by(sourceCode) |> 
+        dplyr::mutate(infoTmp = paste0(infoTmp |> na.omit() |> unique(), collapse = " | ")) |> 
+        dplyr::ungroup() |> 
+        dplyr::mutate(autoUpdatingInfo = dplyr::if_else(is.na(infoTmp), autoUpdatingInfo, paste0(autoUpdatingInfo, " | ", infoTmp))) |> 
+        dplyr::select(-oldConceptId, -newConceptId, -relationshipId, -needsReview, -infoTmp) 
         
     # end
     usagiTibble |>

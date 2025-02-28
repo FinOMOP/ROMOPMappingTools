@@ -31,7 +31,7 @@ vocabulariesToInclude <- c("ICD10")
 
 # Vocabularies to map
 # we need also all the concepts that will be mapped by the usagi files
-pathToICD10fiUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+pathToICD10fiUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
 ICD10fiUsagiFile <- readUsagiFile(pathToICD10fiUsagiFile)
 pathToUNITfiUsagiFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
 UNITfiUsagiFile <- readUsagiFile(pathToUNITfiUsagiFile)

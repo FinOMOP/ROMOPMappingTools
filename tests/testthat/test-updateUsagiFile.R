@@ -22,17 +22,31 @@ test_that("test updateUsagiFile returns no errors with a valid usagi file", {
     skipValidation = TRUE
   )
 
-  # all validations must be successful
-  updateSummary |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(4)
-
-  # Usagi file has not changed 
+  # no new lines introduced
+  usagiFile  <- readUsagiFile(pathToUsagiFile)
   updatedUsagiFile <- readUsagiFile(pathToUpdatedUsagiFile)
+  usagiFile |> nrow() |> expect_equal(updatedUsagiFile |> nrow())
 
-  updatedUsagiFile |> dplyr::filter(!is.na(`ADD_INFO:autoUpdatingInfo`)) |> nrow() |> expect_equal(193)
+  # only updates have been introduced
+  pathToValidatedUsagiFileBeforeUpdate <- tempfile(fileext = ".csv")
+  validationSummaryBeforeUpdate <- validateUsagiFile(pathToUsagiFile, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFileBeforeUpdate, sourceConceptIdOffset = 2000500000)
+  pathToValidatedUsagiFileAfterUpdate <- tempfile(fileext = ".csv")
+  validationSummaryAfterUpdate <- validateUsagiFile(pathToUpdatedUsagiFile, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFileAfterUpdate, sourceConceptIdOffset = 2000500000)
+  
+  validationSummaryBeforeUpdate   <- validationSummaryBeforeUpdate |> 
+    dplyr::filter(!stringr::str_detect(step, "ConceptIds outdated")) |> 
+    dplyr::filter(!stringr::str_detect(step, "Invalid domain combination")) 
+  validationSummaryAfterUpdate    <- validationSummaryAfterUpdate |> 
+    dplyr::filter(!stringr::str_detect(step, "ConceptIds outdated")) |> 
+    dplyr::filter(!stringr::str_detect(step, "Invalid domain combination")) 
 
-  # update ICD10fi.usagi.csv
+  validationSummaryBeforeUpdate  |> expect_equal(validationSummaryAfterUpdate)
+
+  # all validations must be successful
+  validationSummaryAfterUpdate |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(0)
+
   # copy updated file to ICD10fi.usagi.csv
-  file.copy(pathToUpdatedUsagiFile, system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools"), overwrite = TRUE)
+  file.copy(pathToUpdatedUsagiFile, system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools"), overwrite = TRUE)
 })
 
 test_that("test updateUsagiFile detects if the mappings are out of date", {
@@ -56,8 +70,27 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
     pathToUpdatedUsagiFile,
     skipValidation = TRUE
   )
-  
   updatedUsagiFile <- readUsagiFile(pathToUpdatedUsagiFile)
+
+  # no new lines introduced
+  usagiFile  <- readUsagiFile(pathToUsagiFile)
+  updatedUsagiFile <- readUsagiFile(pathToUpdatedUsagiFile)
+  usagiFile |> nrow() |> expect_equal(updatedUsagiFile |> nrow())
+
+  # only updates have been introduced
+  pathToValidatedUsagiFileBeforeUpdate <- tempfile(fileext = ".csv")
+  validationSummaryBeforeUpdate <- validateUsagiFile(pathToUsagiFile, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFileBeforeUpdate, sourceConceptIdOffset = 2000500000)
+  pathToValidatedUsagiFileAfterUpdate <- tempfile(fileext = ".csv")
+  validationSummaryAfterUpdate <- validateUsagiFile(pathToUpdatedUsagiFile, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFileAfterUpdate, sourceConceptIdOffset = 2000500000)
+  
+  validationSummaryBeforeUpdate   <- validationSummaryBeforeUpdate |> 
+    dplyr::filter(!stringr::str_detect(step, "ConceptIds outdated")) |> 
+    dplyr::filter(!stringr::str_detect(step, "Invalid domain combination")) 
+  validationSummaryAfterUpdate    <- validationSummaryAfterUpdate |> 
+    dplyr::filter(!stringr::str_detect(step, "ConceptIds outdated")) |> 
+    dplyr::filter(!stringr::str_detect(step, "Invalid domain combination")) 
+
+  validationSummaryBeforeUpdate  |> expect_equal(validationSummaryAfterUpdate)
 
   # Updated domains
   updateSummary |> dplyr::filter(step == "Updated domains") |> nrow() |> expect_equal(1)
@@ -82,21 +115,31 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds maps to"))  |> nrow() |> expect_equal(2)
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds maps to")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
   unique() |> expect_match("conceptId changed from 320073 to 4148615 based on relationship :Maps to, does not need reviewing")
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds maps to")) |> dplyr::pull(conceptId) |> 
+  expect_equal(c(4148615, 4174262))
 
   # Updated conceptIds that need review
   updateSummary |> dplyr::filter(message == "Updated 3 conceptIds that need review") |> nrow() |> expect_equal(1)
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept replaced by")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
   expect_match("conceptId changed from 3085666 to 3428638 based on relationship :Concept replaced by, needs reviewing")
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept replaced by")) |> dplyr::pull(conceptId) |> 
+  expect_equal(c(3428638))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept replaced by")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("UNCHECKED"))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept same_as to")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
   expect_match("conceptId changed from 3079174 to 3245108 based on relationship :Concept same_as to, needs reviewing")
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept same_as to")) |> dplyr::pull(conceptId) |> 
+  expect_equal(c(3245108))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept same_as to")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("UNCHECKED"))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept poss_eq to")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
   expect_match("conceptId changed from 30258 to 618787 based on relationship :Concept poss_eq to, needs reviewing")
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept poss_eq to")) |> dplyr::pull(conceptId) |> 
+  expect_equal(c(618787))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept poss_eq to")) |> dplyr::pull(mappingStatus) |>  
   expect_equal(c("UNCHECKED"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept poss_eq to")) |> dplyr::pull(conceptId) |> 
+  expect_equal(c(618787))
 
   # Updated conceptIds that could not be updated automatically
   updateSummary |> dplyr::filter(message == "1 conceptIds could not be updated automatically, remapping needed") |> nrow() |> expect_equal(1)

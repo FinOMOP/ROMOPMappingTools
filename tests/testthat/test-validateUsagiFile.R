@@ -1,6 +1,6 @@
 test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   
-  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
   pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
   withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
   
