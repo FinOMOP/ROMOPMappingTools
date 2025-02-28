@@ -4,10 +4,16 @@
 \alias{validateCDMtablesWithDQD}
 \title{Validate OMOP Tables with Data Quality Dashboard}
 \usage{
-validateCDMtablesWithDQD(connection, vocabularyDatabaseSchema)
+validateCDMtablesWithDQD(
+  connectionDetails,
+  vocabularyDatabaseSchema,
+  validationResultsFolder
+)
 }
 \arguments{
-\item{connection_details}{A named list of database connection details}
+\item{vocabularyDatabaseSchema}{A string with the name of the schema where the vocabulary tables are stored}
+
+\item{connection}{A DatabaseConnector connection}
 }
 \value{
 Results from the Data Quality Dashboard.

@@ -1,7 +1,43 @@
+test_that("test updateUsagiFile returns no errors with a valid usagi file", {
+  
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+  
+  vocabularyDatabaseSchema = "main"
+  pathToUpdatedUsagiFile <- tempfile(fileext = ".csv")
+
+  # Create connection to test database
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  updateSummary <- updateUsagiFile(
+    pathToUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToUpdatedUsagiFile,
+    skipValidation = TRUE
+  )
+
+  # all validations must be successful
+  updateSummary |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(4)
+
+  # Usagi file has not changed 
+  updatedUsagiFile <- readUsagiFile(pathToUpdatedUsagiFile)
+
+  updatedUsagiFile |> dplyr::filter(!is.na(`ADD_INFO:autoUpdatingInfo`)) |> nrow() |> expect_equal(193)
+
+  # update ICD10fi.usagi.csv
+  # copy updated file to ICD10fi.usagi.csv
+  file.copy(pathToUpdatedUsagiFile, system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools"), overwrite = TRUE)
+})
 
 test_that("test updateUsagiFile detects if the mappings are out of date", {
   
-  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
   pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
   pathToUpdatedUsagiFile <- tempfile(fileext = ".csv")
   vocabularyDatabaseSchema = "main"

@@ -351,7 +351,7 @@ validateUsagiFile <- function(
             dplyr::filter(!is.na(vocabulary_id) & !is.na(concept_code)) |>
             dplyr::mutate(vocabulary_id = dplyr::if_else(vocabulary_id == "", NA_character_, vocabulary_id)) |>
             dplyr::anti_join(validVocabularyConceptCodes, by = c("vocabulary_id", "concept_code")) |>
-            dplyr::mutate(errorMessage = if_else(is.na(vocabulary_id),
+            dplyr::mutate(errorMessage = dplyr::if_else(is.na(vocabulary_id),
                 paste0("ERROR: ", concept_code, " is not a valid concept in this vocabulary"),
                 paste0("ERROR: ", concept_code, " is not a valid concept code in vocabulary ", vocabulary_id)
             )) |>
@@ -380,7 +380,7 @@ validateUsagiFile <- function(
     usagiTibble |>
         dplyr::mutate(
             tmpvalidationMessages = stringr::str_replace(tmpvalidationMessages, "^\\s*\\|\\s*", ""),
-            mappingStatus = case_when(
+            mappingStatus = dplyr::case_when(
                 tmpvalidationMessages != "" ~ "FLAGGED",
                 TRUE ~ mappingStatus
             )
