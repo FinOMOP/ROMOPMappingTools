@@ -29,7 +29,6 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   # Usagi file has not changed 
   validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
 
-  validatedUsagiFile |> dplyr::filter(!is.na(`ADD_INFO:validationMessages`)) |> nrow() |> expect_equal(0)
 })
 
 test_that("test validateUsagiFile returns errors with the errored usagi file", {

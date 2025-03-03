@@ -25,6 +25,9 @@ library(ROMOPMappingTools)
 
 # Intro
 
+This is a step by step example of how to use the individual functions of the ROMOPMappingTools package.
+Example files are included in the package. In the `inst/testdata` folder you can find the files used in this example.
+
 # Populating the STCM table
 
 The SourceToConceptMap (STCM) table is a table in the OMOP vocabulary database that contains the mappings between source codes and concept ids. 

@@ -135,30 +135,10 @@ validateUsagiFile <- function(
                 TRUE ~ ""
             )
         ) |>
-        dplyr::filter(errorMessage != "") |> 
+        dplyr::filter(errorMessage != "") |>
         dplyr::distinct(conceptId, errorMessage)
 
     if (nrow(outdatedConcepts) > 0) {
-        n <- outdatedConcepts |> dplyr::filter(stringr::str_detect(errorMessage, "does not exist on the target vocabularies")) |> nrow()
-        if (n > 0) {
-            validationLogTibble$ERROR(
-                "ConceptIds not in vocabularies",
-                paste0("Found ", n, " conceptIds that do not exist on the target vocabularies")
-            )
-        } else {
-            validationLogTibble$SUCCESS("ConceptIds not in vocabularies", "")
-        }
-        
-        n <- outdatedConcepts |> dplyr::filter(!stringr::str_detect(errorMessage, "does not exist on the target vocabularies")) |> nrow()
-        if (n > 0) {
-            validationLogTibble$ERROR(
-                "ConceptIds outdated",
-                paste0("Found ", n, " conceptIds that are outdated. Use ROMOPMappingTool::updateUsagiFile() to update the usagi file")
-            )
-        } else {
-            validationLogTibble$SUCCESS("ConceptIds outdated", "")
-        }
-    
         usagiTibble <- usagiTibble |>
             dplyr::left_join(outdatedConcepts, by = c("conceptId")) |>
             dplyr::group_by(sourceCode) |>
@@ -167,6 +147,31 @@ validateUsagiFile <- function(
             dplyr::mutate(tmpvalidationMessages = dplyr::if_else(errorMessage != "", paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
             dplyr::select(-errorMessage)
 
+        n <- usagiTibble |>
+            dplyr::filter(stringr::str_detect(tmpvalidationMessages, "does not exist on the target vocabularies")) |>
+            dplyr::distinct(sourceCode) |>
+            nrow()
+        if (n > 0) {
+            validationLogTibble$ERROR(
+                "ConceptIds not in vocabularies",
+                paste0("Found ", n, " sourceCodes with conceptIds that do not exist on the target vocabularies")
+            )
+        } else {
+            validationLogTibble$SUCCESS("ConceptIds not in vocabularies", "")
+        }
+
+        n <- usagiTibble |>
+            dplyr::filter(stringr::str_detect(tmpvalidationMessages, "ERROR: OUTDATED:")) |>
+            dplyr::distinct(sourceCode) |>
+            nrow()
+        if (n > 0) {
+            validationLogTibble$ERROR(
+                "ConceptIds outdated",
+                paste0("Found ", n, " sourceCodes with conceptIds that are outdated. Use ROMOPMappingTool::updateUsagiFile() to update the usagi file")
+            )
+        } else {
+            validationLogTibble$SUCCESS("ConceptIds outdated", "")
+        }
     }
 
 

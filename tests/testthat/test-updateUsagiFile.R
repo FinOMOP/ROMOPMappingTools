@@ -33,20 +33,43 @@ test_that("test updateUsagiFile returns no errors with a valid usagi file", {
   pathToValidatedUsagiFileAfterUpdate <- tempfile(fileext = ".csv")
   validationSummaryAfterUpdate <- validateUsagiFile(pathToUpdatedUsagiFile, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFileAfterUpdate, sourceConceptIdOffset = 2000500000)
   
-  validationSummaryBeforeUpdate   <- validationSummaryBeforeUpdate |> 
+  validationSummaryBeforeUpdateNoErrors   <- validationSummaryBeforeUpdate |> 
     dplyr::filter(!stringr::str_detect(step, "ConceptIds outdated")) |> 
     dplyr::filter(!stringr::str_detect(step, "Invalid domain combination")) 
-  validationSummaryAfterUpdate    <- validationSummaryAfterUpdate |> 
+  validationSummaryAfterUpdateNoErrors    <- validationSummaryAfterUpdate |> 
     dplyr::filter(!stringr::str_detect(step, "ConceptIds outdated")) |> 
     dplyr::filter(!stringr::str_detect(step, "Invalid domain combination")) 
 
-  validationSummaryBeforeUpdate  |> expect_equal(validationSummaryAfterUpdate)
+  validationSummaryBeforeUpdateNoErrors  |> expect_equal(validationSummaryAfterUpdateNoErrors)
+
+
+  # same number in summary than in the usagi file
+  nSourceCodesAffected <- validationSummaryBeforeUpdate |> dplyr::filter(type != "SUCCESS") |> dplyr::pull(message) |> 
+    stringr::str_extract("\\d+") |> 
+    as.numeric()
+
+  pathToValidatedUsagiFileBeforeUpdate |> readUsagiFile() |> filter(!is.na(`ADD_INFO:validationMessages`)) |> distinct(sourceCode, .keep_all = TRUE) |> nrow() |> expect_equal(nSourceCodesAffected)
+
 
   # all validations must be successful
   validationSummaryAfterUpdate |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(0)
 
+  pathToUpdatedUsagiFile |> readUsagiFile() |> filter(!is.na(`ADD_INFO:autoUpdatingInfo`))  |> distinct(sourceCode) |> nrow() 
+  pathToValidatedUsagiFileAfterUpdate |> readUsagiFile() |> filter(!is.na(`ADD_INFO:validationMessages`))  |> distinct(sourceCode, .keep_all = TRUE) |> nrow() 
+
+  # if run again no change 
+  pathToUpdatedUsagiFile2 <- tempfile(fileext = ".csv")
+  updateSummary2 <- updateUsagiFile(
+    pathToUpdatedUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToUpdatedUsagiFile2,
+    skipValidation = TRUE,
+    appendOrClearAutoUpdatingInfo = "clear"
+  )
+  updateSummary2 |> nrow() |> expect_equal(0)
   # copy updated file to ICD10fi.usagi.csv
-  file.copy(pathToUpdatedUsagiFile, system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools"), overwrite = TRUE)
+  # file.copy(pathToUpdatedUsagiFile, system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools"), overwrite = TRUE)
 })
 
 test_that("test updateUsagiFile detects if the mappings are out of date", {
