@@ -18,3 +18,4 @@ renv.lock
 TODO.md
 
 inst/testdata/OMOPVocabulary/*.csv
+docs

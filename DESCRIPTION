@@ -44,3 +44,4 @@ Suggests:
     shiny
 VignetteBuilder: knitr
 Config/testthat/edition: 3
+URL: https://finomop.github.io/ROMOPMappingTools/
