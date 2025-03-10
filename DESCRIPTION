@@ -1,38 +1,46 @@
 Package: ROMOPMappingTools
-Title: ROMOPMappingTools
-Version: 1.0.0
+Title: Tools for Working with OMOP CDM Mappings
+Version: 2.0.0
 Authors@R: 
     person("Javier", "Gracia-Tabuenca", , "javier.graciatabuenca@tuni.fi", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: Functions to work with mappings in FinOMOP
-License: none
+           comment = c(ORCID = "0000-0002-2455-0598"))
+Description: A comprehensive set of tools for working with mappings in the OMOP Common Data Model (CDM).
+    The package provides functions for validating, updating, and managing source-to-concept mappings,
+    particularly focusing on the integration with Usagi mapping files and vocabulary management.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Imports: 
+    DBI,
+    DatabaseConnector,
+    DataQualityDashboard,
     dplyr,
-    ggplot2,
+    jsonlite,
     lubridate,
     purrr,
-    reactable,
-    reactablefmtr,
+    R6,
     readr,
+    SqlRender,
     stringr,
     tibble,
     tidyr,
     validate,
-    checkmate,
-    flexdashboard,
-    DataQualityDashboard,
-    DatabaseConnector,
-    SqlRender,
-    duckdb,
-    rmarkdown,
-    shiny
+    checkmate
 Depends: 
     R (>= 2.10)
 LazyData: true
 Suggests: 
-    knitr
+    knitr,
+    testthat (>= 3.0.0),
+    withr,
+    duckdb,
+    flexdashboard,
+    ggplot2,
+    reactable,
+    reactablefmtr,
+    rmarkdown,
+    shiny
 VignetteBuilder: knitr
+Config/testthat/edition: 3

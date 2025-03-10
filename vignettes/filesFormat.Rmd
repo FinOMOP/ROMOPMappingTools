@@ -1,0 +1,74 @@
+---
+title: "Tables description and rules"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{usagiFileFormat}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Usagi file format
+
+## Usagi default columns
+
+One row per sourceCode + conceptId combination.
+
+| Name                         | Type      | Description                                         | Rules checked by validateUsagiFile    |
+| ---------------------------- | --------- | --------------------------------------------------- | -------- |
+| sourceCode                   | character | The source code to be mapped                        | not empty, unique sourceCode + conceptId combinations |
+| sourceName                   | character | The name/description of the source code             | not empty, less than 255 characters |
+| sourceFrequency              | integer   | How frequently this code appears in the source data | not empty, set to -1 if not known |
+| sourceAutoAssignedConceptIds | integer   | Automatically assigned concept IDs                  |  |
+| matchScore                   | double    | Score indicating quality of the mapping match (0-1) |  |
+| mappingStatus                | character | Status of the mapping (APPROVED, UNCHECKED, etc.)   | Required, one of the following: APPROVED, UNCHECKED, FLAGED, INEXACT |
+| equivalence                  | character | Type of equivalence (EQUIVALENT, BROADER, etc.)     |  |
+| statusSetBy                  | character | User who set the mapping status                     |  |
+| statusSetOn                  | double    | Timestamp when status was set                       |  |
+| conceptId                    | integer   | Target OMOP concept ID                              | not empty, if 0 the mappingStatus cannot be APPROVED |
+| conceptName                  | character | Name of target OMOP concept                         |  |
+| domainId                     | character | Domain of target concept (Condition, Drug, etc.)    |  |
+| mappingType                  | character | Type of mapping (MAPS_TO, etc.)                     |  |
+| comment                      | character | Comments about the mapping                          |  |
+| createdBy                    | character | User who created the mapping                        |  |
+| createdOn                    | double    | Timestamp when mapping was created                  |  |
+| assignedReviewer             | character | User assigned to review the mapping                 |  |
+
+
+
+
+## Usagi extended columns
+
+The Usagi file is considered a C&CR file if it has the following columns: ADD_INFO:sourceConceptId, ADD_INFO:sourceConceptClass and ADD_INFO:sourceDomain.
+
+The pair ADD_INFO:sourceValidStartDate and ADD_INFO:sourceValidEndDate are optional. If not included, the respective columns in the CONCEPT table will be set to the default values, which are 1900-01-01 and 2099-12-31.
+
+The pair ADD_INFO:sourceParents and ADD_INFO:sourceParentVocabulary are optional. If included, they will be use to populate the CONCEPT_RELATIONSHIP table with the 'Is a' and 'Subsumes' relationships.
+
+The ADD_INFO:validationMessages column is added by validateUsagiFile and contains the messages from the validation checks.
+
+
+| Name                            | Type      | Description                        | Rules    |
+| ------------------------------- | --------- | ---------------------------------- | -------- |
+| ADD_INFO:sourceConceptId        | double    | Source vocabulary concept ID       | not empty, number on the range given by sourceConceptIdOffset, must be unique per each sourceCode |
+| ADD_INFO:sourceConceptClass     | character | Concept class in source vocabulary | not empty, less than 20 characters |
+| ADD_INFO:sourceDomain           | character | Domain in source vocabulary        | not empty, value exist in the DOMAIN table, when the code maps to more than one concept the combined domain is valid|
+| ADD_INFO:sourceValidStartDate   | date      | Start date of validity in source   | if empty, the default value is 1900-01-01, the value must be before ADD_INFO:sourceValidEndDate |
+| ADD_INFO:sourceValidEndDate     | date      | End date of validity in source     | if empty, the default value is 2099-12-31, the value must be after ADD_INFO:sourceValidStartDate |
+| ADD_INFO:sourceParents          | character | Parent codes in source vocabulary  | not empty, if more that one parent, separated by, combination of sourceParents and sourceParentVocabulary must exits in the CDM or in the usagi file |
+| ADD_INFO:sourceParentVocabulary | character | Vocabularies of parent codes       | if empty, the vocabulary is itself, if more that one parent, separated by |
+| ADD_INFO:validationMessages      | character | Column added by validateUsagiFile   | Optional |
+
+
+# vocabularies.csv file format
+
+The `vocabularies.csv` file is used to describe the vocabularies to be processed.
+It is a csv file with the following columns:
+
+| Name                     | Type      | Description                                                | Rules    |
+| ------------------------ | --------- | ---------------------------------------------------------- | -------- |
+| source_vocabulary_id     | character | The id of the vocabulary                                   | not empty, less than 20 characters |
+| source_vocabulary_name   | character | A description of the vocabulary                            | not empty, less than 255 characters |
+| source_concept_id_offset | integer   | The offset of the source concept id                        | not empty, number over 2 billion |
+| path_to_usagi_file      | character | The path to the vocabulary's Usagi file                    | not empty, file must exist |
+| path_to_news_file       | character | The path to the vocabulary's news file                     | not empty, file must exist |
+| ignore                  | boolean   | Indicates if the vocabulary should be ignored in processing | not empty |
