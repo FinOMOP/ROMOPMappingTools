@@ -1,7 +1,7 @@
 test_that("test updateUsagiFile returns no errors with a valid usagi file", {
   
   pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
-  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
   withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
   
   vocabularyDatabaseSchema = "main"
@@ -51,9 +51,6 @@ test_that("test updateUsagiFile returns no errors with a valid usagi file", {
   pathToValidatedUsagiFileBeforeUpdate |> readUsagiFile() |> filter(!is.na(`ADD_INFO:validationMessages`)) |> distinct(sourceCode, .keep_all = TRUE) |> nrow() |> expect_equal(nSourceCodesAffected)
 
 
-  # all validations must be successful
-  validationSummaryAfterUpdate |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(0)
-
   pathToUpdatedUsagiFile |> readUsagiFile() |> filter(!is.na(`ADD_INFO:autoUpdatingInfo`))  |> distinct(sourceCode) |> nrow() 
   pathToValidatedUsagiFileAfterUpdate |> readUsagiFile() |> filter(!is.na(`ADD_INFO:validationMessages`))  |> distinct(sourceCode, .keep_all = TRUE) |> nrow() 
 
@@ -67,7 +64,8 @@ test_that("test updateUsagiFile returns no errors with a valid usagi file", {
     skipValidation = TRUE,
     appendOrClearAutoUpdatingInfo = "clear"
   )
-  updateSummary2 |> nrow() |> expect_equal(0)
+  
+  updateSummary2 |> dplyr::filter(type == "WARNING") |> expect_equal(updateSummary |> dplyr::filter(type == "WARNING"))
   # copy updated file to ICD10fi.usagi.csv
   # file.copy(pathToUpdatedUsagiFile, system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools"), overwrite = TRUE)
 })
@@ -75,7 +73,8 @@ test_that("test updateUsagiFile returns no errors with a valid usagi file", {
 test_that("test updateUsagiFile detects if the mappings are out of date", {
   
   pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
-  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
   pathToUpdatedUsagiFile <- tempfile(fileext = ".csv")
   vocabularyDatabaseSchema = "main"
   

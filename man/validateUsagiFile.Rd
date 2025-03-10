@@ -20,6 +20,8 @@ validateUsagiFile(
 \item{vocabularyDatabaseSchema}{Schema name where the vocabulary tables are stored}
 
 \item{pathToValidatedUsagiFile}{Path where to save the validated Usagi file}
+
+\item{sourceConceptIdOffset}{Integer offset to add to source concept IDs. Default is 0}
 }
 \description{
 Reads a usagi file given in 'pathToUsagiFile' and performs the following checks:

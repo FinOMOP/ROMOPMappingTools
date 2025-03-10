@@ -1,13 +1,39 @@
 #' Append Usagi File to Source to Concept Map Table
 #'
+#' Reads a Usagi mapping file and appends its contents to a Source to Concept Map table.
+#' The function supports both default and extended formats for both Usagi files and STCM tables.
+#'
+#' Default STCM columns:
+#' - source_code, source_concept_id, source_vocabulary_id, source_code_description
+#' - target_concept_id, target_vocabulary_id, valid_start_date, valid_end_date
+#' - invalid_reason
+#'
+#' Extended STCM columns (includes all default columns plus):
+#' - source_concept_class
+#' - source_domain
+#' - source_parents_concept_ids
+#'
+#' Extended Usagi columns:
+#' - ADD_INFO:sourceConceptId
+#' - ADD_INFO:sourceConceptClass
+#' - ADD_INFO:sourceDomain
+#'
+#' If formats don't match (e.g., extended Usagi with default STCM), the extended information
+#' will be ignored with a warning.
+#'
 #' @param vocabularyId String with the vocabulary ID
 #' @param pathToUsagiFile Path to the Usagi file
 #' @param connection Database connection object
 #' @param vocabularyDatabaseSchema Schema name containing vocabulary tables
 #' @param sourceToConceptMapTable Name of source to concept map table
-#' @param skipValidation Whether to skip validation of the Usagi file
+#' @param includeMappingStatus Vector of mapping statuses to include. Must be subset of:
+#'        "APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"
+#' @param skipValidation Whether to skip validation of the Usagi file (default: TRUE)
+#' @param sourceConceptIdOffset Offset to add to source concept IDs (default: 0)
 #'
-#' @importFrom checkmate assertString assertFileExists
+#' @return NULL invisibly. The function modifies the database table directly.
+#'
+#' @importFrom checkmate assertString assertFileExists assertSubset
 #' @importFrom DBI dbListTables dbListFields
 #' @importFrom dplyr transmute mutate select filter row_number left_join group_by summarise ungroup pull bind_rows collect distinct
 #' @importFrom lubridate as_date ymd
@@ -18,12 +44,20 @@
 #' @importFrom DatabaseConnector renderTranslateExecuteSql dbWriteTable
 #'
 #' @export
-appendUsagiFileToSTCMtable <- function(vocabularyId, pathToUsagiFile, connection, vocabularyDatabaseSchema, sourceToConceptMapTable, skipValidation = TRUE) {
+appendUsagiFileToSTCMtable <- function(
+    vocabularyId,
+    pathToUsagiFile,
+    connection,
+    vocabularyDatabaseSchema,
+    sourceToConceptMapTable,
+    includeMappingStatus = "APPROVED",
+    skipValidation = TRUE,
+    sourceConceptIdOffset = 0
+) {
     vocabularyId |> checkmate::assertString()
     pathToUsagiFile |> checkmate::assertFileExists()
     vocabularyDatabaseSchema |> checkmate::assertString()
-    sourceToConceptMapTable |> checkmate::assertString()
-
+    includeMappingStatus |> checkmate::assertSubset(c("APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"))
     #
     # Validation
     #
@@ -60,8 +94,8 @@ appendUsagiFileToSTCMtable <- function(vocabularyId, pathToUsagiFile, connection
     usagiTibble <- readUsagiFile(pathToUsagiFile)
     usagiTibbleColumns <- usagiTibble |> names()
     if (!skipValidation) {
-        usagiTibble <- validateUsagiFile(pathToUsagiFile, connection, vocabularyDatabaseSchema, tempfile())
-        if (usagiTibble |> dplyr::filter(type == "ERROR") |> dplyr::nrow() > 0) {
+        usagiTibble <- validateUsagiFile(pathToUsagiFile, connection, vocabularyDatabaseSchema, tempfile(), sourceConceptIdOffset)
+        if (usagiTibble |> dplyr::filter(type == "ERROR") |> nrow() > 0) {
             stop("The usagi file has the following errors: ", usagiTibble |> dplyr::filter(type == "ERROR") |> dplyr::pull(message) |> paste(collapse = "\n"))
         }
     }
@@ -92,6 +126,7 @@ appendUsagiFileToSTCMtable <- function(vocabularyId, pathToUsagiFile, connection
     #
     if (!STCMTableIsExtended) {
         STCMTableToInsert <- usagiTibble |>
+            dplyr::filter(mappingStatus %in% includeMappingStatus) |>
             dplyr::transmute(
                 source_code = sourceCode,
                 source_concept_id = 0L,
@@ -175,6 +210,7 @@ appendUsagiFileToSTCMtable <- function(vocabularyId, pathToUsagiFile, connection
         }
 
         STCMTableToInsert <- usagiTibble |>
+            dplyr::filter(mappingStatus %in% includeMappingStatus) |>
             dplyr::transmute(
                 source_code = sourceCode,
                 source_concept_id = `ADD_INFO:sourceConceptId`,

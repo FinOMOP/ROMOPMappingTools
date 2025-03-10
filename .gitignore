@@ -16,3 +16,5 @@ renv.lock
 *.duckdb.wal
 
 TODO.md
+
+inst/testdata/OMOPVocabulary/*.csv

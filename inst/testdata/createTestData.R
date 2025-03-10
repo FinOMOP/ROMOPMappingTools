@@ -143,7 +143,7 @@ concept_all <- concept_codes |>
 
 
 # write to csv
-pathToTestDataFolder <- "inst/testdata/OMOPVocabularyICD10only"
+pathToTestDataFolder <- "inst/testdata/OMOPVocabulary"
 
 concept_all |>
     dplyr::collect() |>
@@ -175,7 +175,7 @@ vocabulary_new |>
 DatabaseConnector::disconnect(connection)
 
 # test files are correct
-pathToFullOMOPVocabularyDuckDBfile <- here::here("inst/testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb")
+pathToFullOMOPVocabularyDuckDBfile <- here::here("inst/testdata/OMOPVocabulary/OMOPVocabulary.duckdb")
 
 file.remove(pathToFullOMOPVocabularyDuckDBfile)
 file.remove(paste0(pathToFullOMOPVocabularyDuckDBfile, ".wal"))

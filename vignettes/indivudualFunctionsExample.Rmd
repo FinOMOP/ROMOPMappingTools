@@ -48,6 +48,8 @@ This file contains the mappings for the ICD10fi vocabulary.
 pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
 
 usagiTibble <- readUsagiFile(pathToUsagiFile)
+
+usagiTibble |> dplyr::glimpse()
 ```
 
 ### Validating the Usagi file
@@ -63,13 +65,14 @@ This test database contains only the ICD10 vocabulary with all the keys in other
 
 ```{r}
 pathToOMOPVocabularyDuckDBfile <-  helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
-vocabularyDatabaseSchema <- "main"
-c <- tempfile(fileext = ".csv")
 
-connection <- DatabaseConnector::connect(
-        dbms = "duckdb",
-        server = pathToOMOPVocabularyDuckDBfile
-    )
+connectionDetails <- DatabaseConnector::createConnectionDetails(
+    dbms = "duckdb",
+    server = pathToOMOPVocabularyDuckDBfile
+)
+
+connection <- DatabaseConnector::connect(connectionDetails)
+vocabularyDatabaseSchema <- "main"
 
 pathToValidatedUsagiFile  <- tempfile(fileext = "usagi_validated.csv")
 ```
@@ -117,9 +120,67 @@ Additionaly, the `ADD_INFO:validationMessages` column will indicate the exact er
 
 ![Usagi with errors](./images/Usagi_with_errors.png)
 
+### Updating the Usagi file
 
+If the vocabulary has been updated since the Usagi file was created, it may happen that some of the mappings are outdated.
+This will be detected by the `validateUsagiFile` and show as a "ConceptIds outdated" error. 
+
+```{r}
+pathToOutdatedUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
+
+validationsSummaryWithErrors <- validateUsagiFile(
+  pathToOutdatedUsagiFile,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile,
+  sourceConceptIdOffset = 2000500000
+)
+
+knitr::kable(validationsSummaryWithErrors)
+```
+
+In this case, we can update the Usagi file using the `updateUsagiFile` function
+
+```{r}
+pathToUpdatedUsagiFile <- tempfile(fileext = "usagi_updated.csv")
+
+updateSummary <- updateUsagiFile(
+    pathToOutdatedUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToUpdatedUsagiFile,
+    skipValidation = TRUE
+  )
+
+knitr::kable(updateSummary)
+```
+
+This fuction updates changes in `domain_id`, `concept_name` and if the mapped `concept_id` point to a non-standard concept it will try to find a new mapping for it
+(This is done by looking at the relationship table for relationships of the old concept_id by "Maps to", "Concept replaced by", "Concept same_as to" and "Concept poss_eq to" in that order).
+
+Some times the new concept_id is not found, in this case the function will return a warning and not update the concept_id.
+
+The new updates Usagi file can be validated again with the `validateUsagiFile` function to check if there are any errors.
+
+```{r}
+validationsSummaryWithErrors <- validateUsagiFile(
+  pathToUpdatedUsagiFile,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile,
+  sourceConceptIdOffset = 2000500000
+)
+
+knitr::kable(validationsSummaryWithErrors)
+```
+
+Unfortunatelly, sometimes the updateUsagiFile is introducing new errors, in this case updates in the vocabulary have introduced invalid domain combinations. 
+Moreover, some of the mappings could not be updated because the new concept_id was not found.
+This need to be fixed by the user by reviewing the Usagi file.
 
 ### Uploading the Usagi file into the SourceToConceptMap table in a database
+
+We will continue with the validated Usagi file.
 
 For uploading the validated Usagi file into the SourceToConceptMap table in a database, we can use the `appendUsagiFileToSTCMtable` function. 
 This function needs a connection to the database and schema where the vocabulary is stored and the name of the SourceToConceptMap table.
@@ -152,6 +213,8 @@ dplyr::tbl(connection, "source_to_concept_map_extended") |>
     dplyr::collect()
 ```
 
+Notice that only the approved mappings (mappingStatus == "APPROVED") are uploaded to the STCM table.
+
 Close the connection to the database.
 ```{r}
 DatabaseConnector::disconnect(connection)
@@ -164,17 +227,31 @@ In this case, we can use the `validateVocabularyFolder` and `vocabularyFolderToS
 The `validateVocabularyFolder` function will validate all the Usagi files in the vocabulary folder and return a tibble with the validations.
 The `vocabularyFolderToSTCMAndVocabularyTables` function will upload all the Usagi files to the STCM table and add the vocabularies to the VOCABULARY table.
 
+In the `inst/testdata` folder we have a folder with multiple Usagi files one for ICD10fi and one for UNITSfi. `vocabularies.csv` file is a file that contains the vocabulary information for the vocabulary folder.
+
+```
+inst/testdata/VOCABULARIES/
+├── vocabularies.csv
+├── ICD10fi/
+│   ├── ICD10fi.usagi.csv
+│   └── NEWS.md
+└── UNITfi/
+    ├── UNITfi.usagi.csv
+    └── NEWS.md
+```
+
 Create a new database :
 
 ```{r}
-pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
-vocabularyDatabaseSchema <- "main"
-c <- tempfile(fileext = ".csv")
+pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
 
-connection <- DatabaseConnector::connect(
-        dbms = "duckdb",
-        server = pathToOMOPVocabularyDuckDBfile
-    )
+connectionDetails <- DatabaseConnector::createConnectionDetails(
+    dbms = "duckdb",
+    server = pathToOMOPVocabularyDuckDBfile
+)
+
+connection <- DatabaseConnector::connect(connectionDetails)
+vocabularyDatabaseSchema <- "main"
 ```
 
 ### Validate all the Usagi files in the vocabulary folder
@@ -201,6 +278,11 @@ knitr::kable(validationsLogTibble)
 
 Similary we can use the `vocabularyFolderToSTCMAndVocabularyTables` function to upload all the Usagi files to the STCM table.
 This function will also upload the vocabularies.csv file to the VOCABULARY table.
+
+```{r}
+createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
+```
+
 ```{r}
 vocabularyFolderToSTCMVocabularyConcepClassTables(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 ```
@@ -223,6 +305,7 @@ This function needs a connection to the database and schema where the vocabulary
 
 This function solely call to the SQL code in the `inst/sql/STCMToCDM.sql` file.
 This SQL code can be translated to any other database supported by DatabaseConnector, and be applied directly. 
+
 
 ```{r}
 STCMToCDMTables(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
@@ -274,9 +357,19 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 # Populating the CONCEPT_ANCESTOR table
 
 
+
+Close the connection to the database.
+```{r}
+DatabaseConnector::disconnect(connection)
+```
+
+
 # Validate the CDM tables with DataQualityDashboard
 
 ```{r}
+# Create connectionDetails from the existing connection
+validationResultsFolder <- tempdir()
+
 validationLogTibble <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
 ```
 

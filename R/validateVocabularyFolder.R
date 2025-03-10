@@ -1,3 +1,21 @@
+#' Validate Vocabulary Folder
+#'
+#' Validates all Usagi files in a vocabulary folder against a set of rules.
+#' The folder must contain a vocabularies.csv file that describes the vocabularies
+#' and their corresponding Usagi files.
+#'
+#' @param pathToVocabularyFolder Path to folder containing vocabulary files
+#' @param connection A DatabaseConnector connection object
+#' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
+#' @param validationResultsFolder Folder where validation results will be saved
+#'
+#' @return A tibble containing validation results for all files
+#'
+#' @importFrom checkmate assertDirectory assertFileExists
+#' @importFrom readr read_csv
+#' @importFrom dplyr bind_rows mutate select everything
+#'
+#' @export
 validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, validationResultsFolder) {
     #
     # Parameter validation

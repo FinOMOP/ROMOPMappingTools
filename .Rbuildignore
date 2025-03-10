@@ -3,3 +3,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^data-raw$
+
+.cursor/*
+dev/*
+.vscode/*
+TODO.md
+errorReportSql.txt
+inst/testdata/OMOPVocabulary/*.csv

@@ -63,7 +63,7 @@ You'll need connection details to a database where:
 
 For testing, you can use the DuckDB database that is included in the package.
 ```{r}
-pathToOMOPVocabularyDuckDBfile <- createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
     dbms = "duckdb",
@@ -104,7 +104,7 @@ validationLogTibble <- runAll(
 The function returns a tibble containing a log of the different steps in the process.
 
 ```{r}
-knitr::kable(validationLogTibble)
+#knitr::kable(validationLogTibble)
 ```
 
 If any there is any error in the column `type` the process may have not finished correctly.

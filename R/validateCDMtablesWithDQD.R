@@ -1,16 +1,18 @@
-#' Validate OMOP Tables with Data Quality Dashboard
+#' Validate CDM Tables Using Data Quality Dashboard
 #'
-#' This function validates the OMOP vocabulary tables using the Data Quality Dashboard package.
+#' Validates the CDM vocabulary tables using the OHDSI Data Quality Dashboard.
+#' This performs standard CDM vocabulary table checks to ensure data quality and consistency.
 #'
-#' @param connection A DatabaseConnector connection
-#' @param vocabularyDatabaseSchema A string with the name of the schema where the vocabulary tables are stored
-#' @importFrom DatabaseConnector dbListTables
+#' @param connectionDetails DatabaseConnector connection details object
+#' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
+#' @param validationResultsFolder Folder where validation results will be saved
+#'
+#' @return A tibble containing validation results
+#'
+#' @importFrom DatabaseConnector connect disconnect
 #' @importFrom DataQualityDashboard executeDqChecks
-#' @importFrom checkmate assertClass assertString
-#' @return Results from the Data Quality Dashboard.
 #'
 #' @export
-
 validateCDMtablesWithDQD <- function(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder) {
   # check if the connection is a DatabaseConnector connection
   connectionDetails |> checkmate::assertClass("ConnectionDetails")

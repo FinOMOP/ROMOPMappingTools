@@ -16,7 +16,15 @@
 #' @param pathToUsagiFile Path to the Usagi mapping file to validate
 #' @param connection A DatabaseConnector connection object
 #' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
-#' @param pathToValidatedUsagiFile Path where to save the validated Usagi file
+#' @param pathToUpdatedUsagiFile Path where to save the updated Usagi file
+#' @param updateLevelTibble Optional tibble defining relationship update rules. Default rules are:
+#'   - "Maps to" (level 1, no review needed)
+#'   - "Concept replaced by" (level 2, review needed)
+#'   - "Concept same_as to" (level 3, review needed)
+#'   - "Concept poss_eq to" (level 4, review needed)
+#' @param appendOrClearAutoUpdatingInfo Whether to append ("append") or clear ("clear") auto-updating info
+#' @param skipValidation Whether to skip validation checks if TRUE. Default is FALSE
+#' @param sourceConceptIdOffset Integer offset to add to source concept IDs. Default is 0
 #'
 #' @importFrom checkmate assertFileExists assertSubset
 #' @importFrom DBI dbConnect dbListTables
@@ -31,7 +39,8 @@ updateUsagiFile <- function(
     pathToUpdatedUsagiFile,
     updateLevelTibble = NULL,
     appendOrClearAutoUpdatingInfo = "append",
-    skipValidation = FALSE) {
+    skipValidation = FALSE,
+    sourceConceptIdOffset = 0) {
     #
     # Parameter validation
     #
@@ -62,7 +71,7 @@ updateUsagiFile <- function(
 
     # validate the usagi file
     if (!skipValidation) {
-        usagiTibble <- validateUsagiFile(pathToUsagiFile, connection, vocabularyDatabaseSchema, tempfile())
+        usagiTibble <- validateUsagiFile(pathToUsagiFile, connection, vocabularyDatabaseSchema, tempfile(), sourceConceptIdOffset)
         if (usagiTibble |> dplyr::filter(type == "ERROR") |> nrow() > 0) {
             stop("The usagi file has the following errors: ", usagiTibble |> dplyr::filter(type == "ERROR") |> dplyr::pull(message) |> paste(collapse = "\n"))
         }
@@ -148,13 +157,13 @@ updateUsagiFile <- function(
         dplyr::left_join(outdatedStandardConcepts |> dplyr::mutate(conceptId = oldConceptId), by = c("sourceCode", "conceptId")) |>
         dplyr::mutate(
             conceptId = dplyr::if_else(!is.na(newConceptId), newConceptId, conceptId),
-            mappingStatus = dplyr::if_else(!is.na(needsReview) & needsReview, "UNCHECKED", mappingStatus),
             infoTmp = dplyr::case_when(
                 action == "needsRemapping" ~ paste0("conceptId ", oldConceptId, " could not be updated automatically, remapping needed"),
                 action == "needsReview" ~ paste0("conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", needs reviewing"),
                 action == "noReview" ~ paste0("conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", does not need reviewing"),
                 TRUE ~ NA_character_
             ),
+            mappingStatus = dplyr::if_else(is.na(action) | action == "noReview", mappingStatus, "UNCHECKED"),
             hasChangendConceptId = !is.na(newConceptId)
         ) |>
         dplyr::group_by(sourceCode) |>

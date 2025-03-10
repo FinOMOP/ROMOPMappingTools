@@ -1,7 +1,7 @@
 test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   
-  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
-  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
   withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
   
   vocabularyDatabaseSchema = "main"
@@ -34,7 +34,8 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
 test_that("test validateUsagiFile returns errors with the errored usagi file", {
   
   pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
-  pathToOMOPVocabularyDuckDBfile <- testthatSetup_pathToOMOPVocabularyDuckDBfile
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
   vocabularyDatabaseSchema = "main"
   sourceConceptIdOffset = 2000500000

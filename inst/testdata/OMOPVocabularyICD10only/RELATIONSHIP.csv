@@ -1,8 +1,0 @@
-relationship_id	relationship_name	is_hierarchical	defines_ancestry	reverse_relationship_id	relationship_concept_id
-Is a	Is a	0	0	Subsumes	44818821
-Concept replaced by	Concept replaced by	0	0	Concept replaces	44818956
-Concept same_as to	Inactive same_as active (SNOMED)	0	0	Concept same_as from	44818958
-Concept poss_eq to	Inactive possibly_equivalent_to active (SNOMED)	0	0	Concept poss_eq from	44818962
-Mapped from	Standard to Non-standard map (OMOP)	0	0	Maps to	44818976
-Maps to	Non-standard to Standard map (OMOP)	0	0	Mapped from	44818977
-Subsumes	Subsumes	1	1	Is a	44818723

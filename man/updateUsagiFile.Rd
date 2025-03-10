@@ -10,7 +10,9 @@ updateUsagiFile(
   vocabularyDatabaseSchema,
   pathToUpdatedUsagiFile,
   updateLevelTibble = NULL,
-  skipValidation = FALSE
+  appendOrClearAutoUpdatingInfo = "append",
+  skipValidation = FALSE,
+  sourceConceptIdOffset = 0
 )
 }
 \arguments{
@@ -20,7 +22,21 @@ updateUsagiFile(
 
 \item{vocabularyDatabaseSchema}{Schema name where the vocabulary tables are stored}
 
-\item{pathToValidatedUsagiFile}{Path where to save the validated Usagi file}
+\item{pathToUpdatedUsagiFile}{Path where to save the updated Usagi file}
+
+\item{updateLevelTibble}{Optional tibble defining relationship update rules. Default rules are:
+\itemize{
+\item "Maps to" (level 1, no review needed)
+\item "Concept replaced by" (level 2, review needed)
+\item "Concept same_as to" (level 3, review needed)
+\item "Concept poss_eq to" (level 4, review needed)
+}}
+
+\item{appendOrClearAutoUpdatingInfo}{Whether to append ("append") or clear ("clear") auto-updating info}
+
+\item{skipValidation}{Whether to skip validation checks if TRUE. Default is FALSE}
+
+\item{sourceConceptIdOffset}{Integer offset to add to source concept IDs. Default is 0}
 }
 \description{
 Reads a usagi file given in 'pathToUsagiFile' and performs the following checks:

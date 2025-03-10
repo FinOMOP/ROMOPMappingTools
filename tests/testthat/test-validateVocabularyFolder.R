@@ -36,7 +36,8 @@ test_that("validateVocabularyFolder returns all ERRORS for invalid vocabulary fo
     pathToValidatedVocabularyFolder <- file.path(tempdir(), "validated_vocabularies_with_errors")
     dir.create(pathToValidatedVocabularyFolder, showWarnings = FALSE)
     withr::defer(unlink(pathToValidatedVocabularyFolder, recursive = TRUE))
-    pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
+    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+    withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
 
     # Create connection to test database

@@ -1,15 +1,17 @@
-#' Convert SOURCE_TO_CONCEPT_MAP_EXTENDED to CDM Tables
+#' Convert Source to Concept Map to CDM Tables
 #'
-#' @description
-#' Creates and populates CDM tables (CONCEPT, CONCEPT_RELATIONSHIP, CONCEPT_ANCESTOR) 
-#' from SOURCE_TO_CONCEPT_MAP_EXTENDED table data.
+#' Converts the contents of a Source to Concept Map table into standard CDM vocabulary tables.
+#' This includes creating entries in:
+#' - CONCEPT table for source concepts
+#' - CONCEPT_RELATIONSHIP table for mapping relationships
+#' - Additional relationship types if using extended STCM format
 #'
-#' @param connection           A DatabaseConnector connection object
-#' @param vocabularyDatabaseSchema Schema containing the vocabulary and STCM tables
-#' @param sourceToConceptMapTable Name of the SOURCE_TO_CONCEPT_MAP_EXTENDED table
+#' @param connection A DatabaseConnector connection object
+#' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
+#' @param sourceToConceptMapTable Name of the source to concept map table
 #'
-#' @return
-#' Invisible TRUE if successful
+#' @importFrom DatabaseConnector renderTranslateExecuteSql
+#' @importFrom SqlRender readSql render translate
 #'
 #' @export
 STCMToCDMTables <- function(connection,

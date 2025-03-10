@@ -1,18 +1,14 @@
-#' Create SOURCE_TO_CONCEPT_MAP_EXTENDED table
+#' Create Extended Source to Concept Map Table
 #'
-#' @description
-#' Creates the SOURCE_TO_CONCEPT_MAP_EXTENDED table in the specified schema
+#' Creates an extended version of the Source to Concept Map table that includes additional columns
+#' for source concept class, domain, and parent relationships.
 #'
-#' @param connectionDetails    An R object of type \code{connectionDetails} created using the
-#'                            function \code{createConnectionDetails} in the
-#'                            \code{DatabaseConnector} package.
-#' @param cdmDatabaseSchema   The name of the database schema that will contain the OMOP CDM
-#'                           tables. Requires appropriate user permissions to create new tables.
-#' @param overwrite          If TRUE, will drop existing table before creating new one. If FALSE,
-#'                          will raise an error if table already exists. Default is TRUE.
+#' @param connection A DatabaseConnector connection object
+#' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
+#' @param sourceToConceptMapTable Name of the extended source to concept map table to create
+#' @param overwrite Whether to overwrite an existing table. Default is TRUE
 #'
-#' @return
-#' TRUE if table is created successfully
+#' @importFrom DatabaseConnector renderTranslateExecuteSql
 #'
 #' @export
 createSourceToConceptMapExtended <- function(connection, vocabularyDatabaseSchema, sourceToConceptMapTable, overwrite = TRUE) {

@@ -2,21 +2,23 @@
 % Please edit documentation in R/STCMToCDMTables.R
 \name{STCMToCDMTables}
 \alias{STCMToCDMTables}
-\title{Convert SOURCE_TO_CONCEPT_MAP_EXTENDED to CDM Tables}
+\title{Convert Source to Concept Map to CDM Tables}
 \usage{
 STCMToCDMTables(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 }
 \arguments{
 \item{connection}{A DatabaseConnector connection object}
 
-\item{vocabularyDatabaseSchema}{Schema containing the vocabulary and STCM tables}
+\item{vocabularyDatabaseSchema}{Schema name where the vocabulary tables are stored}
 
-\item{sourceToConceptMapTable}{Name of the SOURCE_TO_CONCEPT_MAP_EXTENDED table}
-}
-\value{
-Invisible TRUE if successful
+\item{sourceToConceptMapTable}{Name of the source to concept map table}
 }
 \description{
-Creates and populates CDM tables (CONCEPT, CONCEPT_RELATIONSHIP, CONCEPT_ANCESTOR)
-from SOURCE_TO_CONCEPT_MAP_EXTENDED table data.
+Converts the contents of a Source to Concept Map table into standard CDM vocabulary tables.
+This includes creating entries in:
+\itemize{
+\item CONCEPT table for source concepts
+\item CONCEPT_RELATIONSHIP table for mapping relationships
+\item Additional relationship types if using extended STCM format
+}
 }

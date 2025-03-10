@@ -1,4 +1,48 @@
-vocabularyFolderToSTCMVocabularyConcepClassTables <- function(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, sourceToConceptMapTable, skipValidation = TRUE) {
+#' Upload Vocabulary Folder to CDM Tables
+#'
+#' Uploads all vocabulary files from a folder to the CDM tables. This includes:
+#' - Adding vocabularies to the VOCABULARY table
+#' - Adding concept classes to the CONCEPT_CLASS table
+#' - Adding mappings to the Source to Concept Map table
+#' - Creating corresponding CONCEPT entries
+#'
+#' The vocabulary folder must contain:
+#' - vocabularies.csv: A file describing the vocabularies with columns:
+#'   - source_vocabulary_id
+#'   - source_vocabulary_name
+#'   - source_concept_id_offset
+#'   - path_to_usagi_file
+#'   - path_to_news_file
+#'   - ignore
+#' - Usagi mapping files as referenced in vocabularies.csv
+#' - NEWS files containing version information as referenced in vocabularies.csv
+#'
+#' @param pathToVocabularyFolder Path to folder containing vocabulary files
+#' @param connection A DatabaseConnector connection object
+#' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
+#' @param sourceToConceptMapTable Name of the source to concept map table
+#' @param skipValidation Whether to skip validation of the Usagi files (default: TRUE)
+#' @param pathToValidatedUsagiFolder Path where validated Usagi files will be saved if validation is performed
+#'
+#' @return NULL invisibly. The function modifies the database tables directly.
+#'
+#' @importFrom readr read_csv
+#' @importFrom dplyr filter mutate transmute pull bind_rows distinct select
+#' @importFrom purrr map_chr
+#' @importFrom stringr str_extract
+#' @importFrom lubridate ymd
+#' @importFrom DatabaseConnector renderTranslateExecuteSql dbWriteTable
+#' @importFrom tibble tibble
+#'
+#' @export
+vocabularyFolderToSTCMVocabularyConcepClassTables <- function(
+    pathToVocabularyFolder,
+    connection,
+    vocabularyDatabaseSchema,
+    sourceToConceptMapTable,
+    skipValidation = TRUE,
+    pathToValidatedUsagiFolder = NULL
+) {
     if (!skipValidation) {
         validationsLogTibble <- validateVocabularyFolder(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFolder)
         if (nrow(validationsLogTibble |> dplyr::filter(type != "SUCCESS")) > 0) {

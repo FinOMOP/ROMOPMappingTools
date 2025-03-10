@@ -2,7 +2,7 @@
 % Please edit documentation in R/validateCDMtablesWithDQD.R
 \name{validateCDMtablesWithDQD}
 \alias{validateCDMtablesWithDQD}
-\title{Validate OMOP Tables with Data Quality Dashboard}
+\title{Validate CDM Tables Using Data Quality Dashboard}
 \usage{
 validateCDMtablesWithDQD(
   connectionDetails,
@@ -11,13 +11,16 @@ validateCDMtablesWithDQD(
 )
 }
 \arguments{
-\item{vocabularyDatabaseSchema}{A string with the name of the schema where the vocabulary tables are stored}
+\item{connectionDetails}{DatabaseConnector connection details object}
 
-\item{connection}{A DatabaseConnector connection}
+\item{vocabularyDatabaseSchema}{Schema name where the vocabulary tables are stored}
+
+\item{validationResultsFolder}{Folder where validation results will be saved}
 }
 \value{
-Results from the Data Quality Dashboard.
+A tibble containing validation results
 }
 \description{
-This function validates the OMOP vocabulary tables using the Data Quality Dashboard package.
+Validates the CDM vocabulary tables using the OHDSI Data Quality Dashboard.
+This performs standard CDM vocabulary table checks to ensure data quality and consistency.
 }

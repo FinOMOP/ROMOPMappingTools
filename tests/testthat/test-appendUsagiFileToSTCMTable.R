@@ -1,6 +1,6 @@
 test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceToConceptMapTable for a non-extended sourceToConceptMapTable", {
     pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
-    nrowUsagiFile <- readr::read_csv(pathToUsagiFile, show_col_types = FALSE) |> nrow()
+    nrowUsagiFile <- readUsagiFile(pathToUsagiFile) |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
     pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
     withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
@@ -21,7 +21,7 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
     ) |>
         expect_warning("The usagi file is extended but the sourceToConceptMapTable is not extended.")
 
-    stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> as_tibble()
+    stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> tibble::as_tibble()
     stcmTable |>
         nrow() |>
         expect_equal(nrowUsagiFile)
@@ -36,8 +36,8 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
 
 test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceToConceptMapTable for an extended sourceToConceptMapTable", {
     pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
-    nrowUsagiFile <- readr::read_csv(pathToUsagiFile, show_col_types = FALSE) |> nrow()
-    pathToOMOPVocabularyDuckDBfile <- system.file("testdata/OMOPVocabularyICD10only/OMOPVocabularyICD10only.duckdb", package = "ROMOPMappingTools")
+    nrowUsagiFile <- readUsagiFile(pathToUsagiFile) |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
+    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
     vocabularyDatabaseSchema <- "main"
 
     connection <- DatabaseConnector::connect(
@@ -58,7 +58,7 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
         sourceToConceptMapTable = sourceToConceptMapTable
     ) 
 
-    stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> as_tibble()
+    stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> tibble::as_tibble()
     stcmTable |>
         nrow() |>
         expect_equal(nrowUsagiFile)
@@ -73,7 +73,6 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
     stcmTable |>
         dplyr::filter(is.na(SOURCE_PARENTS_CONCEPT_IDS)) |>
         nrow() |>
-        expect_equal(28)
+        expect_equal(21)
 
-    
 })
