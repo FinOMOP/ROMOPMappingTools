@@ -2,6 +2,7 @@
 # ROMOPMappingTools
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/FinOMOP/ROMOPMappingTools/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FinOMOP/ROMOPMappingTools/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 ![](https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/6c195491-eceb-447c-86c9-86d66b8ee63d)
