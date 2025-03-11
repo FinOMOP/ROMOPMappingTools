@@ -197,6 +197,18 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 
 ## Populating the CONCEPT_ANCESTOR table
 
+Since we have added the "Is a" and "Subsumes" relationships to the CONCEPT_RELATIONSHIP table, we can use this information to populate the CONCEPT_ANCESTOR table. 
+This is done with the `conceptRelationshipToAncestorTables` function.
+
+This can be applied to any non-standard vocabulary, not only the ones included in the `vocabularies.csv` file.
+
+```{r}
+conceptRelationshipToAncestorTables(
+  connection,
+  vocabularyDatabaseSchema,
+  vocabularyList = c("ICD10", "ICD10fi", "UNITfi")
+)
+```
 
 Close the connection to the database.
 ```{r}
