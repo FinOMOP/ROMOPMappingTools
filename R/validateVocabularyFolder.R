@@ -124,5 +124,5 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
         validationsLogTibble <- validationsLogTibble |> dplyr::bind_rows(validationLogTibble)
     }
 
-    return(validationsLogTibble)
+    return(validationsLogTibble  |> dplyr::select(context, type, step, message))
 }

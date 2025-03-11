@@ -1,7 +1,7 @@
 #' Run All Validation and Upload Steps
 #'
 #' @description
-#' Runs the complete workflow of validating vocabulary files and uploading them to CDM tables. 
+#' Runs the complete workflow of validating vocabulary files and uploading them to CDM tables.
 #' It performs the following steps:
 #' 1. Validate the vocabulary folder
 #' 2. If sourceToConceptMapTable is not NULL, create the SourceToConceptMap table
@@ -109,6 +109,52 @@ runAll <- function(
             message = errorMessage
         ))
         return(validationLogTibble)
+    }
+
+    # create the ancestor tables
+    message("Creating the ancestor tables")
+    errorMessage <- ""
+    tryCatch(
+        {
+            # get all the vocabulary ids used as ancestors
+            vocabularyIds <- c()
+            vocabulariesTibble <- readr::read_csv(pathToVocabularyFolder |> file.path("vocabularies.csv"), show_col_types = FALSE)
+            for (i in 1:nrow(vocabulariesTibble)) {
+                vocabularyIds <- c(vocabularyIds, vocabulariesTibble$source_vocabulary_id[i])
+                pathToUsagiFile <- file.path(pathToVocabularyFolder, vocabulariesTibble$path_to_usagi_file[i])
+                usagiTibble <- readUsagiFile(pathToUsagiFile)
+                if ("ADD_INFO:sourceParentVocabulary" %in% names(usagiTibble)) {
+                    vocabularyId <- usagiTibble |>
+                        dplyr::distinct(`ADD_INFO:sourceParentVocabulary`) |>
+                        dplyr::pull(`ADD_INFO:sourceParentVocabulary`) |>
+                        stringr::str_split("\\|") |>
+                        unlist()
+                    vocabularyIds <- c(vocabularyIds, vocabularyId)
+                }
+            }
+            vocabularyList <- vocabularyIds |>
+                unique() |>
+                na.omit() |>
+                setdiff("")
+
+            conceptRelationshipToAncestorTables(
+                connection = connection,
+                vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+                vocabularyList = vocabularyList
+            )
+        },
+        error = function(e) {
+            errorMessage <<- e$message
+        }
+    )
+
+    if (errorMessage != "") {
+        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
+            context = "conceptRelationshipToAncestorTables",
+            type = "ERROR",
+            step = "creating the ancestor tables",
+            message = errorMessage
+        ))
     }
 
     # close the connection

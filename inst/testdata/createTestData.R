@@ -60,7 +60,7 @@ dplyr::filter(
 #     )
 
 conceptRelationship_new <- conceptRelationship |> 
-    dplyr::filter(relationship_id %in% c("Maps to", "Concept replaced by", "Concept same_as to", "Concept poss_eq to")) |>
+    dplyr::filter(relationship_id %in% c("Maps to", "Concept replaced by", "Concept same_as to", "Concept poss_eq to", "Subsumes")) |>
     dplyr::semi_join(
         concept_codes |> dplyr::filter(is.na(standard_concept)),
         by = c("concept_id_1" = "concept_id")
