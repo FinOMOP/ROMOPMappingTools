@@ -12,6 +12,7 @@
 #' @param pathToVocabularyFolder Path to folder containing vocabulary files
 #' @param connectionDetails DatabaseConnector connection details object
 #' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
+#' @param pathToCodeCountsFolder Path to folder containing code counts files
 #' @param validationResultsFolder Folder where validation results will be saved
 #' @param sourceToConceptMapTable Optional name of source to concept map table
 #'
@@ -24,12 +25,14 @@ runAll <- function(
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
+    pathToCodeCountsFolder,
     validationResultsFolder,
     sourceToConceptMapTable = NULL) {
     # validate parameters
     pathToVocabularyFolder |> checkmate::assertDirectory()
     connectionDetails |> checkmate::assertClass("ConnectionDetails")
     vocabularyDatabaseSchema |> checkmate::assertString()
+    pathToCodeCountsFolder |> checkmate::assertDirectory()
     validationResultsFolder |> checkmate::assertDirectory()
     sourceToConceptMapTable |> checkmate::assertString(null.ok = TRUE)
 
@@ -162,15 +165,36 @@ runAll <- function(
 
     # validation with DQD
     message("Validating the CDM tables with DQD")
-    validationLogTibbleTmp <- validateCDMtablesWithDQD(
+    validationLogTibbledqd <- validateCDMtablesWithDQD(
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         validationResultsFolder = validationResultsFolder
     )
 
-    # join and save the validation log tibble
-    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbleTmp) |>
+
+    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbledqd) |>
         dplyr::select(context, type, step, message)
+
+
+    # validate code counts folder
+    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validateCodeCountsFolder(
+        pathToCodeCountsFolder = pathToCodeCountsFolder
+    ))
+
+    # calculate mapping status
+    mappingStatus <- calculateMappingStatus(
+        pathToCodeCountsFolder = pathToCodeCountsFolder,
+        connectionDetails = connectionDetails,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema
+    )
+
+    # build status dashboard
+    buildStatusDashboard(
+        mapping_status = mappingStatus,
+        output_file_html = file.path(validationResultsFolder, "mappingStatus.html")
+    )
+
+    # save validation log tibble
     validationLogTibble |> readr::write_csv(file.path(validationResultsFolder, "validationLogTibble.csv"), na = "")
 
     return(validationLogTibble)
