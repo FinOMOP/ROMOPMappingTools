@@ -7,7 +7,7 @@
 conceptRelationshipToAncestorTables(
   connection,
   vocabularyDatabaseSchema,
-  sourceToConceptMapTable
+  vocabularyList
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ conceptRelationshipToAncestorTables(
 
 \item{vocabularyDatabaseSchema}{Schema containing the vocabulary and STCM tables}
 
-\item{sourceToConceptMapTable}{Name of the SOURCE_TO_CONCEPT_MAP_EXTENDED table}
+\item{vocabularyList}{Vector of vocabulary_ids to include (default: c("ICD10"))}
 }
 \value{
 Invisible TRUE if successful

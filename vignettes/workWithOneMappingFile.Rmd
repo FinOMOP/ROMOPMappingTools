@@ -1,0 +1,178 @@
+---
+title: "Working with individual mapping files"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{run}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ROMOPMappingTools)
+```
+
+# Intro
+
+This vignette shows how to use some of the functions of the ROMOPMappingTools package to work with a single Usagi mapping file.
+Reading and Usagi file, validating its format, or updating it after a vocabulary update. 
+For trasforming a single usagi file into C&CR tables of the OMOP vocabulary, we recommend follow the same steps as in the [Work with multiple mapping files](workWithMultipleMappingFiles.html) vignette.
+This is because the process need some other information that is not included in the Usagi file, but n the 'vocabularies.csv' file.
+For automating all the process in a github repository, please refer to the [Work as a github repository](workAsGithubRepo.html) vignette.
+
+Example files are included in the package. In the `inst/testdata` folder you can find the files used in this example.
+
+## Reading a Usagi file
+
+For reading the Usagi file, we can use the `readUsagiFile` function, which returns a tibble with the correct columns formated.
+It can read a standard Usagi file or an extended Usagi file, see the [Usagi file format](usagiFileFormat.html) vignette for more details.
+In this example we will read a extended Usagi file, from the test data.
+This file contains the mappings for the ICD10fi vocabulary.
+
+```{r}
+pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+
+usagiTibble <- readUsagiFile(pathToUsagiFile)
+
+usagiTibble |> dplyr::glimpse()
+```
+
+## Validating a Usagi file
+
+To validate if all the information in the Usagi file is correct, we can use the `validateUsagiFile` function. 
+This function takes an Usagi or Usagi-extended file and and performs a series of validations, see the function help for more details `?validateUsagiFile`.
+The function also needs a connection to the OMOP vocabulary database and schema to where the vocabulary tables are stored in order to make some of the validations.
+The function also need the number used to offset the source concept ids in the Usagi file.
+The function returns a tibble with a summary of the validations conducted and if error are found, a new Usagi file with the errors will be created in the specified path.
+
+For this example, we will use the test database in DuckDB format included in the package.
+This test database contains only the ICD10 vocabulary with all the keys in other tables (see `inst/testdata/createTestData.R` for more details).
+
+```{r}
+pathToOMOPVocabularyDuckDBfile <-  helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+
+connectionDetails <- DatabaseConnector::createConnectionDetails(
+    dbms = "duckdb",
+    server = pathToOMOPVocabularyDuckDBfile
+)
+
+connection <- DatabaseConnector::connect(connectionDetails)
+vocabularyDatabaseSchema <- "main"
+
+pathToValidatedUsagiFile  <- tempfile(fileext = "usagi_validated.csv")
+```
+
+```{r}
+validationsSummary <- validateUsagiFile(
+  pathToUsagiFile,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile, 
+  sourceConceptIdOffset = 2000500000
+)
+```
+
+```{r}
+knitr::kable(validationsSummary)
+```
+
+In this case the Usagi file is valid and no errors are found. Hence, the new validated Usagi file remains unchanged.
+
+However, we can see what happens with a usagi file with errors.
+In this case we use an other Usagi file with all type of errors, wich is included in the package for unit testing purposes.
+
+```{r}
+pathToUsagiFileWithErrors <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
+
+usagiTibbleWithErrors <- readUsagiFile(pathToUsagiFileWithErrors)
+```
+
+```{r}
+validationsSummaryWithErrors <- validateUsagiFile(
+  pathToUsagiFileWithErrors,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile,
+  sourceConceptIdOffset = 2000500000
+)
+```
+
+```{r}
+knitr::kable(validationsSummaryWithErrors)
+```
+
+In this case, if we open the new validate Usagi with the Usagi software these mapping with errors will appear as FLAGGED.
+Additionally, the `ADD_INFO:validationMessages` column will indicate the exact error or errors found.
+
+![Usagi with errors](./img/Usagi_with_errors.png)
+
+## Updating a Usagi file
+
+If the vocabulary has been updated since the Usagi file was created, it may happen that some of the mappings are outdated.
+This will be detected by the `validateUsagiFile` and show as a "ConceptIds outdated" error. 
+
+In this case we will use an other Usagi file with outdated concept ids, which is included in the package for unit testing purposes.
+
+```{r}
+pathToOutdatedUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
+
+validationsSummaryWithErrors <- validateUsagiFile(
+  pathToOutdatedUsagiFile,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile,
+  sourceConceptIdOffset = 2000500000
+)
+
+knitr::kable(validationsSummaryWithErrors)
+```
+
+If outdated error are detected, we can attempt to update the Usagi file automatically using the `updateUsagiFile` function.
+This function takes an Usagi or Usagi-extended file, a connection to the database, the schema with the vocabulary tables and a path to a file where to store the updated Usagi file.
+
+```{r}
+pathToUpdatedUsagiFile <- tempfile(fileext = "usagi_updated.csv")
+
+updateSummary <- updateUsagiFile(
+    pathToOutdatedUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToUpdatedUsagiFile,
+    skipValidation = TRUE
+  )
+
+knitr::kable(updateSummary)
+```
+
+This fuction updates changes in `domain_id`, `concept_name` and if the mapped `concept_id` point to a non-standard concept it will try to find a new mapping for it
+(This is done by looking at the relationship table for relationships of the old concept_id by "Maps to", "Concept replaced by", "Concept same_as to" and "Concept poss_eq to" in that order).
+A new column `ADD_INFO:autoUpdatingInfo` is added to the updated Usagi file to show the specific changes made to the file.
+
+Some times, like in this case, a new concept_id can not be found, this is shown as a warning.
+
+The new updates Usagi file can be validated again with the `validateUsagiFile` function to check if there are any errors.
+
+```{r}
+validationsSummaryWithErrors <- validateUsagiFile(
+  pathToUpdatedUsagiFile,
+  connection,
+  vocabularyDatabaseSchema,
+  pathToValidatedUsagiFile = pathToValidatedUsagiFile,
+  sourceConceptIdOffset = 2000500000
+)
+
+knitr::kable(validationsSummaryWithErrors)
+```
+
+Unfortunatelly, sometimes the updateUsagiFile is introducing new errors, in this case updates in the vocabulary have introduced invalid domain combinations. 
+Moreover, some of the mappings could not be updated because the new concept_id was not found.
+This need to be fixed by the user by reviewing the Usagi file.
+ 

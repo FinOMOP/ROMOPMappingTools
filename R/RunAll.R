@@ -1,7 +1,7 @@
 #' Run All Validation and Upload Steps
 #'
 #' @description
-#' Runs the complete workflow of validating vocabulary files and uploading them to CDM tables. 
+#' Runs the complete workflow of validating vocabulary files and uploading them to CDM tables.
 #' It performs the following steps:
 #' 1. Validate the vocabulary folder
 #' 2. If sourceToConceptMapTable is not NULL, create the SourceToConceptMap table
@@ -12,6 +12,7 @@
 #' @param pathToVocabularyFolder Path to folder containing vocabulary files
 #' @param connectionDetails DatabaseConnector connection details object
 #' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
+#' @param pathToCodeCountsFolder Path to folder containing code counts files
 #' @param validationResultsFolder Folder where validation results will be saved
 #' @param sourceToConceptMapTable Optional name of source to concept map table
 #'
@@ -24,12 +25,14 @@ runAll <- function(
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
+    pathToCodeCountsFolder,
     validationResultsFolder,
     sourceToConceptMapTable = NULL) {
     # validate parameters
     pathToVocabularyFolder |> checkmate::assertDirectory()
     connectionDetails |> checkmate::assertClass("ConnectionDetails")
     vocabularyDatabaseSchema |> checkmate::assertString()
+    pathToCodeCountsFolder |> checkmate::assertDirectory()
     validationResultsFolder |> checkmate::assertDirectory()
     sourceToConceptMapTable |> checkmate::assertString(null.ok = TRUE)
 
@@ -111,20 +114,87 @@ runAll <- function(
         return(validationLogTibble)
     }
 
+    # create the ancestor tables
+    message("Creating the ancestor tables")
+    errorMessage <- ""
+    tryCatch(
+        {
+            # get all the vocabulary ids used as ancestors
+            vocabularyIds <- c()
+            vocabulariesTibble <- readr::read_csv(pathToVocabularyFolder |> file.path("vocabularies.csv"), show_col_types = FALSE)
+            for (i in 1:nrow(vocabulariesTibble)) {
+                vocabularyIds <- c(vocabularyIds, vocabulariesTibble$source_vocabulary_id[i])
+                pathToUsagiFile <- file.path(pathToVocabularyFolder, vocabulariesTibble$path_to_usagi_file[i])
+                usagiTibble <- readUsagiFile(pathToUsagiFile)
+                if ("ADD_INFO:sourceParentVocabulary" %in% names(usagiTibble)) {
+                    vocabularyId <- usagiTibble |>
+                        dplyr::distinct(`ADD_INFO:sourceParentVocabulary`) |>
+                        dplyr::pull(`ADD_INFO:sourceParentVocabulary`) |>
+                        stringr::str_split("\\|") |>
+                        unlist()
+                    vocabularyIds <- c(vocabularyIds, vocabularyId)
+                }
+            }
+            vocabularyList <- vocabularyIds |>
+                unique() |>
+                na.omit() |>
+                setdiff("")
+
+            conceptRelationshipToAncestorTables(
+                connection = connection,
+                vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+                vocabularyList = vocabularyList
+            )
+        },
+        error = function(e) {
+            errorMessage <<- e$message
+        }
+    )
+
+    if (errorMessage != "") {
+        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
+            context = "conceptRelationshipToAncestorTables",
+            type = "ERROR",
+            step = "creating the ancestor tables",
+            message = errorMessage
+        ))
+    }
+
     # close the connection
     DatabaseConnector::disconnect(connection)
 
     # validation with DQD
     message("Validating the CDM tables with DQD")
-    validationLogTibbleTmp <- validateCDMtablesWithDQD(
+    validationLogTibbledqd <- validateCDMtablesWithDQD(
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         validationResultsFolder = validationResultsFolder
     )
 
-    # join and save the validation log tibble
-    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbleTmp) |>
+
+    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbledqd) |>
         dplyr::select(context, type, step, message)
+
+
+    # validate code counts folder
+    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validateCodeCountsFolder(
+        pathToCodeCountsFolder = pathToCodeCountsFolder
+    ))
+
+    # calculate mapping status
+    mappingStatus <- calculateMappingStatus(
+        pathToCodeCountsFolder = pathToCodeCountsFolder,
+        connectionDetails = connectionDetails,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema
+    )
+
+    # build status dashboard
+    buildStatusDashboard(
+        mapping_status = mappingStatus,
+        output_file_html = file.path(validationResultsFolder, "mappingStatus.html")
+    )
+
+    # save validation log tibble
     validationLogTibble |> readr::write_csv(file.path(validationResultsFolder, "validationLogTibble.csv"), na = "")
 
     return(validationLogTibble)
