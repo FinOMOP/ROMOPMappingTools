@@ -35,6 +35,8 @@ Imports:
     RColorBrewer,
     scales,
     tippy
+Remotes:
+    OHDSI/DataQualityDashboard
 Depends: 
     R (>= 2.10)
 LazyData: true
