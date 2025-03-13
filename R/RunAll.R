@@ -12,6 +12,7 @@
 #' @param pathToVocabularyFolder Path to folder containing vocabulary files
 #' @param connectionDetails DatabaseConnector connection details object
 #' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
+#' @param pathToCodeCountsFolder Path to folder containing code counts files
 #' @param validationResultsFolder Folder where validation results will be saved
 #' @param sourceToConceptMapTable Optional name of source to concept map table
 #'
@@ -24,12 +25,14 @@ runAll <- function(
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
+    pathToCodeCountsFolder,
     validationResultsFolder,
     sourceToConceptMapTable = NULL) {
     # validate parameters
     pathToVocabularyFolder |> checkmate::assertDirectory()
     connectionDetails |> checkmate::assertClass("ConnectionDetails")
     vocabularyDatabaseSchema |> checkmate::assertString()
+    pathToCodeCountsFolder |> checkmate::assertDirectory()
     validationResultsFolder |> checkmate::assertDirectory()
     sourceToConceptMapTable |> checkmate::assertString(null.ok = TRUE)
 
@@ -38,7 +41,7 @@ runAll <- function(
 
     # validate the vocabulary folder
     message("Validating the vocabulary folder")
-    validationLogR6 <- validateVocabularyFolder(
+    validationLogTibble <- validateVocabularyFolder(
         pathToVocabularyFolder = pathToVocabularyFolder,
         connection = connection,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
@@ -46,9 +49,9 @@ runAll <- function(
     )
 
     # if there are errors at this point stop
-    if (validationLogR6 |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
+    if (validationLogTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
         message("Errors found in the vocabulary folder")
-        return(validationLogR6)
+        return(validationLogTibble)
     }
 
     # if sourceToConceptMapTable is not NULL, create the SourceToConceptMap table
@@ -76,13 +79,13 @@ runAll <- function(
     )
 
     if (errorMessage != "") {
-        validationLogR6 <- dplyr::bind_rows(validationLogR6, dplyr::tibble(
+        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
             context = "vocabulary.csv",
             type = "ERROR",
             step = "uploading the vocabulary.csv and Usagi files to the SourceToConceptMap table",
             message = errorMessage
         ))
-        return(validationLogR6)
+        return(validationLogTibble)
     }
 
     # STCM to CDM table
@@ -102,13 +105,13 @@ runAll <- function(
     )
 
     if (errorMessage != "") {
-        validationLogR6 <- dplyr::bind_rows(validationLogR6, dplyr::tibble(
+        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
             context = "STCMToCDMTables",
             type = "ERROR",
             step = "moving the SourceToConceptMap table to the CDM table",
             message = errorMessage
         ))
-        return(validationLogR6)
+        return(validationLogTibble)
     }
 
     # create the ancestor tables
@@ -149,7 +152,7 @@ runAll <- function(
     )
 
     if (errorMessage != "") {
-        validationLogR6 <- dplyr::bind_rows(validationLogR6, dplyr::tibble(
+        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
             context = "conceptRelationshipToAncestorTables",
             type = "ERROR",
             step = "creating the ancestor tables",
@@ -162,16 +165,37 @@ runAll <- function(
 
     # validation with DQD
     message("Validating the CDM tables with DQD")
-    validationLogR6Tmp <- validateCDMtablesWithDQD(
+    validationLogTibbledqd <- validateCDMtablesWithDQD(
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         validationResultsFolder = validationResultsFolder
     )
 
-    # join and save the validation log tibble
-    validationLogR6 <- dplyr::bind_rows(validationLogR6, validationLogR6Tmp) |>
-        dplyr::select(context, type, step, message)
-    validationLogR6 |> readr::write_csv(file.path(validationResultsFolder, "validationLogR6.csv"), na = "")
 
-    return(validationLogR6)
+    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbledqd) |>
+        dplyr::select(context, type, step, message)
+
+
+    # validate code counts folder
+    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validateCodeCountsFolder(
+        pathToCodeCountsFolder = pathToCodeCountsFolder
+    ))
+
+    # calculate mapping status
+    mappingStatus <- calculateMappingStatus(
+        pathToCodeCountsFolder = pathToCodeCountsFolder,
+        connectionDetails = connectionDetails,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema
+    )
+
+    # build status dashboard
+    buildStatusDashboard(
+        mapping_status = mappingStatus,
+        output_file_html = file.path(validationResultsFolder, "mappingStatus.html")
+    )
+
+    # save validation log tibble
+    validationLogTibble |> readr::write_csv(file.path(validationResultsFolder, "validationLogTibble.csv"), na = "")
+
+    return(validationLogTibble)
 }

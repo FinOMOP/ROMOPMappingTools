@@ -8,6 +8,7 @@ runAll(
   pathToVocabularyFolder,
   connectionDetails,
   vocabularyDatabaseSchema,
+  pathToCodeCountsFolder,
   validationResultsFolder,
   sourceToConceptMapTable = NULL
 )
@@ -18,6 +19,8 @@ runAll(
 \item{connectionDetails}{DatabaseConnector connection details object}
 
 \item{vocabularyDatabaseSchema}{Schema containing the vocabulary tables}
+
+\item{pathToCodeCountsFolder}{Path to folder containing code counts files}
 
 \item{validationResultsFolder}{Folder where validation results will be saved}
 

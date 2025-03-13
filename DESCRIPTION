@@ -27,7 +27,14 @@ Imports:
     tibble,
     tidyr,
     validate,
-    checkmate
+    checkmate,
+    shiny,
+    reactable,
+    rmarkdown,
+    ggplot2,
+    RColorBrewer,
+    scales,
+    tippy
 Depends: 
     R (>= 2.10)
 LazyData: true
@@ -36,12 +43,7 @@ Suggests:
     testthat (>= 3.0.0),
     withr,
     duckdb,
-    flexdashboard,
-    ggplot2,
-    reactable,
-    reactablefmtr,
-    rmarkdown,
-    shiny
+    flexdashboard
 VignetteBuilder: knitr
 Config/testthat/edition: 3
 URL: https://finomop.github.io/ROMOPMappingTools/

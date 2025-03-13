@@ -15,12 +15,11 @@
 #'
 #' @param pathToCodeCountsFolder The path to the vocabularies coverage file.
 #' @param connectionDetails The connection details for the OMOP tables.
-#' @param databases_code_counts_tables The tables containing the code counts for different databases.
-#' @param ignore_failed_rules Logical value indicating whether to ignore databases with failed rules (default is FALSE).
-#' @param calculate_all_databases Logical value indicating whether to calculate code counts for all databases (default is TRUE).
+#' @param vocabularyDatabaseSchema The database schema for the OMOP vocabulary.
+#' @param includeCountForAllDatabases Logical value indicating whether to include code counts for all databases (default is TRUE).
+#' @param skipValidation Logical value indicating whether to skip validation of the input parameters (default is TRUE).
 #' @return A list containing two tables: `concepts_to_match` and `code_counts_matched`, representing the mapping status for code counts.
 #'
-#' @importFrom checkmate assertFileExists assertTibble
 #' @importFrom dplyr bind_rows case_when filter group_by left_join mutate rename select semi_join summarize ungroup
 #' @importFrom stringr str_c
 #' @importFrom SqlRender render
