@@ -49,7 +49,7 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
     # check the vocabularies.csv file has correct values
     validationRules <- validate::validator(
         source_vocabulary_id.is.not.empty = !is.na(source_vocabulary_id) & source_vocabulary_id != "",
-        source_vocabulary_id.is.less.than.20.characters = nchar(source_vocabulary_id) < 20,
+        source_vocabulary_id.is.less.than.20.characters = nchar(source_vocabulary_id) <= 20,
         source_vocabulary_name.is.not.empty = !is.na(source_vocabulary_name) & source_vocabulary_name != "",
         source_vocabulary_name.is.less.than.255.characters = nchar(source_vocabulary_name) < 255,
         source_concept_id_offset.is.a.number.over.2.billion = source_concept_id_offset > 2000000000,
