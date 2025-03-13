@@ -225,16 +225,16 @@ We include the function `validateCDMtablesWithDQD` in the package to facilitate 
 # Create connectionDetails from the existing connection
 validationResultsFolder <- tempdir()
 
-validationLogTibble <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
+validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
 ```
 
 ```{r}
-knitr::kable(validationLogTibble)
+knitr::kable(validationLogR6)
 ```
 
 We can see that there are no errors.
 ```{r}
-validationLogTibble |>
+validationLogR6 |>
   dplyr::filter(type == "ERROR") |>
   knitr::kable()
 ```

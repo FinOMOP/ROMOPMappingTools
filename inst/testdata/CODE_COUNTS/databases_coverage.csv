@@ -1,0 +1,3 @@
+database_name,path_to_code_counts_file,ignore
+FinnGenDF10,./databases/FinnGenDF10.csv,FALSE
+HUS,./databases/HUS.csv,FALSE

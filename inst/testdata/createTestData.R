@@ -196,10 +196,10 @@ DatabaseConnector::disconnect(connection)
 
 
 # test if the data is correct
-validationLogTibble <- validateCDMtablesWithDQD(
+validationLogR6 <- validateCDMtablesWithDQD(
     connectionDetails = connectionDetails,
     vocabularyDatabaseSchema = "main",
     validationResultsFolder = tempdir()
 )
 
-validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() |> testthat::expect_equal(0)
+validationLogR6 |> dplyr::filter(type == "ERROR") |> nrow() |> testthat::expect_equal(0)

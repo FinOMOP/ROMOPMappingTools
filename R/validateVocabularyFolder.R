@@ -36,14 +36,14 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
     #
     # Checks
     #
-    validationLogTibble <- LogTibble$new()
+    validationLogR6 <- LogTibble$new()
 
     # check the vocabularies.csv file has the correct columns
     missingColumns <- c("source_vocabulary_id", "source_vocabulary_name", "source_concept_id_offset", "path_to_usagi_file", "path_to_news_file", "ignore") |>
         setdiff(names(vocabulariesTibble))
     if (length(missingColumns) > 0) {
-        validationLogTibble$ERROR("Missing columns", paste0("Missing columns: ", paste(missingColumns, collapse = ", ")))
-        return(validationLogTibble$logTibble)
+        validationLogR6$ERROR("Missing columns", paste0("Missing columns: ", paste(missingColumns, collapse = ", ")))
+        return(validationLogR6$logTibble)
     }
 
     # check the vocabularies.csv file has correct values
@@ -56,14 +56,14 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
         source_concept_id_offset.is.unique = is_unique(source_concept_id_offset)
     )
     validations <- validate::confront(vocabulariesTibble, validationRules)
-    result <- .applyValidationRules(fileTibble = vocabulariesTibble, validations, validationLogTibble)
+    result <- .applyValidationRules(fileTibble = vocabulariesTibble, validations, validationLogR6)
     vocabulariesTibble <- result$fileTibble
-    validationLogTibble <- result$validationLogTibble
+    validationLogR6 <- result$validationLogR6
 
-    if (validationLogTibble$logTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
+    if (validationLogR6$logTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
         vocabulariesTibble |>
             readr::write_csv(file.path(validationResultsFolder, "vocabularies.csv"), na = "")
-        return(validationLogTibble$logTibble)
+        return(validationLogR6$logTibble)
     }
 
     vocabulariesTibble <- vocabulariesTibble |>
@@ -99,7 +99,7 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
     #
 
     # Validate each Usagi file
-    validationsLogTibble <- validationLogTibble$logTibble |>
+    validationsLogTibble <- validationLogR6$logTibble |>
         dplyr::mutate(context = "vocabulary.csv")
     for (i in 1:nrow(vocabulariesTibble)) {
         message(paste0("Validating Usagi file ", vocabulariesTibble$path_to_usagi_file[i]))
@@ -109,7 +109,7 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
         sourceConceptIdOffset <- vocabulariesTibble$source_concept_id_offset[i]
         dir.create(dirname(pathToValidatedUsagiFile), showWarnings = FALSE, recursive = TRUE)
 
-        validationLogTibble <- validateUsagiFile(
+        validationLogR6 <- validateUsagiFile(
             pathToUsagiFile = pathToUsagiFile,
             connection = connection,
             vocabularyDatabaseSchema = vocabularyDatabaseSchema,
@@ -117,11 +117,11 @@ validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabul
             sourceConceptIdOffset = sourceConceptIdOffset
         )
 
-        validationLogTibble <- validationLogTibble |>
+        validationLogR6 <- validationLogR6 |>
             dplyr::mutate(context = vocabulariesTibble$source_vocabulary_id[i]) |>
             dplyr::select(context, dplyr::everything())
 
-        validationsLogTibble <- validationsLogTibble |> dplyr::bind_rows(validationLogTibble)
+        validationsLogTibble <- validationsLogTibble |> dplyr::bind_rows(validationLogR6)
     }
 
     return(validationsLogTibble  |> dplyr::select(context, type, step, message))

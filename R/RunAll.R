@@ -38,7 +38,7 @@ runAll <- function(
 
     # validate the vocabulary folder
     message("Validating the vocabulary folder")
-    validationLogTibble <- validateVocabularyFolder(
+    validationLogR6 <- validateVocabularyFolder(
         pathToVocabularyFolder = pathToVocabularyFolder,
         connection = connection,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
@@ -46,9 +46,9 @@ runAll <- function(
     )
 
     # if there are errors at this point stop
-    if (validationLogTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
+    if (validationLogR6 |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
         message("Errors found in the vocabulary folder")
-        return(validationLogTibble)
+        return(validationLogR6)
     }
 
     # if sourceToConceptMapTable is not NULL, create the SourceToConceptMap table
@@ -76,13 +76,13 @@ runAll <- function(
     )
 
     if (errorMessage != "") {
-        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
+        validationLogR6 <- dplyr::bind_rows(validationLogR6, dplyr::tibble(
             context = "vocabulary.csv",
             type = "ERROR",
             step = "uploading the vocabulary.csv and Usagi files to the SourceToConceptMap table",
             message = errorMessage
         ))
-        return(validationLogTibble)
+        return(validationLogR6)
     }
 
     # STCM to CDM table
@@ -102,13 +102,13 @@ runAll <- function(
     )
 
     if (errorMessage != "") {
-        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
+        validationLogR6 <- dplyr::bind_rows(validationLogR6, dplyr::tibble(
             context = "STCMToCDMTables",
             type = "ERROR",
             step = "moving the SourceToConceptMap table to the CDM table",
             message = errorMessage
         ))
-        return(validationLogTibble)
+        return(validationLogR6)
     }
 
     # create the ancestor tables
@@ -149,7 +149,7 @@ runAll <- function(
     )
 
     if (errorMessage != "") {
-        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
+        validationLogR6 <- dplyr::bind_rows(validationLogR6, dplyr::tibble(
             context = "conceptRelationshipToAncestorTables",
             type = "ERROR",
             step = "creating the ancestor tables",
@@ -162,16 +162,16 @@ runAll <- function(
 
     # validation with DQD
     message("Validating the CDM tables with DQD")
-    validationLogTibbleTmp <- validateCDMtablesWithDQD(
+    validationLogR6Tmp <- validateCDMtablesWithDQD(
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         validationResultsFolder = validationResultsFolder
     )
 
     # join and save the validation log tibble
-    validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbleTmp) |>
+    validationLogR6 <- dplyr::bind_rows(validationLogR6, validationLogR6Tmp) |>
         dplyr::select(context, type, step, message)
-    validationLogTibble |> readr::write_csv(file.path(validationResultsFolder, "validationLogTibble.csv"), na = "")
+    validationLogR6 |> readr::write_csv(file.path(validationResultsFolder, "validationLogR6.csv"), na = "")
 
-    return(validationLogTibble)
+    return(validationLogR6)
 }
