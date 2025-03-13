@@ -328,9 +328,8 @@ validateUsagiFile <- function(
 
             validVocabularyConceptCodes <- dplyr::bind_rows(validVocabularyConceptCodes, parentVocabularyConceptCodes)
         }
-
         parentConceptCodes <- usagiTibble |>
-            dplyr::select(`ADD_INFO:sourceParents`, `ADD_INFO:sourceParentVocabulary`) |>
+            dplyr::select(`ADD_INFO:sourceParents`, `ADD_INFO:sourceParentVocabulary`) |> 
             dplyr::mutate(row = dplyr::row_number()) |>
             dplyr::mutate(
                 vocabulary_id = purrr::map2(`ADD_INFO:sourceParents`, `ADD_INFO:sourceParentVocabulary`, ~ {
@@ -342,7 +341,7 @@ validateUsagiFile <- function(
                         stringr::str_split("\\|") |>
                         purrr::flatten_chr()
 
-                    if (length(x) != length(y)) {
+                    if (!is.na(y) && length(x) != length(y)) {
                         stop("length of parent concept codes and parent vocabularies must be the same")
                     }
 

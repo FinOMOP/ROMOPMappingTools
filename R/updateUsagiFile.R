@@ -39,7 +39,7 @@ updateUsagiFile <- function(
     pathToUpdatedUsagiFile,
     updateLevelTibble = NULL,
     appendOrClearAutoUpdatingInfo = "append",
-    skipValidation = FALSE,
+    skipValidation = TRUE,
     sourceConceptIdOffset = 0) {
     #
     # Parameter validation
