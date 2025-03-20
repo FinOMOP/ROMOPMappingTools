@@ -5,17 +5,23 @@
 \title{Build Status Dashboard}
 \usage{
 buildStatusDashboard(
-  mapping_status = NULL,
+  pathToCodeCountsFolder,
+  connectionDetails,
+  vocabularyDatabaseSchema,
   output_file_html = file.path(tempdir(), "MappingStatusDashboard.html")
 )
 }
 \arguments{
-\item{mapping_status}{Mapping status information.}
+\item{pathToCodeCountsFolder}{Path to folder containing code counts files}
 
-\item{output_file_html}{The path to the output HTML file.}
+\item{connectionDetails}{DatabaseConnector connection details object}
+
+\item{vocabularyDatabaseSchema}{Schema containing the vocabulary tables}
+
+\item{output_file_html}{The path to the output HTML file}
 }
 \value{
-The path to the output HTML file.
+A validation log tibble
 }
 \description{
 This function generates a status dashboard for mapping status.
