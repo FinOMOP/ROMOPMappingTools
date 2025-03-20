@@ -57,6 +57,7 @@ The ADD_INFO:validationMessages column is added by validateUsagiFile and contain
 | ADD_INFO:sourceParents          | character | Parent codes in source vocabulary  | not empty, if more that one parent, separated by, combination of sourceParents and sourceParentVocabulary must exits in the CDM or in the usagi file |
 | ADD_INFO:sourceParentVocabulary | character | Vocabularies of parent codes       | if empty, the vocabulary is itself, if more that one parent, separated by |
 | ADD_INFO:validationMessages      | character | Column added by validateUsagiFile   | Optional |
+| ADD_INFO:autoUpdatingInfo       | character | Column added by updateUsagiFile     | Optional |
 
 
 # vocabularies.csv file format
@@ -72,3 +73,27 @@ It is a csv file with the following columns:
 | path_to_usagi_file      | character | The path to the vocabulary's Usagi file                    | not empty, file must exist |
 | path_to_news_file       | character | The path to the vocabulary's news file                     | not empty, file must exist |
 | ignore                  | boolean   | Indicates if the vocabulary should be ignored in processing | not empty |
+
+
+# SOURCE_TO_CONCEPT_MAP_EXTENDED table format
+
+The SOURCE_TO_CONCEPT_MAP_EXTENDED is an extension of the SOURCE_TO_CONCEPT_MAP table, see [CDM](https://ohdsi.github.io/CommonDataModel/cdm54.html#source_to_concept_map). 
+It is used to store the source to concept map extended information.
+
+The SOURCE_TO_CONCEPT_MAP_EXTENDED table has the following columns:
+
+| Name                     | Type      | Description                                                | Rules    |
+| ------------------------ | --------- | ---------------------------------------------------------- | -------- |
+| source_code              | character | Source code for the concept                                | not empty |
+| source_vocabulary_id     | character | Source vocabulary the concept was mapped from              | not empty, must exist in VOCABULARY table |
+| source_code_description  | character | Description of source code                                 | not empty |
+| target_concept_id        | integer   | Concept ID of the target concept                          | not empty, must exist in CONCEPT table |
+| target_vocabulary_id     | character | Target vocabulary the concept was mapped to                | not empty, must exist in VOCABULARY table |
+| valid_start_date        | date      | Date when mapping became valid                             | not empty, must be before valid_end_date |
+| valid_end_date          | date      | Date when mapping became invalid                           | not empty, must be after valid_start_date |
+| invalid_reason          | character | Reason why mapping was invalidated                         | empty if valid_end_date is 2099-12-31 |
+| source_concept_id        | integer   | Source concept ID                                         | not empty |
+| source_concept_class     | character | Concept class in source vocabulary                        | not empty, less than 20 characters |
+| source_domain           | character | Domain in source vocabulary                               | not empty, must exist in DOMAIN table |
+| source_parents_concept_ids | character | Parent concept IDs in source vocabulary                   | optional, comma-separated list |
+

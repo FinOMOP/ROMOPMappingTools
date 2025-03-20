@@ -1,0 +1,29 @@
+---
+title: "Running the complete mapping process"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Running the complete mapping process}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ROMOPMappingTools)
+```
+
+# Introduction
+
+The `runAll` function provides a streamlined way to execute the complete mapping process:
+1. Validates all Usagi files in a vocabulary folder
+2. Creates and populates the SOURCE_TO_CONCEPT_MAP_EXTENDED table
+3. Creates CDM vocabulary tables from the mappings
+4. Validates the resulting CDM tables using DataQualityDashboard

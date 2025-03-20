@@ -75,6 +75,6 @@ readUsagiFile <- function(pathToUsagiFile) {
     )
 
     suppressWarnings(
-        readr::read_csv(pathToUsagiFile, col_types = cols)
+        readr::read_csv(pathToUsagiFile, col_types = cols, na = c(""))
     )
 } 

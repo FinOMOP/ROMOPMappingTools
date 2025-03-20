@@ -54,8 +54,8 @@ validateCDMtablesWithDQD <- function(connectionDetails, vocabularyDatabaseSchema
 
   jsonlite::write_json(resultsDQD, file.path(validationResultsFolder, "resultsDQD.json"))
 
-  # convert resultsDQD to a validationLogTibble
-  validationLogTibble <- resultsDQD$CheckResults |> 
+  # convert resultsDQD to a validationLogR6
+  validationLogR6 <- resultsDQD$CheckResults |> 
     tibble::as_tibble() |> 
     dplyr::transmute( 
       context = "DQD",
@@ -70,5 +70,5 @@ validateCDMtablesWithDQD <- function(connectionDetails, vocabularyDatabaseSchema
 
 
 
-  return(validationLogTibble)
+  return(validationLogR6)
 }
