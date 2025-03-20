@@ -26,14 +26,14 @@ test_that("buildStatusDashboard works", {
         )
     )
 
-    pathToOutputFile <- file.path(validationResultsFolder, "VOCABULARIES_VALIDATION_STATUS.md") 
+    pathToValidationStatusMdFile <- file.path(validationResultsFolder, "VOCABULARIES_VALIDATION_STATUS.md") 
     buildValidationStatusMd(
         validationLogTibble = validationLogTibble,
-        pathToOutputFile = pathToOutputFile
+        pathToValidationStatusMdFile = pathToValidationStatusMdFile
     )
 
     # check the validation results folder
-    expect_true(file.exists(pathToOutputFile))
+    expect_true(file.exists(pathToValidationStatusMdFile))
 })  
 
 

@@ -21,7 +21,7 @@
 #' @export
 buildValidationStatusMd <- function(
     validationLogTibble, 
-    pathToOutputFile = file.path(tempdir(), "VOCABULARIES_VALIDATION_STATUS.md")
+    pathToValidationStatusMdFile = file.path(tempdir(), "VOCABULARIES_VALIDATION_STATUS.md")
     ) {
     # validate parameters
     validationLogTibble |> checkmate::assertTibble()
@@ -54,7 +54,7 @@ buildValidationStatusMd <- function(
     
     
     # save markdown file
-    writeLines(mdText, pathToOutputFile)
+    writeLines(mdText, pathToValidationStatusMdFile)
 
-    return(pathToOutputFile)
+    return(pathToValidationStatusMdFile)
 }
