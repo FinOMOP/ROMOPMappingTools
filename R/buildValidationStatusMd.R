@@ -16,7 +16,7 @@
 #' @return Path to the generated markdown file
 #'
 #' @importFrom checkmate assertTibble assertNames
-#' @importFrom kable kable
+#' @importFrom knitr kable
 #'
 #' @export
 buildValidationStatusMd <- function(
