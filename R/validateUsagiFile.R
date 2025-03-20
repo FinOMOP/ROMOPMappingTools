@@ -125,14 +125,15 @@ validateUsagiFile <- function(
 
     outdatedConcepts <- usagiTibble |>
         dplyr::filter(conceptId != 0) |>
+        dplyr::filter(mappingStatus != "INVALID_TARGET") |>
         dplyr::distinct(conceptId, domainId, conceptName) |>
         dplyr::left_join(mappedConcepts, by = c("conceptId")) |>
         dplyr::mutate(
             errorMessage = dplyr::case_when(
                 is.na(domainId.y) | is.na(conceptName.y) ~ paste0("ERROR: conceptId ", conceptId, " does not exist on the target vocabularies"),
-                domainId.x != domainId.y ~ paste0("ERROR: OUTDATED: domainId for conceptId ", conceptId, " is different in the target vocabularies"),
-                conceptName.x != conceptName.y ~ paste0("ERROR: OUTDATED: conceptName for conceptId ", conceptId, " is different in the target vocabularies"),
-                is.na(standardConcept) ~ paste0("ERROR: OUTDATED: standard_concept for conceptId ", conceptId, " has changed to non-standard"),
+                domainId.x != domainId.y ~ paste0("WARNING: OUTDATED: domainId for conceptId ", conceptId, " is different in the target vocabularies"),
+                conceptName.x != conceptName.y ~ paste0("WARNING: OUTDATED: conceptName for conceptId ", conceptId, " is different in the target vocabularies"),
+                is.na(standardConcept) ~ paste0("WARNING: OUTDATED: standard_concept for conceptId ", conceptId, " has changed to non-standard"),
                 TRUE ~ ""
             )
         ) |>
@@ -162,17 +163,20 @@ validateUsagiFile <- function(
         }
 
         n <- usagiTibble |>
-            dplyr::filter(stringr::str_detect(tmpvalidationMessages, "ERROR: OUTDATED:")) |>
+            dplyr::filter(stringr::str_detect(tmpvalidationMessages, "WARNING: OUTDATED:")) |>
             dplyr::distinct(sourceCode) |>
             nrow()
         if (n > 0) {
-            validationLogR6$ERROR(
+            validationLogR6$WARNING(
                 "ConceptIds outdated",
                 paste0("Found ", n, " sourceCodes with conceptIds that are outdated. Use ROMOPMappingTool::updateUsagiFile() to update the usagi file")
             )
         } else {
             validationLogR6$SUCCESS("ConceptIds outdated", "")
         }
+    }else{
+        validationLogR6$SUCCESS("ConceptIds not in vocabularies", "")
+        validationLogR6$SUCCESS("ConceptIds outdated", "")
     }
 
 
@@ -328,9 +332,8 @@ validateUsagiFile <- function(
 
             validVocabularyConceptCodes <- dplyr::bind_rows(validVocabularyConceptCodes, parentVocabularyConceptCodes)
         }
-
         parentConceptCodes <- usagiTibble |>
-            dplyr::select(`ADD_INFO:sourceParents`, `ADD_INFO:sourceParentVocabulary`) |>
+            dplyr::select(`ADD_INFO:sourceParents`, `ADD_INFO:sourceParentVocabulary`) |> 
             dplyr::mutate(row = dplyr::row_number()) |>
             dplyr::mutate(
                 vocabulary_id = purrr::map2(`ADD_INFO:sourceParents`, `ADD_INFO:sourceParentVocabulary`, ~ {
@@ -342,7 +345,7 @@ validateUsagiFile <- function(
                         stringr::str_split("\\|") |>
                         purrr::flatten_chr()
 
-                    if (length(x) != length(y)) {
+                    if (!any(is.na(y)) && length(x) != length(y)) {
                         stop("length of parent concept codes and parent vocabularies must be the same")
                     }
 
@@ -350,7 +353,8 @@ validateUsagiFile <- function(
                 })
             ) |>
             tidyr::unnest(cols = c(vocabulary_id)) |>
-            dplyr::select(-`ADD_INFO:sourceParentVocabulary`, -`ADD_INFO:sourceParents`)
+            dplyr::select(-`ADD_INFO:sourceParentVocabulary`, -`ADD_INFO:sourceParents`) |> 
+            dplyr::mutate(concept_code = dplyr::if_else(concept_code == "", NA_character_, concept_code))
 
         notValidParentConceptCodes <- parentConceptCodes |>
             dplyr::filter(!is.na(vocabulary_id) & !is.na(concept_code)) |>
