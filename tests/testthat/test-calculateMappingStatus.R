@@ -22,7 +22,4 @@ test_that("calculateMappingStatus returns a tibble", {
     mappingStatus$concepts_to_match  |> checkmate::expect_tibble()
     mappingStatus$code_counts_matched  |> checkmate::expect_tibble()
 
-
-    output_file_html <- mappingStatus |> buildStatusDashboard()
-    browseURL(output_file_html)
 })

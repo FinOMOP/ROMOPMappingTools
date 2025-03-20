@@ -2,10 +2,12 @@
 #'
 #' This function generates a status dashboard for mapping status.
 #'
-#' @param mapping_status Mapping status information.
-#' @param output_file_html The path to the output HTML file.
+#' @param pathToCodeCountsFolder Path to folder containing code counts files
+#' @param connectionDetails DatabaseConnector connection details object
+#' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
+#' @param output_file_html The path to the output HTML file
 #'
-#' @return The path to the output HTML file.
+#' @return A validation log tibble
 #'
 #' @importFrom dplyr select mutate filter if_else
 #' @importFrom rmarkdown render
