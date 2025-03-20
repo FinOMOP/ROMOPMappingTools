@@ -29,7 +29,7 @@ DatabaseConnector::disconnect(connection)
 validationResultsFolder <- file.path(tempdir(), "validationResults")
 dir.create(validationResultsFolder, showWarnings = FALSE, recursive = TRUE)
 
-validationLogTibble <- ROMOPMappingTools::runAll(
+validationLogTibble <- buildVocabulariesAll(
     pathToVocabularyFolder = pathToVocabularyFolder,
     connectionDetails = connectionDetails,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema,
@@ -42,21 +42,49 @@ validationLogTibble <- ROMOPMappingTools::runAll(
 # Validate individual usagi files
 connection <- DatabaseConnector::connect(connectionDetails)
 
-vocabularyId <- "ICD8fi"
-sourceConceptIdOffset <- 2000300000
-validationLogTibble <- ROMOPMappingTools::validateUsagiFile(
-    pathToUsagiFile = file.path(pathToVocabularyFolder, vocabularyId, paste0(vocabularyId, ".usagi.csv")),
+vocabularyId <- "ICD10fi"
+
+pathToVocabularyInfoFile <- file.path(pathToVocabularyFolder, "vocabularies.csv")
+vocabulariesTibble <- readr::read_csv(pathToVocabularyInfoFile, show_col_types = FALSE)
+sourceConceptIdOffset <- vocabulariesTibble |> dplyr::filter(source_vocabulary_id == vocabularyId) |> dplyr::pull(source_concept_id_offset)
+pathToUsagiFile <- file.path(pathToVocabularyFolder, vocabularyId, paste0(vocabularyId, ".usagi.csv"))
+
+usagiTibble <- readUsagiFile(pathToUsagiFile)
+
+pathToValidatedUsagiFile  <- tempfile(fileext = ".csv")
+validationLogTibble <- validateUsagiFile(
+    pathToUsagiFile = pathToUsagiFile,
     connection = connection,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-    pathToValidatedUsagiFile = tempfile(fileext = ".csv"),
+    pathToValidatedUsagiFile = pathToValidatedUsagiFile,
     sourceConceptIdOffset = sourceConceptIdOffset
 )
 
+validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
+validatedUsagiFile |> dplyr::filter(!is.na(`ADD_INFO:validationMessages`)) |> View()
 
+pathToUpdatedUsagiFile <- tempfile(fileext = ".csv")
 updateLogTibble <- ROMOPMappingTools::updateUsagiFile(
-    pathToUsagiFile = file.path(pathToVocabularyFolder, vocabularyId, paste0(vocabularyId, ".usagi.csv")),
-    pathToUpdatedUsagiFile = tempfile(fileext = ".csv"),
+    pathToUsagiFile = pathToUsagiFile,
+    pathToUpdatedUsagiFile = pathToUpdatedUsagiFile,
     connection = connection,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema, 
     skipValidation = TRUE
 )
+
+pathToValidatedUsagiFileUpdated <- tempfile(fileext = ".csv")
+validationLogTibbleUpdatedUsagiFile <- ROMOPMappingTools::validateUsagiFile(
+    pathToUsagiFile = pathToUpdatedUsagiFile,
+    connection = connection,
+    vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+    pathToValidatedUsagiFile = pathToValidatedUsagiFileUpdated,
+    sourceConceptIdOffset = sourceConceptIdOffset
+)
+
+updatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
+updatedUsagiFile |> dplyr::filter(!is.na(`ADD_INFO:validationMessages`)) |> View()
+updatedUsagiFile %>% dplyr::filter(conceptId == 0) %>% dplyr::count(mappingStatus)
+
+
+updatedUsagiFile <- readUsagiFile(pathToUsagiFile)
+updatedUsagiFile %>% dplyr::filter(conceptId == 0) %>% dplyr::count(mappingStatus)

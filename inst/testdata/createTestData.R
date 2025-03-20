@@ -1,4 +1,4 @@
-pathToFullOMOPVocabularyCSVsFolder <- "~/Documents/Repos/FinOMOP/FinOMOP_OMOP_vocabulary/OMOP_VOCABULARIES/input_omop_vocabulary"
+pathToFullOMOPVocabularyCSVsFolder <- "../OMOP_vocabularies/data/input_omop_vocabulary"
 
 # convert to duckdb
 pathToFullOMOPVocabularyDuckDBfile <- tempfile()
@@ -41,6 +41,8 @@ ICD10fiUsagiFileWithErrors <- readUsagiFile(pathToICD10fiUsagiFileWithErrors)
 allUsagiFiles <- dplyr::bind_rows(ICD10fiUsagiFile, UNITfiUsagiFile, ICD10fiUsagiFileWithErrors)
 
 conceptIdsToMap <- allUsagiFiles |> dplyr::pull(conceptId) |> unique()
+# add extra conceptIds to map
+conceptIdsToMap <- c(conceptIdsToMap, 138604, 313219)
 
 
 # For each table we have to add also the concepts to the concept table

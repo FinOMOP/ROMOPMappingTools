@@ -107,17 +107,19 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 
   # ConceptIds outdated
   validationsSummary |> dplyr::filter(step == "ConceptIds outdated") |> nrow() |> expect_equal(1)
-  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds outdated"))  |> nrow() |> expect_equal(8)
-  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds outdated")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds outdated") & mappingStatus == "FLAGGED")  |> nrow() |> expect_equal(9)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "ConceptIds outdated") & mappingStatus == "FLAGGED") |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal(
-    c("ERROR: OUTDATED: domainId for conceptId 4150516 is different in the target vocabularies",
-      "ERROR: OUTDATED: conceptName for conceptId 4130374 is different in the target vocabularies", 
-      "ERROR: OUTDATED: standard_concept for conceptId 320073 has changed to non-standard",
-      "ERROR: OUTDATED: standard_concept for conceptId 320073 has changed to non-standard",
-      "ERROR: OUTDATED: standard_concept for conceptId 3085666 has changed to non-standard",
-      "ERROR: OUTDATED: standard_concept for conceptId 3079174 has changed to non-standard", 
-      "ERROR: OUTDATED: standard_concept for conceptId 30258 has changed to non-standard",
-      "ERROR: OUTDATED: standard_concept for conceptId 4071477 has changed to non-standard")
+    c("WARNING: OUTDATED: domainId for conceptId 4150516 is different in the target vocabularies",
+      "WARNING: OUTDATED: conceptName for conceptId 4130374 is different in the target vocabularies", 
+      "WARNING: OUTDATED: standard_concept for conceptId 320073 has changed to non-standard",
+      "WARNING: OUTDATED: standard_concept for conceptId 320073 has changed to non-standard",
+      "WARNING: OUTDATED: standard_concept for conceptId 3085666 has changed to non-standard",
+      "WARNING: OUTDATED: standard_concept for conceptId 3079174 has changed to non-standard", 
+      "WARNING: OUTDATED: standard_concept for conceptId 30258 has changed to non-standard",
+      "WARNING: OUTDATED: standard_concept for conceptId 4071477 has changed to non-standard",
+      "WARNING: OUTDATED: standard_concept for conceptId 320073 has changed to non-standard"
+    )
   )
 
   # Missing C&CR columns
@@ -163,7 +165,7 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validationsSummary |> dplyr::filter(step == "Invalid domain combination") |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid domain combination"))  |> nrow() |> expect_equal(2)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Invalid domain combination")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
-  expect_equal(rep("ERROR: OUTDATED: domainId for conceptId 4109415 is different in the target vocabularies | ERROR: this code is mapped to more than one domains that are not compatible: Condition noDomain", 2))
+  expect_equal(rep("WARNING: OUTDATED: domainId for conceptId 4109415 is different in the target vocabularies | ERROR: this code is mapped to more than one domains that are not compatible: Condition noDomain", 2))
 
   # Missing date columns
 
@@ -194,6 +196,8 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   # it opens with Usagi
   #file.copy(pathToValidatedUsagiFile, "~/Downloads/ICD10fi.usagi.csv", overwrite = TRUE)
 })
+
+
 
 
 

@@ -87,6 +87,25 @@ updateUsagiFile <- function(
     #
     # update
     #
+    # check if the file has already been updated by Usagi
+    # if so, take the comment into a new row
+    usagiTibbleNoUpdated <- usagiTibble |>
+        dplyr::filter((stringr::str_detect(comment, "Invalid existing target:") & conceptId != 0) | !stringr::str_detect(comment, "Invalid existing target:") | is.na(comment)) |> 
+        dplyr::mutate(
+            comment = dplyr::if_else(!is.na(comment) & !stringr::str_detect(comment, "Invalid existing target:"), '', comment),
+            mappingStatus = dplyr::if_else(!is.na(comment) & !stringr::str_detect(comment, "Invalid existing target:"), "UNCHECKED", mappingStatus)
+            )
+
+    usagiTibbleUpdated <- usagiTibble |>
+        dplyr::filter(stringr::str_detect(comment, "Invalid existing target:")) |> 
+        dplyr::mutate(
+            conceptId = stringr::str_extract(comment, "\\d+") |> as.integer(),
+            comment = ""
+            ) |> 
+            dplyr::distinct(sourceCode, conceptId, .keep_all = TRUE) 
+
+    usagiTibble <- dplyr::bind_rows(usagiTibbleNoUpdated, usagiTibbleUpdated)
+
     # Check if auto updating info column exists and rename it
     if ("ADD_INFO:autoUpdatingInfo" %in% usagiTibbleColumns) {
         usagiTibble <- usagiTibble |>
@@ -152,7 +171,7 @@ updateUsagiFile <- function(
             )
         )
 
-    usagiTibble <- usagiTibble |>
+    usagiTibble <- usagiTibble |> 
         # join to sourceCode, modify only the affected conceptName, but modify all the autoUpdatingInfo
         dplyr::left_join(outdatedStandardConcepts |> dplyr::mutate(conceptId = oldConceptId), by = c("sourceCode", "conceptId")) |>
         dplyr::mutate(
@@ -163,11 +182,27 @@ updateUsagiFile <- function(
                 action == "noReview" ~ paste0("conceptId changed from ", oldConceptId, " to ", newConceptId, " based on relationship :", relationshipId, ", does not need reviewing"),
                 TRUE ~ NA_character_
             ),
-            mappingStatus = dplyr::if_else(is.na(action) | action == "noReview", mappingStatus, "UNCHECKED"),
+            mappingStatus = dplyr::case_when(
+                action == "needsRemapping" ~ "INVALID_TARGET",
+                action == "needsReview" ~ "UNCHECKED",
+                action == "noReview" ~ "APPROVED",
+                TRUE ~ mappingStatus
+            ),
+            conceptId = dplyr::if_else(!is.na(action) & action == "needsRemapping", 0, conceptId),
+            conceptName = dplyr::if_else(!is.na(action) & action == "needsRemapping", "Unmapped", conceptName),
+            comment = dplyr::if_else(!is.na(action) & action == "needsRemapping", paste0("Invalid existing target: ", oldConceptId), ''),
             hasChangendConceptId = !is.na(newConceptId)
-        ) |>
+        ) |> 
         dplyr::group_by(sourceCode) |>
         dplyr::mutate(infoTmp = paste0(infoTmp |> na.omit() |> unique(), collapse = " | ")) |>
+        dplyr::mutate(mappingStatus = dplyr::case_when(
+            any(mappingStatus == "INVALID_TARGET") ~ "INVALID_TARGET",
+            any(mappingStatus == "FLAGGED") ~ "FLAGGED",
+            any(mappingStatus == "INEXACT") ~ "INEXACT",
+            any(mappingStatus == "UNCHECKED") ~ "UNCHECKED",
+            any(mappingStatus == "APPROVED") ~ "APPROVED",
+            TRUE ~ dplyr::first(mappingStatus)
+        )) |>
         dplyr::ungroup() |>
         dplyr::mutate(autoUpdatingInfo = dplyr::if_else(infoTmp == "", autoUpdatingInfo, paste0(autoUpdatingInfo, " | ", infoTmp))) |>
         dplyr::select(-oldConceptId, -newConceptId, -relationshipId, -needsReview, -infoTmp)
@@ -222,10 +257,14 @@ updateUsagiFile <- function(
             dplyr::left_join(outdatedDomains, by = c("sourceCode", "conceptId")) |>
             dplyr::mutate(
                 domainId = dplyr::if_else(!is.na(newDomainId), newDomainId, domainId),
-                autoUpdatingInfo = dplyr::if_else(!is.na(newDomainId), paste0(autoUpdatingInfo, " | domainId updated from ", oldDomainId, " to ", newDomainId), autoUpdatingInfo),
+                infoTmp = dplyr::if_else(!is.na(newDomainId), paste0("domainId updated from ", oldDomainId, " to ", newDomainId), ""),
                 hasChangedDomainId = !is.na(newDomainId)
             ) |>
-            dplyr::select(-oldDomainId, -newDomainId)
+            dplyr::group_by(sourceCode) |>
+            dplyr::mutate(infoTmp = paste0(infoTmp |> na.omit() |> unique(), collapse = " | ")) |>
+            dplyr::ungroup() |>
+            dplyr::mutate(autoUpdatingInfo = dplyr::if_else(infoTmp == "", autoUpdatingInfo, paste0(autoUpdatingInfo, " | ", infoTmp))) |>
+            dplyr::select(-oldDomainId, -newDomainId, -infoTmp)
 
 
         n <- usagiTibble |>
@@ -252,10 +291,14 @@ updateUsagiFile <- function(
             dplyr::left_join(outdatedNames, by = c("sourceCode", "conceptId")) |>
             dplyr::mutate(
                 conceptName = dplyr::if_else(!is.na(newConceptName), newConceptName, conceptName),
-                autoUpdatingInfo = dplyr::if_else(!is.na(newConceptName), paste0(autoUpdatingInfo, " | conceptName changed from ", oldConceptName, " to ", newConceptName), autoUpdatingInfo),
+                infoTmp = dplyr::if_else(!is.na(newConceptName), paste0("conceptName changed from ", oldConceptName, " to ", newConceptName), ""),
                 hasChangedConceptName = !is.na(newConceptName)
             ) |>
-            dplyr::select(-oldConceptName, -newConceptName)
+            dplyr::group_by(sourceCode) |>
+            dplyr::mutate(infoTmp = paste0(infoTmp |> na.omit() |> unique(), collapse = " | ")) |>
+            dplyr::ungroup() |>
+            dplyr::mutate(autoUpdatingInfo = dplyr::if_else(infoTmp == "", autoUpdatingInfo, paste0(autoUpdatingInfo, " | ", infoTmp))) |>
+            dplyr::select(-oldConceptName, -newConceptName, -infoTmp)
 
         n <- usagiTibble |>
             dplyr::filter(hasChangedConceptName & !hasChangendConceptId) |>
@@ -275,6 +318,7 @@ updateUsagiFile <- function(
         dplyr::select(-action, -hasChangendConceptId) |>
         dplyr::mutate(autoUpdatingInfo = ifelse(autoUpdatingInfo == "", autoUpdatingInfo, paste0(lubridate::today(), autoUpdatingInfo))) |>
         dplyr::rename(`ADD_INFO:autoUpdatingInfo` = autoUpdatingInfo) |>
+        dplyr::distinct() |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
         readr::write_csv(pathToUpdatedUsagiFile, na = "")
 
     return(updateLogTibble$logTibble)
