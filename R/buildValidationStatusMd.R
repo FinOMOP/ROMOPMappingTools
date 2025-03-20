@@ -10,7 +10,7 @@
 #'
 #' @param validationLogTibble A tibble containing validation results with columns:
 #'   context, type, step, and message
-#' @param pathToOutputFile Path where the markdown file will be saved
+#' @param pathToValidationStatusMdFile Path where the markdown file will be saved
 #'   (default: tempdir()/VOCABULARIES_VALIDATION_STATUS.md)
 #'
 #' @return Path to the generated markdown file

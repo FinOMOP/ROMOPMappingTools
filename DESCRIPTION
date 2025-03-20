@@ -34,14 +34,14 @@ Imports:
     ggplot2,
     RColorBrewer,
     scales,
-    tippy
+    tippy,
+    knitr
 Remotes:
     OHDSI/DataQualityDashboard
 Depends: 
     R (>= 2.10)
 LazyData: true
 Suggests: 
-    knitr,
     testthat (>= 3.0.0),
     withr,
     duckdb,

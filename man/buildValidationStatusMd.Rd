@@ -14,7 +14,7 @@ buildValidationStatusMd(
 \item{validationLogTibble}{A tibble containing validation results with columns:
 context, type, step, and message}
 
-\item{pathToOutputFile}{Path where the markdown file will be saved
+\item{pathToValidationStatusMdFile}{Path where the markdown file will be saved
 (default: tempdir()/VOCABULARIES_VALIDATION_STATUS.md)}
 }
 \value{
