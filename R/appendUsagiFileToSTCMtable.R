@@ -124,6 +124,7 @@ appendUsagiFileToSTCMtable <- function(
     #
     # Function
     #
+    #TODO include all but only map these that are accepted
     if (!STCMTableIsExtended) {
         STCMTableToInsert <- usagiTibble |>
             dplyr::filter(mappingStatus %in% includeMappingStatus) |>

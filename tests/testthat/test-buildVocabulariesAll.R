@@ -30,7 +30,6 @@ test_that("buildVocabulariesAll works", {
 
     # check the validation results folder
     expect_true(!file.exists(file.path(validationResultsFolder, "resultsDQD.json")))
-    expect_true(file.exists(file.path(validationResultsFolder, "VALIDATION_STATUS.md")))
 })  
 
 

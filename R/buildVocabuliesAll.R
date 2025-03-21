@@ -168,17 +168,9 @@ buildVocabulariesAll <- function(
         validationResultsFolder = tempdir()
     )
 
-
     validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbledqd) |>
         dplyr::select(context, type, step, message)
 
-
-    # save validation log tibble
-    pathToValidationStatusMdFile <- file.path(validationResultsFolder, "VALIDATION_STATUS.md")
-    ROMOPMappingTools::buildValidationStatusMd(
-        validationLogTibble = validationLogTibble,
-        pathToValidationStatusMdFile = pathToValidationStatusMdFile
-    )
 
     return(validationLogTibble)
 }
