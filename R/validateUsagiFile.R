@@ -396,8 +396,8 @@ validateUsagiFile <- function(
                 TRUE ~ mappingStatus
             )
         ) |>
-        dplyr::rename(`ADD_INFO:validationMessages` = tmpvalidationMessages) 
-        
+        dplyr::mutate(`ADD_INFO:validationMessages` = tmpvalidationMessages)  |> 
+        dplyr::select(-tmpvalidationMessages)
         
         # Kill switch, if other than `mappingStatus` and `ADD_INFO:validationMessages` are different then error 
         byNames <- usagiTibble |> names() |> setdiff(c("mappingStatus", "ADD_INFO:validationMessages"))
