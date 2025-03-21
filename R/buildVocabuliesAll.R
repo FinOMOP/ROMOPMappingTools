@@ -25,14 +25,12 @@ buildVocabulariesAll <- function(
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
-    pathToCodeCountsFolder,
     validationResultsFolder,
     sourceToConceptMapTable = NULL) {
     # validate parameters
     pathToVocabularyFolder |> checkmate::assertDirectory()
     connectionDetails |> checkmate::assertClass("ConnectionDetails")
     vocabularyDatabaseSchema |> checkmate::assertString()
-    pathToCodeCountsFolder |> checkmate::assertDirectory()
     validationResultsFolder |> checkmate::assertDirectory()
     sourceToConceptMapTable |> checkmate::assertString(null.ok = TRUE)
 

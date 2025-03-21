@@ -1,7 +1,6 @@
 test_that("buildVocabulariesAll works", {
     # Set up test data
     pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
-    pathToCodeCountsFolder <- system.file("testdata/CODE_COUNTS", package = "ROMOPMappingTools")
     pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
     withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
@@ -19,7 +18,6 @@ test_that("buildVocabulariesAll works", {
     suppressWarnings(
     validationLogTibble <- buildVocabulariesAll(
         pathToVocabularyFolder = pathToVocabularyFolder,
-        pathToCodeCountsFolder = pathToCodeCountsFolder,
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         validationResultsFolder = validationResultsFolder
