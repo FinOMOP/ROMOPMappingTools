@@ -26,8 +26,12 @@ test_that("test validateUsagiFile returns no errors with a valid usagi file", {
   # all validations must be successful
   validationsSummary |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(0)
 
-  # Usagi file has not changed 
-  validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
+  # Usagi file has not changed apart from mappingStatus and ADD_INFO:validationMessages
+  usagiTibble <- readUsagiFile(pathToUsagiFile)
+  validatedUsagiTibble <- readUsagiFile(pathToValidatedUsagiFile)
+
+  byNames <- usagiTibble |> names() |> setdiff(c("mappingStatus", "ADD_INFO:validationMessages"))
+  expect_equal(usagiTibble |> dplyr::select(dplyr::all_of(byNames)), validatedUsagiTibble |> dplyr::select(dplyr::all_of(byNames)))
 
 })
 
@@ -195,6 +199,14 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 
   # it opens with Usagi
   #file.copy(pathToValidatedUsagiFile, "~/Downloads/ICD10fi.usagi.csv", overwrite = TRUE)
+
+
+  # Usagi file has not changed apart from mappingStatus and ADD_INFO:validationMessages
+  usagiTibble <- readUsagiFile(pathToUsagiFile)
+  validatedUsagiTibble <- readUsagiFile(pathToValidatedUsagiFile)
+
+  byNames <- usagiTibble |> names() |> setdiff(c("mappingStatus", "ADD_INFO:validationMessages"))
+  expect_equal(usagiTibble |> dplyr::select(dplyr::all_of(byNames)), validatedUsagiTibble |> dplyr::select(dplyr::all_of(byNames)))
 })
 
 

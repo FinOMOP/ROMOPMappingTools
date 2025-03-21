@@ -29,11 +29,8 @@ test_that("buildVocabulariesAll works", {
     validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() |> expect_equal(0)
 
     # check the validation results folder
-    expect_true(file.exists(file.path(validationResultsFolder, "validationLogTibble.csv")))
-    expect_true(file.exists(file.path(validationResultsFolder, "resultsDQD.json")))
-    
-    resultsDQD <- jsonlite::read_json(file.path(validationResultsFolder, "resultsDQD.json"), simplifyVector = TRUE)
-    resultsDQD$CheckResults |> dplyr::as_tibble()  |> dplyr::filter(failed==1) 
+    expect_true(!file.exists(file.path(validationResultsFolder, "resultsDQD.json")))
+    expect_true(file.exists(file.path(validationResultsFolder, "VALIDATION_STATUS.md")))
 })  
 
 

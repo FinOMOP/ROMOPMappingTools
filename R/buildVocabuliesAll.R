@@ -12,7 +12,6 @@
 #' @param pathToVocabularyFolder Path to folder containing vocabulary files
 #' @param connectionDetails DatabaseConnector connection details object
 #' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
-#' @param pathToCodeCountsFolder Path to folder containing code counts files
 #' @param validationResultsFolder Folder where validation results will be saved
 #' @param sourceToConceptMapTable Optional name of source to concept map table
 #'
@@ -166,7 +165,7 @@ buildVocabulariesAll <- function(
     validationLogTibbledqd <- validateCDMtablesWithDQD(
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-        validationResultsFolder = validationResultsFolder
+        validationResultsFolder = tempdir()
     )
 
 
@@ -175,7 +174,11 @@ buildVocabulariesAll <- function(
 
 
     # save validation log tibble
-    validationLogTibble |> readr::write_csv(file.path(validationResultsFolder, "validationLogTibble.csv"), na = "")
+    pathToValidationStatusMdFile <- file.path(validationResultsFolder, "VALIDATION_STATUS.md")
+    ROMOPMappingTools::buildValidationStatusMd(
+        validationLogTibble = validationLogTibble,
+        pathToValidationStatusMdFile = pathToValidationStatusMdFile
+    )
 
     return(validationLogTibble)
 }

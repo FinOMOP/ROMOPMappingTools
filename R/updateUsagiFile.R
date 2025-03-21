@@ -319,7 +319,7 @@ updateUsagiFile <- function(
         dplyr::mutate(autoUpdatingInfo = ifelse(autoUpdatingInfo == "", autoUpdatingInfo, paste0(lubridate::today(), autoUpdatingInfo))) |>
         dplyr::rename(`ADD_INFO:autoUpdatingInfo` = autoUpdatingInfo) |>
         dplyr::distinct() |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
-        readr::write_csv(pathToUpdatedUsagiFile, na = "")
+        writeUsagiFile(pathToUpdatedUsagiFile)
 
     return(updateLogTibble$logTibble)
 }

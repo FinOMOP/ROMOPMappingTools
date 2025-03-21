@@ -19,7 +19,6 @@ test_that("buildStatusDashboard works", {
     suppressWarnings(
     validationLogTibble <- buildVocabulariesAll(
         pathToVocabularyFolder = pathToVocabularyFolder,
-        pathToCodeCountsFolder = pathToCodeCountsFolder,
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         validationResultsFolder = validationResultsFolder

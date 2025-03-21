@@ -47,6 +47,7 @@ validateUsagiFile <- function(
 
     # Read the usagi file
     usagiTibble <- readUsagiFile(pathToUsagiFile)
+    usagiTibbleOriginal <- usagiTibble
     usagiTibbleColumns <- usagiTibble |> names()
 
     # Add tmpvalidationMessages message column
@@ -384,9 +385,10 @@ validateUsagiFile <- function(
         }
     }
 
-
+    #
     # end
-    usagiTibble |>
+    #
+    usagiTibble <- usagiTibble |>
         dplyr::mutate(
             tmpvalidationMessages = stringr::str_replace(tmpvalidationMessages, "^\\s*\\|\\s*", ""),
             mappingStatus = dplyr::case_when(
@@ -394,8 +396,21 @@ validateUsagiFile <- function(
                 TRUE ~ mappingStatus
             )
         ) |>
-        dplyr::rename(`ADD_INFO:validationMessages` = tmpvalidationMessages) |>
-        readr::write_csv(pathToValidatedUsagiFile, na = "")
+        dplyr::rename(`ADD_INFO:validationMessages` = tmpvalidationMessages) 
+        
+        
+        # Kill switch, if other than `mappingStatus` and `ADD_INFO:validationMessages` are different then error 
+        byNames <- usagiTibble |> names() |> setdiff(c("mappingStatus", "ADD_INFO:validationMessages"))
+        differences <- usagiTibbleOriginal |> 
+            dplyr::select(dplyr::all_of(byNames)) |> 
+            dplyr::anti_join(usagiTibble |> dplyr::select(dplyr::all_of(byNames)), by = byNames)
+        if (differences |> nrow() > 0) {
+            validationLogR6$ERROR("Validation failed", "Validation failed")
+            return(validationLogR6$logTibble)
+        }
+
+     usagiTibble |>
+        writeUsagiFile(pathToValidatedUsagiFile)
 
     return(validationLogR6$logTibble)
 }

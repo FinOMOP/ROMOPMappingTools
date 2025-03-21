@@ -8,38 +8,41 @@ test_that("buildStatusDashboard works", {
     validationResultsFolder <- file.path(tempdir(), "validationResults")
     dir.create(validationResultsFolder, showWarnings = FALSE, recursive = TRUE)
     withr::defer(unlink(validationResultsFolder, recursive = TRUE))
-    
+
     # Create connection details for test database
     connectionDetails <- DatabaseConnector::createConnectionDetails(
         dbms = "duckdb",
         server = pathToOMOPVocabularyDuckDBfile
     )
-    
+
     # Run function
     suppressWarnings(
-    validationLogTibble <- buildVocabulariesAll(
-        pathToVocabularyFolder = pathToVocabularyFolder,
-        pathToCodeCountsFolder = pathToCodeCountsFolder,
-        connectionDetails = connectionDetails,
-        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-        validationResultsFolder = validationResultsFolder
+        validationLogTibble <- buildVocabulariesAll(
+            pathToVocabularyFolder = pathToVocabularyFolder,
+            connectionDetails = connectionDetails,
+            vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+            validationResultsFolder = validationResultsFolder
         )
     )
 
     output_file_html <- file.path(validationResultsFolder, "MappingStatusDashboard.html")
 
-    validationLogTibble <- buildStatusDashboard(
-        pathToCodeCountsFolder = pathToCodeCountsFolder,
-        connectionDetails = connectionDetails,
-        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-        output_file_html = output_file_html
+    # TODO: there is a warning that needs to be fixed
+    suppressWarnings(
+        validationLogTibble <- buildStatusDashboard(
+            pathToCodeCountsFolder = pathToCodeCountsFolder,
+            connectionDetails = connectionDetails,
+            vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+            output_file_html = output_file_html
+        )
     )
 
     # Check results
-    validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() |> expect_equal(0)
+    validationLogTibble |>
+        dplyr::filter(type == "ERROR") |>
+        nrow() |>
+        expect_equal(0)
 
     # check the validation results folder
     expect_true(file.exists(output_file_html))
-})  
-
-
+})

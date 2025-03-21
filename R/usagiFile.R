@@ -69,7 +69,7 @@ readUsagiFile <- function(pathToUsagiFile) {
         `ADD_INFO:sourceValidEndDate` = readr::col_date(),
         `ADD_INFO:sourceParents` = readr::col_character(),
         `ADD_INFO:sourceParentVocabulary` = readr::col_character(),
-        `ADD_INFO:validationMessagess` = readr::col_character(),
+        `ADD_INFO:validationMessages` = readr::col_character(),
         #
         .default = readr::col_character()
     )
@@ -77,4 +77,92 @@ readUsagiFile <- function(pathToUsagiFile) {
     suppressWarnings(
         readr::read_csv(pathToUsagiFile, col_types = cols, na = c(""))
     )
-} 
+}
+
+#' Write a Usagi mapping file
+#'
+#' @description
+#' Write a Usagi mapping file to disk
+#'
+#' @details
+#' The function writes a Usagi mapping file with the following columns:
+#' - sourceCode (character): Source code
+#' - sourceName (character): Source name
+#' - sourceFrequency (integer): Source frequency
+#' - sourceAutoAssignedConceptIds (integer): Source auto-assigned concept IDs
+#' - matchScore (double): Match score
+#' - mappingStatus (character): Mapping status
+#' - equivalence (character): Equivalence
+#' - statusSetBy (character): Status set by
+#' - statusSetOn (double): Status set on
+#' - conceptId (integer): Concept ID
+#' - conceptName (character): Concept name
+#' - domainId (character): Domain ID
+#' - mappingType (character): Mapping type
+#' - comment (character): Comment
+#' - createdBy (character): Created by
+#' - createdOn (double): Created on
+#' - assignedReviewer (character): Assigned reviewer
+#' - ADD_INFO:sourceConceptId (double): Source concept ID
+#' - ADD_INFO:sourceConceptClass (character): Source concept class
+#' - ADD_INFO:sourceDomain (character): Source domain
+#' - ADD_INFO:sourceValidStartDate (date): Source valid start date
+#' - ADD_INFO:sourceValidEndDate (date): Source valid end date
+#' - ADD_INFO:sourceParents (character): Source parents
+#' - ADD_INFO:sourceParentVocabulary (character): Source parent vocabulary
+#' - ADD_INFO:validationMessages (character): Validation messages
+#' - ADD_INFO:autoUpdatingInfo (character): Auto updating info
+#'
+#' @param usagiTibble A tibble containing the Usagi mapping data
+#' @param pathToUsagiFile Path where the Usagi mapping file should be written
+#'
+#' @return None
+#'
+#' @importFrom readr write_csv
+#' @importFrom dplyr select any_of
+#'
+#' @export
+writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
+    firstColNames <- c(
+        "sourceCode",
+        "sourceName",
+        "sourceFrequency",
+        "sourceAutoAssignedConceptIds",
+        "matchScore",
+        "mappingStatus",
+        "equivalence",
+        "statusSetBy",
+        "statusSetOn",
+        "conceptId",
+        "conceptName",
+        "domainId",
+        "mappingType",
+        "comment",
+        "createdBy",
+        "createdOn",
+        "assignedReviewer",
+        "ADD_INFO:sourceConceptId",
+        "ADD_INFO:sourceConceptClass",
+        "ADD_INFO:sourceDomain",
+        "ADD_INFO:sourceValidStartDate",
+        "ADD_INFO:sourceValidEndDate",
+        "ADD_INFO:sourceParents",
+        "ADD_INFO:sourceParentVocabulary"
+    )
+
+    lastColNames <- c(
+        "ADD_INFO:validationMessages",
+        "ADD_INFO:autoUpdatingInfo"
+    )
+
+    colNames <- usagiTibble |> names()
+    midColNames <- colNames |> setdiff(c(firstColNames, lastColNames))
+
+    # order the columns
+    usagiTibble <- usagiTibble |>
+        dplyr::select(
+            dplyr::any_of(c(firstColNames, midColNames, lastColNames))
+        )
+
+    readr::write_csv(usagiTibble, pathToUsagiFile, na = "")
+}
