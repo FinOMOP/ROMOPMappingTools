@@ -26,8 +26,10 @@
 #' @param connection Database connection object
 #' @param vocabularyDatabaseSchema Schema name containing vocabulary tables
 #' @param sourceToConceptMapTable Name of source to concept map table
-#' @param includeMappingStatus Vector of mapping statuses to include. Must be subset of:
+#' @param includeConcepts Vector of mapping statuses to include. Must be subset of:
 #'        "APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"
+#' @param includeMappings Vector of mapping statuses to include. Must be subset of:
+#'        "APPROVED", "UNCHECKED", "FLAGGED", "INVALID_TARGET"
 #' @param skipValidation Whether to skip validation of the Usagi file (default: TRUE)
 #' @param sourceConceptIdOffset Offset to add to source concept IDs (default: 0)
 #'
@@ -50,14 +52,16 @@ appendUsagiFileToSTCMtable <- function(
     connection,
     vocabularyDatabaseSchema,
     sourceToConceptMapTable,
-    includeMappingStatus = "APPROVED",
+    includeConcepts = c("APPROVED", "UNCHECKED", "INVALID_TARGET"),
+    includeMappings = c("APPROVED"),
     skipValidation = TRUE,
     sourceConceptIdOffset = 0
 ) {
     vocabularyId |> checkmate::assertString()
     pathToUsagiFile |> checkmate::assertFileExists()
     vocabularyDatabaseSchema |> checkmate::assertString()
-    includeMappingStatus |> checkmate::assertSubset(c("APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"))
+    includeConcepts |> checkmate::assertSubset(c("APPROVED", "UNCHECKED", "FLAGGED", "INVALID_TARGET"))
+    includeMappings |> checkmate::assertSubset(c("APPROVED", "UNCHECKED", "FLAGGED", "INVALID_TARGET"))
     #
     # Validation
     #
@@ -124,16 +128,15 @@ appendUsagiFileToSTCMtable <- function(
     #
     # Function
     #
-    #TODO include all but only map these that are accepted
     if (!STCMTableIsExtended) {
         STCMTableToInsert <- usagiTibble |>
-            dplyr::filter(mappingStatus %in% includeMappingStatus) |>
+            dplyr::filter(mappingStatus %in% includeConcepts) |>
             dplyr::transmute(
                 source_code = sourceCode,
                 source_concept_id = 0L,
                 source_vocabulary_id = {{ vocabularyId }},
                 source_code_description = sourceName,
-                target_concept_id = conceptId,
+                target_concept_id = dplyr::if_else(mappingStatus %in% includeMappings, conceptId, 0L),
                 target_vocabulary_id = "",
                 valid_start_date = as.Date("1970-01-01"),
                 valid_end_date = as.Date("2099-12-31"),
@@ -211,13 +214,13 @@ appendUsagiFileToSTCMtable <- function(
         }
 
         STCMTableToInsert <- usagiTibble |>
-            dplyr::filter(mappingStatus %in% includeMappingStatus) |>
+            dplyr::filter(mappingStatus %in% includeConcepts) |>
             dplyr::transmute(
                 source_code = sourceCode,
                 source_concept_id = `ADD_INFO:sourceConceptId`,
                 source_vocabulary_id = {{ vocabularyId }},
                 source_code_description = sourceName,
-                target_concept_id = conceptId,
+                target_concept_id = dplyr::if_else(mappingStatus %in% includeMappings, conceptId, 0L),
                 target_vocabulary_id = "",
                 valid_start_date = `ADD_INFO:sourceValidStartDate`,
                 valid_end_date = `ADD_INFO:sourceValidEndDate`,

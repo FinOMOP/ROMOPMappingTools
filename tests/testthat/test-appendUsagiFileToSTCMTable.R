@@ -1,6 +1,7 @@
 test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceToConceptMapTable for a non-extended sourceToConceptMapTable", {
     pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
-    nrowUsagiFile <- readUsagiFile(pathToUsagiFile) |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
+    nrowUsagiFile <- readUsagiFile(pathToUsagiFile)  |> nrow()
+    nrowUsagiFileMapped <- readUsagiFile(pathToUsagiFile)  |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
     pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
     withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
@@ -27,6 +28,11 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
         expect_equal(nrowUsagiFile)
 
     stcmTable |>
+        dplyr::filter(TARGET_CONCEPT_ID != 0L) |>
+        dplyr::count() |> dplyr::pull(n) |>
+        expect_equal(nrowUsagiFileMapped)
+
+    stcmTable |>
         names() |>
         stringr::str_to_lower() |>
         expect_equal(c(
@@ -36,7 +42,8 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
 
 test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceToConceptMapTable for an extended sourceToConceptMapTable", {
     pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
-    nrowUsagiFile <- readUsagiFile(pathToUsagiFile) |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
+    nrowUsagiFile <- readUsagiFile(pathToUsagiFile)  |> nrow()
+    nrowUsagiFileMapped <- readUsagiFile(pathToUsagiFile)  |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
     pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
     vocabularyDatabaseSchema <- "main"
 
@@ -62,6 +69,12 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
     stcmTable |>
         nrow() |>
         expect_equal(nrowUsagiFile)
+
+    stcmTable |>
+        dplyr::filter(TARGET_CONCEPT_ID != 0L) |>
+        dplyr::count() |> dplyr::pull(n) |>
+        expect_equal(nrowUsagiFileMapped)
+        
     stcmTable |>
         names() |> 
         stringr::str_to_lower() |>

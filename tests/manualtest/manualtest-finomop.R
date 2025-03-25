@@ -33,7 +33,6 @@ validationLogTibble <- buildVocabulariesAll(
     pathToVocabularyFolder = pathToVocabularyFolder,
     connectionDetails = connectionDetails,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-    pathToCodeCountsFolder = pathToCodeCountsFolder,
     validationResultsFolder = validationResultsFolder
 )
 
