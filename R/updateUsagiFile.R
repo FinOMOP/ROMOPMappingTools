@@ -321,5 +321,9 @@ updateUsagiFile <- function(
         dplyr::distinct() |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
         writeUsagiFile(pathToUpdatedUsagiFile)
 
+    if (updateLogTibble$logTibble |>  nrow() == 0) {
+        updateLogTibble$SUCCESS("Updated Usagi file", "No updates needed")
+    }
+
     return(updateLogTibble$logTibble)
 }

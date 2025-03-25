@@ -16,7 +16,12 @@
 #' @importFrom dplyr bind_rows mutate select everything
 #'
 #' @export
-validateVocabularyFolder <- function(pathToVocabularyFolder, connection, vocabularyDatabaseSchema, validationResultsFolder) {
+validateVocabularyFolder <- function(
+    pathToVocabularyFolder,
+    connection,
+    vocabularyDatabaseSchema,
+    validationResultsFolder
+) {
     #
     # Parameter validation
     #
