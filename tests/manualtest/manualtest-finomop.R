@@ -41,7 +41,7 @@ validationLogTibble <- buildVocabulariesAll(
 # Validate individual usagi files
 connection <- DatabaseConnector::connect(connectionDetails)
 
-vocabularyId <- "ICD10fi"
+vocabularyId <- "NCSPfi"
 
 pathToVocabularyInfoFile <- file.path(pathToVocabularyFolder, "vocabularies.csv")
 vocabulariesTibble <- readr::read_csv(pathToVocabularyInfoFile, show_col_types = FALSE)
@@ -79,6 +79,8 @@ validationLogTibbleUpdatedUsagiFile <- ROMOPMappingTools::validateUsagiFile(
     pathToValidatedUsagiFile = pathToValidatedUsagiFileUpdated,
     sourceConceptIdOffset = sourceConceptIdOffset
 )
+
+pathToValidatedUsagiFileUpdated  |> readUsagiFile()|> filter(!is.na(`ADD_INFO:validationMessages`)) |> View()
 
 updatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
 updatedUsagiFile |> dplyr::filter(!is.na(`ADD_INFO:validationMessages`)) |> View()

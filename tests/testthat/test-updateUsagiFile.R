@@ -87,7 +87,7 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   # no new lines introduced, only for Invalid codes 
   usagiFile  <- readUsagiFile(pathToUsagiFile)
   updatedUsagiFile <- readUsagiFile(pathToUpdatedUsagiFile)
-  usagiFile |> nrow() |> expect_equal(updatedUsagiFile |> nrow() -2)
+  usagiFile |> nrow() |> expect_equal(updatedUsagiFile |> nrow() -1)
 
   # only updates have been introduced
   pathToValidatedUsagiFileBeforeUpdate <- tempfile(fileext = ".csv")
@@ -158,16 +158,28 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c(618787, 618787))
 
   # Updated conceptIds that could not be updated automatically
-  updateSummary |> dplyr::filter(message == "2 conceptIds could not be updated automatically, remapping needed") |> nrow() |> expect_equal(1)
-  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
+  updateSummary |> dplyr::filter(message == "3 conceptIds could not be updated automatically, remapping needed") |> nrow() |> expect_equal(1)
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found\\]")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
   expect_match("conceptId 4071477 could not be updated automatically, remapping needed")
-  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found")) |> dplyr::pull(mappingStatus) |> 
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found\\]")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("INVALID_TARGET"))
-  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found")) |> dplyr::pull(conceptId)  |> 
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found\\]")) |> dplyr::pull(conceptId)  |> 
   expect_equal(0)
-  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found")) |> dplyr::pull(conceptName)  |> 
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found\\]")) |> dplyr::pull(conceptName)  |> 
   expect_equal(c("Unmapped"))
-  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found")) |> dplyr::pull(comment)  |> 
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found\\]")) |> dplyr::pull(comment)  |> 
+  expect_equal(c("Invalid existing target: 4071477"))
+
+  # Updated conceptIds that could not be updated automatically 2, it has 2 rows with 2 invalid conceptIds
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
+  expect_match("conceptId 4071477 could not be updated automatically, remapping needed")
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(mappingStatus) |> 
+  expect_equal(c("INVALID_TARGET"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(conceptId)  |> 
+  expect_equal(c(0))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(conceptName)  |> 
+  expect_equal(c("Unmapped"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(comment)  |> 
   expect_equal(c("Invalid existing target: 4071477"))
 
   # Updated by usagi

@@ -318,7 +318,7 @@ updateUsagiFile <- function(
         dplyr::select(-action, -hasChangendConceptId) |>
         dplyr::mutate(autoUpdatingInfo = ifelse(autoUpdatingInfo == "", autoUpdatingInfo, paste0(lubridate::today(), autoUpdatingInfo))) |>
         dplyr::rename(`ADD_INFO:autoUpdatingInfo` = autoUpdatingInfo) |>
-        dplyr::distinct() |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
+        dplyr::distinct(dplyr::across(-comment), .keep_all = TRUE) |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
         writeUsagiFile(pathToUpdatedUsagiFile)
 
     if (updateLogTibble$logTibble |>  nrow() == 0) {
