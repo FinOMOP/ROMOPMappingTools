@@ -205,8 +205,13 @@ updateUsagiFile <- function(
         )) |>
         dplyr::ungroup() |>
         dplyr::mutate(autoUpdatingInfo = dplyr::if_else(infoTmp == "", autoUpdatingInfo, paste0(autoUpdatingInfo, " | ", infoTmp))) |>
-        dplyr::select(-oldConceptId, -newConceptId, -relationshipId, -needsReview, -infoTmp)
-
+        dplyr::select(-oldConceptId, -newConceptId, -relationshipId, -needsReview, -infoTmp) |> 
+        # if the new donceptId is repeated, keep the first one, apply only to the row with action is not na
+        dplyr::group_by(sourceCode, conceptId) |>
+        dplyr::mutate(n = dplyr::row_number()) |>
+        dplyr::ungroup() |>
+        dplyr::filter(n == 1 | (n > 1 & is.na(action))) |>
+        dplyr::select(-n)
 
     n <- usagiTibble |>
         dplyr::filter(action == "noReview") |>
@@ -318,7 +323,7 @@ updateUsagiFile <- function(
         dplyr::select(-action, -hasChangendConceptId) |>
         dplyr::mutate(autoUpdatingInfo = ifelse(autoUpdatingInfo == "", autoUpdatingInfo, paste0(lubridate::today(), autoUpdatingInfo))) |>
         dplyr::rename(`ADD_INFO:autoUpdatingInfo` = autoUpdatingInfo) |>
-        dplyr::distinct(dplyr::across(-comment), .keep_all = TRUE) |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
+        #dplyr::distinct(sourceCode, conceptId, .keep_all = TRUE) |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
         writeUsagiFile(pathToUpdatedUsagiFile)
 
     if (updateLogTibble$logTibble |>  nrow() == 0) {

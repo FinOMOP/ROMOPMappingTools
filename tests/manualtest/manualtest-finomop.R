@@ -41,7 +41,7 @@ validationLogTibble <- buildVocabulariesAll(
 # Validate individual usagi files
 connection <- DatabaseConnector::connect(connectionDetails)
 
-vocabularyId <- "NCSPfi"
+vocabularyId <- "SNOMED2fi"
 
 pathToVocabularyInfoFile <- file.path(pathToVocabularyFolder, "vocabularies.csv")
 vocabulariesTibble <- readr::read_csv(pathToVocabularyInfoFile, show_col_types = FALSE)

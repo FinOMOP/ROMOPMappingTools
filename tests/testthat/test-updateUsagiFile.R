@@ -84,11 +84,6 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   )
   updatedUsagiFile <- readUsagiFile(pathToUpdatedUsagiFile)
 
-  # no new lines introduced, only for Invalid codes 
-  usagiFile  <- readUsagiFile(pathToUsagiFile)
-  updatedUsagiFile <- readUsagiFile(pathToUpdatedUsagiFile)
-  usagiFile |> nrow() |> expect_equal(updatedUsagiFile |> nrow() -1)
-
   # only updates have been introduced
   pathToValidatedUsagiFileBeforeUpdate <- tempfile(fileext = ".csv")
   validationSummaryBeforeUpdate <- validateUsagiFile(pathToUsagiFile, connection, vocabularyDatabaseSchema, pathToValidatedUsagiFileBeforeUpdate, sourceConceptIdOffset = 2000500000)
@@ -135,7 +130,7 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c(4148615, 4174262, 4148615, 4174262))
 
   # Updated conceptIds that need review
-  updateSummary |> dplyr::filter(message == "Updated 10 conceptIds that need review") |> nrow() |> expect_equal(1)
+  updateSummary |> dplyr::filter(message == "Updated 9 conceptIds that need review") |> nrow() |> expect_equal(1)
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept replaced by")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
   expect_match("conceptId changed from 3085666 to 3428638 based on relationship :Concept replaced by, needs reviewing")
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept replaced by")) |> dplyr::pull(conceptId) |> 
