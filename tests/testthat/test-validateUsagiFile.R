@@ -119,7 +119,7 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "\\[APPROVED mappingStatus with concepts outdated")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
   expect_equal(rep("ERROR OUTDATED conceptId: conceptId 1234 does not exist on the target vocabularies", 3))
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "\\[APPROVED mappingStatus with concepts outdated")) |> dplyr::pull(mappingStatus) |> 
-  expect_equal(rep("FLAGGED", 3))
+  expect_equal(rep("APPROVED", 3))
 
   # Not APPROVED ConceptIds not in vocabularies
   validationsSummary |> dplyr::filter(step == "Not APPROVED mappingStatus with concepts outdated") |> nrow() |> expect_equal(1)
@@ -144,7 +144,7 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
     )
   )
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "\\[APPROVED ConceptIds outdated\\]")) |> dplyr::pull(mappingStatus) |> 
-  expect_equal(rep("FLAGGED", 7))
+  expect_equal(rep("APPROVED", 7))
 
   #Not APPROVED ConceptIds outdated
   validationsSummary |> dplyr::filter(step == "Not APPROVED mappingStatus with concepts outdated") |> nrow() |> expect_equal(1)

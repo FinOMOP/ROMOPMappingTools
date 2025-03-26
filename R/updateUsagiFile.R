@@ -196,9 +196,8 @@ updateUsagiFile <- function(
         dplyr::group_by(sourceCode) |>
         dplyr::mutate(infoTmp = paste0(infoTmp |> na.omit() |> unique(), collapse = " | ")) |>
         dplyr::mutate(mappingStatus = dplyr::case_when(
-            any(mappingStatus == "INVALID_TARGET") ~ "INVALID_TARGET",
             any(mappingStatus == "FLAGGED") ~ "FLAGGED",
-            any(mappingStatus == "INEXACT") ~ "INEXACT",
+            any(mappingStatus == "INVALID_TARGET") ~ "INVALID_TARGET",
             any(mappingStatus == "UNCHECKED") ~ "UNCHECKED",
             any(mappingStatus == "APPROVED") ~ "APPROVED",
             TRUE ~ dplyr::first(mappingStatus)
