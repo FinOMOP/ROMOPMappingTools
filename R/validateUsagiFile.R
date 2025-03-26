@@ -422,7 +422,11 @@ validateUsagiFile <- function(
     usagiTibble <- usagiTibble |>
         dplyr::mutate(
             `ADD_INFO:validationMessages` = stringr::str_replace(tmpvalidationMessages, "^\\s*\\|\\s*", ""),
-            mappingStatus = dplyr::if_else(stringr::str_detect(tmpvalidationMessages, "ERROR"), "FLAGGED", mappingStatus)
+            # Change to FLAGGED if there is an error not due to outdated concepts
+            mappingStatus = dplyr::if_else(
+                stringr::str_detect(tmpvalidationMessages, "ERROR") & !stringr::str_detect(tmpvalidationMessages, "OUTDATED"),
+                "FLAGGED", 
+                mappingStatus)
         ) |>
         dplyr::select(-tmpvalidationMessages)
 
