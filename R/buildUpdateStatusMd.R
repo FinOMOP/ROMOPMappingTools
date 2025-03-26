@@ -36,7 +36,7 @@ buildUpdateStatusMd <- function(
     mdText <- paste0(mdText, "\n\n")
     
     # save markdown file
-    writeLines(mdText, pathToValidationStatusMdFile)
+    writeLines(mdText, pathToUpdateStatusMdFile)
 
-    return(pathToValidationStatusMdFile)
+    return(pathToUpdateStatusMdFile)
 }
