@@ -194,7 +194,7 @@ updateUsagiFile <- function(
             createdOn = dplyr::if_else(!is.na(action) & action == "needsRemapping", 0, createdOn),
             statusSetBy = dplyr::if_else(!is.na(action), "Automatic update", statusSetBy),
             statusSetBy = dplyr::if_else(!is.na(action) & action == "needsRemapping", "", statusSetBy),
-            statusSetOn = dplyr::if_else(!is.na(action), Sys.time() |> as.numeric() * 1000, statusSetOn),
+            statusSetOn = dplyr::if_else(!is.na(action), Sys.time() |> as.integer() * 1000 , statusSetOn),
             statusSetOn = dplyr::if_else(!is.na(action) & action == "needsRemapping", 0, statusSetOn),
             conceptName = dplyr::if_else(!is.na(action) & action == "needsRemapping", "Unmapped", conceptName),
             comment = dplyr::if_else(!is.na(action) & action == "needsRemapping", paste0("Invalid existing target: ", oldConceptId), ''),
