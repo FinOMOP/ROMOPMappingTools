@@ -188,7 +188,7 @@ appendUsagiFileToSTCMtable <- function(
                             stringr::str_split("\\|") |>
                             purrr::flatten_chr()
 
-                        if (length(x) != length(y)) {
+                        if (!any(is.na(y)) && length(x) != length(y)) {
                             stop("length of parent concept codes and parent vocabularies must be the same")
                         }
 

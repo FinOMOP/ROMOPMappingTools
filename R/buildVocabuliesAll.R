@@ -46,7 +46,7 @@ buildVocabulariesAll <- function(
     )
 
     # if there are errors at this point stop
-    if (validationLogTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
+    if (validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() > 0) {
         message("Errors found in the vocabulary folder")
         return(validationLogTibble)
     }

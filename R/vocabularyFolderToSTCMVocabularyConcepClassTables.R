@@ -55,7 +55,6 @@ vocabularyFolderToSTCMVocabularyConcepClassTables <- function(
     #
     message("Appending vocabularies.csv to VOCABULARY table")
     vocabulariesTibble <- readr::read_csv(file.path(pathToVocabularyFolder, "vocabularies.csv"), show_col_types = FALSE)
-    vocabulariesTibble <- vocabulariesTibble |> dplyr::filter(ignore == FALSE)
 
     # get all the vocabulary references from the NEWS file
     vocabularyTableToInsert <- vocabulariesTibble |>
@@ -132,8 +131,11 @@ vocabularyFolderToSTCMVocabularyConcepClassTables <- function(
         dplyr::transmute(
             concept_class_id = `ADD_INFO:sourceConceptClass`,
             concept_class_name = `ADD_INFO:sourceConceptClass`,
-            concept_class_concept_id = source_concept_id_offset + (1:nrow(conceptClasses)) 
-        )
+            concept_class_concept_id = source_concept_id_offset 
+        ) |> 
+        dplyr::group_by(concept_class_concept_id) |>
+        dplyr::mutate(concept_class_concept_id = concept_class_concept_id + dplyr::row_number()) |>
+        dplyr::ungroup()
 
     # delete rows if concept class id exists
     DatabaseConnector::renderTranslateExecuteSql(

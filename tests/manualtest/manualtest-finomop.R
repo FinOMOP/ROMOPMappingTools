@@ -41,6 +41,10 @@ validationLogTibble <- buildVocabulariesAll(
 # Validate individual usagi files
 connection <- DatabaseConnector::connect(connectionDetails)
 
+concept  <- dplyr::tbl(connection, "CONCEPT") 
+concept   |> count(concept_id) |> arrange(desc(n))
+concept   |> filter(concept_id == 2001900015) |> collect() |> View()
+
 vocabularyId <- "SNOMED2fi"
 
 pathToVocabularyInfoFile <- file.path(pathToVocabularyFolder, "vocabularies.csv")
