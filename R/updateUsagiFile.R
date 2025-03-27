@@ -189,19 +189,45 @@ updateUsagiFile <- function(
                 TRUE ~ mappingStatus
             ),
             conceptId = dplyr::if_else(!is.na(action) & action == "needsRemapping", 0, conceptId),
+            domainId = dplyr::if_else(!is.na(action) & action == "needsRemapping", "", domainId),
+            createdBy = dplyr::if_else(!is.na(action) & action == "needsRemapping", "", createdBy),
+            createdOn = dplyr::if_else(!is.na(action) & action == "needsRemapping", 0, createdOn),
+            statusSetBy = dplyr::if_else(!is.na(action), "Automatic update", statusSetBy),
+            statusSetBy = dplyr::if_else(!is.na(action) & action == "needsRemapping", "", statusSetBy),
+            statusSetOn = dplyr::if_else(!is.na(action), Sys.time() |> as.numeric() * 1000, statusSetOn),
+            statusSetOn = dplyr::if_else(!is.na(action) & action == "needsRemapping", 0, statusSetOn),
             conceptName = dplyr::if_else(!is.na(action) & action == "needsRemapping", "Unmapped", conceptName),
             comment = dplyr::if_else(!is.na(action) & action == "needsRemapping", paste0("Invalid existing target: ", oldConceptId), ''),
             hasChangendConceptId = !is.na(newConceptId)
         ) |> 
         dplyr::group_by(sourceCode) |>
         dplyr::mutate(infoTmp = paste0(infoTmp |> na.omit() |> unique(), collapse = " | ")) |>
-        dplyr::mutate(mappingStatus = dplyr::case_when(
+        dplyr::mutate(
+            mappingStatus = dplyr::case_when(
             any(mappingStatus == "FLAGGED") ~ "FLAGGED",
             any(mappingStatus == "INVALID_TARGET") ~ "INVALID_TARGET",
             any(mappingStatus == "UNCHECKED") ~ "UNCHECKED",
             any(mappingStatus == "APPROVED") ~ "APPROVED",
             TRUE ~ dplyr::first(mappingStatus)
-        )) |>
+            ),
+            createdBy = dplyr::case_when(
+                any(createdBy == "") ~ "",
+                TRUE ~ dplyr::first(createdBy)
+            ),
+            createdOn = dplyr::case_when(
+                any(createdOn == 0) ~ 0,
+                TRUE ~ max(createdOn)
+            ),
+            statusSetBy = dplyr::case_when(
+                any(statusSetBy == "") ~ "",
+                any(statusSetBy == "Automatic update") ~ "Automatic update",
+                TRUE ~ dplyr::first(statusSetBy)
+            ),
+            statusSetOn = dplyr::case_when(
+                any(statusSetOn == 0) ~ 0,
+                TRUE ~ max(statusSetOn)
+            ),
+        ) |>
         dplyr::ungroup() |>
         dplyr::mutate(autoUpdatingInfo = dplyr::if_else(infoTmp == "", autoUpdatingInfo, paste0(autoUpdatingInfo, " | ", infoTmp))) |>
         dplyr::select(-oldConceptId, -newConceptId, -relationshipId, -needsReview, -infoTmp) |> 

@@ -149,8 +149,9 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c(618787, 618787))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept poss_eq to")) |> dplyr::pull(mappingStatus) |>  
   expect_equal(c("UNCHECKED", "UNCHECKED"))
-  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept poss_eq to")) |> dplyr::pull(conceptId) |> 
-  expect_equal(c(618787, 618787))
+  #
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds Concept")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(rep("Automatic update", 6))
 
   # Updated conceptIds that could not be updated automatically
   updateSummary |> dplyr::filter(message == "3 conceptIds could not be updated automatically, remapping needed") |> nrow() |> expect_equal(1)
@@ -164,6 +165,8 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c("Unmapped"))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found\\]")) |> dplyr::pull(comment)  |> 
   expect_equal(c("Invalid existing target: 4071477"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found\\]")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(NA_character_)
 
   # Updated conceptIds that could not be updated automatically 2, it has 2 rows with 2 invalid conceptIds
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
@@ -176,6 +179,8 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c("Unmapped"))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(comment)  |> 
   expect_equal(c("Invalid existing target: 4071477"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated conceptIds not found 2\\]")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(NA_character_)
 
   # Updated by usagi
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi]")) |> nrow() |> expect_equal(1)
@@ -185,6 +190,8 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c(0))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi]")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("INVALID_TARGET"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi]")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(NA_character_)
 
   # Updated by usagi 2 one invalid
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 2 one invalid")) |> nrow() |> expect_equal(2)
@@ -194,6 +201,8 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c(4121541,3245108))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 2 one invalid")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("UNCHECKED", "UNCHECKED"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 2 one invalid")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(c("Automatic update", "Automatic update"))
 
   # Updated by usagi 2 2 invalid
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 2 2 invalid")) |> nrow() |> expect_equal(1)
@@ -201,6 +210,8 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(3245108)
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 2 2 invalid")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("UNCHECKED"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 2 2 invalid")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(c("Automatic update"))
 
   #Updated by usagi 3 1 invalid
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 3 1 invalid")) |> nrow() |> expect_equal(4)
@@ -208,13 +219,17 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c(4054068, 4331284, 4310238, 3245108))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 3 1 invalid")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("UNCHECKED", "UNCHECKED", "UNCHECKED", "UNCHECKED"))
-
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 3 1 invalid")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(c("Automatic update", "Automatic update", "Automatic update", "Automatic update"))
+  
   #Updated by usagi 1 reamap to mapped
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 1 reamap to mapped")) |> nrow() |> expect_equal(1)
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 1 reamap to mapped")) |> dplyr::pull(conceptId) |> 
   expect_equal(c(320741))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 1 reamap to mapped")) |> dplyr::pull(mappingStatus) |> 
   expect_equal(c("UNCHECKED"))
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 1 reamap to mapped")) |> dplyr::pull(statusSetBy) |> 
+  expect_equal(c("Automatic update"))
 })
 
 
