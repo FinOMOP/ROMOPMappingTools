@@ -160,7 +160,7 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
 
     # order the columns
     usagiTibble <- usagiTibble |>
-        dplyr::select(-`ADD_INFO:obsolete_conceptId`) |>    
+        dplyr::select(dplyr::any_of(-`ADD_INFO:obsolete_conceptId`)) |>    
         dplyr::select(
             dplyr::any_of(c(firstColNames, midColNames, lastColNames))
         )
