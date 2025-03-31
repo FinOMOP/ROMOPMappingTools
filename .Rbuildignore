@@ -10,3 +10,7 @@ dev/*
 TODO.md
 errorReportSql.txt
 inst/testdata/OMOPVocabulary/*.csv
+^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

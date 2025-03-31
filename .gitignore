@@ -5,6 +5,7 @@
 .DS_Store
 inst/doc
 .vscode
+.cursor
 #docs keep docks run pkgdown locy and upload
 
 errorReportSql.txt
@@ -18,3 +19,4 @@ renv.lock
 TODO.md
 
 inst/testdata/OMOPVocabulary/*.csv
+docs

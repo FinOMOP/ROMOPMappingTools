@@ -47,6 +47,7 @@ validateUsagiFile <- function(
 
     # Read the usagi file
     usagiTibble <- readUsagiFile(pathToUsagiFile)
+    usagiTibbleOriginal <- usagiTibble
     usagiTibbleColumns <- usagiTibble |> names()
 
     # Add tmpvalidationMessages message column
@@ -57,7 +58,7 @@ validateUsagiFile <- function(
     # Checks
     #
 
-    validationLogTibble <- LogTibble$new()
+    validationLogR6 <- LogTibble$new()
 
     # - Check default usagi columns
     missingColumns <-
@@ -83,13 +84,13 @@ validateUsagiFile <- function(
         setdiff(usagiTibbleColumns)
 
     if (length(missingColumns) > 0) {
-        validationLogTibble$ERROR(
+        validationLogR6$ERROR(
             "Missing default columns",
             paste0("Missing columns: ", paste(missingColumns, collapse = ", "))
         )
-        return(validationLogTibble$logTibble)
+        return(validationLogR6$logTibble)
     } else {
-        validationLogTibble$SUCCESS("Missing default columns", "")
+        validationLogR6$SUCCESS("Missing default columns", "")
     }
 
     validationRules <- validate::validator(
@@ -99,14 +100,14 @@ validateUsagiFile <- function(
         SourceName.is.more.than.255.characters = field_length(sourceName, min = 0, max = 255),
         SourceFrequency.is.not.empty = is_complete(sourceFrequency),
         MappingStatus.is.empty = is_complete(mappingStatus),
-        MappingStatus.is.one.of.the.following = mappingStatus %in% c("APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"),
-        Concept_id.is.0.for.APPROVED.mappingStatus = if (mappingStatus == "APPROVED") conceptId != 0
+        MappingStatus.is.not.valid = mappingStatus %in% c("APPROVED", "UNCHECKED", "FLAGGED", "INVALID_TARGET"),
+        APPROVED.mappingStatus.conceptId.is.0 = if (mappingStatus == "APPROVED") conceptId != 0
     )
     validations <- validate::confront(usagiTibble, validationRules)
 
-    result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
+    result <- .applyValidationRules(usagiTibble, validations, validationLogR6)
     usagiTibble <- result$fileTibble
-    validationLogTibble <- result$validationLogTibble
+    validationLogR6 <- result$validationLogR6
 
     # - check if conceptIds exists in the database
     # - check if the mappings are up to date
@@ -125,55 +126,73 @@ validateUsagiFile <- function(
 
     outdatedConcepts <- usagiTibble |>
         dplyr::filter(conceptId != 0) |>
+        dplyr::filter(mappingStatus != "INVALID_TARGET") |>
         dplyr::distinct(conceptId, domainId, conceptName) |>
         dplyr::left_join(mappedConcepts, by = c("conceptId")) |>
         dplyr::mutate(
             errorMessage = dplyr::case_when(
-                is.na(domainId.y) | is.na(conceptName.y) ~ paste0("ERROR: conceptId ", conceptId, " does not exist on the target vocabularies"),
-                domainId.x != domainId.y ~ paste0("ERROR: OUTDATED: domainId for conceptId ", conceptId, " is different in the target vocabularies"),
-                conceptName.x != conceptName.y ~ paste0("ERROR: OUTDATED: conceptName for conceptId ", conceptId, " is different in the target vocabularies"),
-                is.na(standardConcept) ~ paste0("ERROR: OUTDATED: standard_concept for conceptId ", conceptId, " has changed to non-standard"),
+                is.na(domainId.y) | is.na(conceptName.y) ~ paste0("OUTDATED conceptId: conceptId ", conceptId, " does not exist on the target vocabularies"),
+                domainId.x != domainId.y ~ paste0("OUTDATED domainId: domainId for conceptId ", conceptId, " is different in the target vocabularies"),
+                conceptName.x != conceptName.y ~ paste0("OUTDATED conceptName: conceptName for conceptId ", conceptId, " is different in the target vocabularies"),
+                is.na(standardConcept) ~ paste0("OUTDATED standardConcept: standardConcept for conceptId ", conceptId, " has changed to non-standard"),
                 TRUE ~ ""
             )
         ) |>
         dplyr::filter(errorMessage != "") |>
         dplyr::distinct(conceptId, errorMessage)
-
+ 
     if (nrow(outdatedConcepts) > 0) {
         usagiTibble <- usagiTibble |>
             dplyr::left_join(outdatedConcepts, by = c("conceptId")) |>
+            dplyr::mutate(errorMessage = dplyr::case_when(
+                !is.na(errorMessage) & mappingStatus%in% c("FLAGGED", "APPROVED") ~ paste0("ERROR ", errorMessage),
+                !is.na(errorMessage) & mappingStatus %in% c("UNCHECKED") ~ paste0("WARNING ", errorMessage),
+                TRUE ~ errorMessage
+            )) |>
             dplyr::group_by(sourceCode) |>
             dplyr::mutate(errorMessage = paste(na.omit(errorMessage), collapse = ", ")) |>
             dplyr::ungroup() |>
             dplyr::mutate(tmpvalidationMessages = dplyr::if_else(errorMessage != "", paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
             dplyr::select(-errorMessage)
-
-        n <- usagiTibble |>
-            dplyr::filter(stringr::str_detect(tmpvalidationMessages, "does not exist on the target vocabularies")) |>
-            dplyr::distinct(sourceCode) |>
-            nrow()
-        if (n > 0) {
-            validationLogTibble$ERROR(
-                "ConceptIds not in vocabularies",
-                paste0("Found ", n, " sourceCodes with conceptIds that do not exist on the target vocabularies")
-            )
-        } else {
-            validationLogTibble$SUCCESS("ConceptIds not in vocabularies", "")
-        }
-
-        n <- usagiTibble |>
-            dplyr::filter(stringr::str_detect(tmpvalidationMessages, "ERROR: OUTDATED:")) |>
-            dplyr::distinct(sourceCode) |>
-            nrow()
-        if (n > 0) {
-            validationLogTibble$ERROR(
-                "ConceptIds outdated",
-                paste0("Found ", n, " sourceCodes with conceptIds that are outdated. Use ROMOPMappingTool::updateUsagiFile() to update the usagi file")
-            )
-        } else {
-            validationLogTibble$SUCCESS("ConceptIds outdated", "")
-        }
     }
+
+    # conceptIds not in vocabularies
+    totalOutdatedErrors <- usagiTibble  |> 
+    dplyr::mutate(
+        error = stringr::str_extract(tmpvalidationMessages, "\\w+\\s+OUTDATED\\s+\\w+:"),
+        errorLevel = stringr::str_extract(error, "\\w+"),
+        errorType = stringr::str_extract(error, "\\w+(?=:)")
+    ) |>
+    dplyr::filter(!is.na(error)) |>
+    dplyr::count(errorLevel, errorType)  |> 
+    dplyr::mutate(errorMessage = dplyr::case_when(
+        errorType == "conceptId" ~ paste0(n, " conceptIds do not exist on the target vocabularies"),
+        errorType == "domainId" ~ paste0(n, " domainIds are outdated"),
+        errorType == "conceptName" ~ paste0(n, " conceptNames are outdated"),
+        errorType == "standardConcept" ~ paste0(n, " standardConcepts have changed to non-standard"),
+        TRUE ~ ""
+    )) |>
+    dplyr::group_by(errorLevel) |>
+    dplyr::summarise(message = paste(errorMessage, collapse = ", "))
+
+    if (totalOutdatedErrors |> dplyr::filter(errorLevel == "ERROR") |> nrow() > 0) {
+        validationLogR6$ERROR(
+            "APPROVED mappingStatus with concepts outdated",
+            totalOutdatedErrors |> dplyr::filter(errorLevel == "ERROR") |> dplyr::pull(message)
+        )
+    } else {
+        validationLogR6$SUCCESS("APPROVED mappingStatus with concepts outdated", "")
+    }
+
+    if (totalOutdatedErrors |> dplyr::filter(errorLevel == "WARNING") |> nrow() > 0) {
+        validationLogR6$WARNING(
+            "Not APPROVED mappingStatus with concepts outdated",
+            totalOutdatedErrors |> dplyr::filter(errorLevel == "WARNING") |> dplyr::pull(message)
+        )
+    } else {
+        validationLogR6$SUCCESS("Not APPROVED mappingStatus with concepts outdated", "")
+    }
+
 
 
     # if it has the ADD_INFO:sourceConceptId and ADD_INFO:sourceConceptClass and ADD_INFO:sourceDomain will be used as C&CR
@@ -190,13 +209,13 @@ validateUsagiFile <- function(
             setdiff(usagiTibbleColumns)
 
         if (length(missingColumns) > 0) {
-            validationLogTibble$ERROR(
+            validationLogR6$ERROR(
                 "Missing C&CR columns",
                 paste0("Missing columns: ", paste(missingColumns, collapse = ", "))
             )
-            return(validationLogTibble$logTibble)
+            return(validationLogR6$logTibble)
         } else {
-            validationLogTibble$SUCCESS("Missing C&CR columns", "")
+            validationLogR6$SUCCESS("Missing C&CR columns", "")
         }
 
         validDomains <- connection |>
@@ -213,14 +232,15 @@ validateUsagiFile <- function(
 
         validations <- validate::confront(usagiTibble, validationRules, ref = list(validDomains = validDomains, sourceConceptIdOffset = sourceConceptIdOffset))
 
-        result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
+        result <- .applyValidationRules(usagiTibble, validations, validationLogR6)
         usagiTibble <- result$fileTibble
-        validationLogTibble <- result$validationLogTibble
+        validationLogR6 <- result$validationLogR6
 
         # check if when the code maps to more than one concept the combined domain is valid
         invalidDomainCombinations <- usagiTibble |>
-            dplyr::select(sourceCode, domainId) |>
-            dplyr::group_by(sourceCode) |>
+            dplyr::filter(mappingStatus != "INVALID_TARGET") |>
+            dplyr::select(sourceCode, domainId, mappingStatus) |>
+            dplyr::group_by(sourceCode, mappingStatus) |>
             dplyr::summarise(
                 recalcualted_domainId = stringr::str_c(sort(unique(domainId)), collapse = " "),
                 n_domains = dplyr::n(),
@@ -241,21 +261,37 @@ validateUsagiFile <- function(
                 TRUE ~ recalcualted_domainId
             )) |>
             dplyr::filter(!(recalcualted_domainId %in% validDomains)) |>
-            dplyr::mutate(errorMessage = paste0("ERROR: this code is mapped to more than one domains that are not compatible: ", recalcualted_domainId)) |>
+            dplyr::mutate(
+                errorMessage = paste0("this code is mapped to more than one domains that are not compatible: ", recalcualted_domainId), 
+                errorMessage = dplyr::if_else(mappingStatus == "UNCHECKED", paste0("WARNING: ", errorMessage), paste0("ERROR: ", errorMessage))
+                ) |>
             dplyr::select(sourceCode, errorMessage)
 
-        if (nrow(invalidDomainCombinations) > 0) {
-            validationLogTibble$ERROR(
-                "Invalid domain combination",
-                paste0("Found ", nrow(invalidDomainCombinations), " codes with invalid domain combinations")
-            )
 
+        if (nrow(invalidDomainCombinations) > 0) {
             usagiTibble <- usagiTibble |>
                 dplyr::left_join(invalidDomainCombinations, by = c("sourceCode")) |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
                 dplyr::select(-errorMessage)
+        }
+
+        n <- invalidDomainCombinations |> dplyr::filter(stringr::str_detect(errorMessage, "WARNING")) |> nrow()
+        if (n > 0) {
+            validationLogR6$WARNING(
+                "Not APPROVED mappingStatus with valid domain combination",
+                paste0("Found ", n, " codes with invalid domain combinations")
+            )
         } else {
-            validationLogTibble$SUCCESS("Invalid domain combination", "")
+            validationLogR6$SUCCESS("Not APPROVED mappingStatus with valid domain combination", "")
+        }
+        n <- invalidDomainCombinations |> dplyr::filter(stringr::str_detect(errorMessage, "ERROR")) |> nrow()
+        if (n > 0) {
+            validationLogR6$ERROR(
+                "APPROVED mappingStatus with valid domain combination",
+                paste0("Found ", n, " codes with invalid domain combinations")
+            )
+        } else {
+            validationLogR6$SUCCESS("APPROVED mappingStatus with valid domain combination", "")
         }
     }
 
@@ -269,13 +305,13 @@ validateUsagiFile <- function(
             setdiff(usagiTibbleColumns)
 
         if (length(missingColumns) > 0) {
-            validationLogTibble$ERROR(
+            validationLogR6$ERROR(
                 "Missing date columns",
                 paste0("Missing columns: ", paste(missingColumns, collapse = ", "))
             )
-            return(validationLogTibble)
+            return(validationLogR6)
         } else {
-            validationLogTibble$SUCCESS("Missing date columns", "")
+            validationLogR6$SUCCESS("Missing date columns", "")
         }
 
         validationRules <- validate::validator(
@@ -283,9 +319,9 @@ validateUsagiFile <- function(
         )
         validations <- validate::confront(usagiTibble, validationRules)
 
-        result <- .applyValidationRules(usagiTibble, validations, validationLogTibble)
+        result <- .applyValidationRules(usagiTibble, validations, validationLogR6)
         usagiTibble <- result$fileTibble
-        validationLogTibble <- result$validationLogTibble
+        validationLogR6 <- result$validationLogR6
     }
 
     # Check ADD_INFO:sourceParents,ADD_INFO:sourceParentVocabulary
@@ -298,13 +334,13 @@ validateUsagiFile <- function(
             setdiff(usagiTibbleColumns)
 
         if (length(missingColumns) > 0) {
-            validationLogTibble$ERROR(
+            validationLogR6$ERROR(
                 "Missing parent columns",
                 paste0("Missing columns: ", paste(missingColumns, collapse = ", "))
             )
-            return(validationLogTibble)
+            return(validationLogR6)
         } else {
-            validationLogTibble$SUCCESS("Missing parent columns", "")
+            validationLogR6$SUCCESS("Missing parent columns", "")
         }
 
         # check if sourceParents is a valid conceptCode in the ParentVocabulary
@@ -328,7 +364,6 @@ validateUsagiFile <- function(
 
             validVocabularyConceptCodes <- dplyr::bind_rows(validVocabularyConceptCodes, parentVocabularyConceptCodes)
         }
-
         parentConceptCodes <- usagiTibble |>
             dplyr::select(`ADD_INFO:sourceParents`, `ADD_INFO:sourceParentVocabulary`) |>
             dplyr::mutate(row = dplyr::row_number()) |>
@@ -342,7 +377,7 @@ validateUsagiFile <- function(
                         stringr::str_split("\\|") |>
                         purrr::flatten_chr()
 
-                    if (length(x) != length(y)) {
+                    if (!any(is.na(y)) && length(x) != length(y)) {
                         stop("length of parent concept codes and parent vocabularies must be the same")
                     }
 
@@ -350,7 +385,8 @@ validateUsagiFile <- function(
                 })
             ) |>
             tidyr::unnest(cols = c(vocabulary_id)) |>
-            dplyr::select(-`ADD_INFO:sourceParentVocabulary`, -`ADD_INFO:sourceParents`)
+            dplyr::select(-`ADD_INFO:sourceParentVocabulary`, -`ADD_INFO:sourceParents`) |>
+            dplyr::mutate(concept_code = dplyr::if_else(concept_code == "", NA_character_, concept_code))
 
         notValidParentConceptCodes <- parentConceptCodes |>
             dplyr::filter(!is.na(vocabulary_id) & !is.na(concept_code)) |>
@@ -365,7 +401,7 @@ validateUsagiFile <- function(
             dplyr::ungroup()
 
         if (nrow(notValidParentConceptCodes) > 0) {
-            validationLogTibble$ERROR(
+            validationLogR6$ERROR(
                 "Invalid parent concept code",
                 paste0("Found ", nrow(notValidParentConceptCodes), " codes with invalid parent concept codes")
             )
@@ -376,29 +412,45 @@ validateUsagiFile <- function(
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
                 dplyr::select(-row, -errorMessage)
         } else {
-            validationLogTibble$SUCCESS("Invalid parent concept code", "")
+            validationLogR6$SUCCESS("Invalid parent concept code", "")
         }
     }
 
-
+    #
     # end
-    usagiTibble |>
+    #
+    usagiTibble <- usagiTibble |>
         dplyr::mutate(
-            tmpvalidationMessages = stringr::str_replace(tmpvalidationMessages, "^\\s*\\|\\s*", ""),
-            mappingStatus = dplyr::case_when(
-                tmpvalidationMessages != "" ~ "FLAGGED",
-                TRUE ~ mappingStatus
-            )
+            `ADD_INFO:validationMessages` = stringr::str_replace(tmpvalidationMessages, "^\\s*\\|\\s*", ""),
+            # Change to FLAGGED if there is an error not due to outdated concepts, this means there is string with 'ERROR:'
+            mappingStatus = dplyr::if_else(
+                stringr::str_detect(tmpvalidationMessages, "ERROR:"),
+                "FLAGGED", 
+                mappingStatus)
         ) |>
-        dplyr::rename(`ADD_INFO:validationMessages` = tmpvalidationMessages) |>
-        readr::write_csv(pathToValidatedUsagiFile, na = "")
+        dplyr::select(-tmpvalidationMessages)
 
-    return(validationLogTibble$logTibble)
+    # Kill switch, if other than `mappingStatus` and `ADD_INFO:validationMessages` are different then error
+    byNames <- usagiTibble |>
+        names() |>
+        setdiff(c("mappingStatus", "ADD_INFO:validationMessages"))
+    differences <- usagiTibbleOriginal |>
+        dplyr::select(dplyr::all_of(byNames)) |>
+        dplyr::anti_join(usagiTibble |> dplyr::select(dplyr::all_of(byNames)), by = byNames)
+    if (differences |> nrow() > 0) {
+        validationLogR6$ERROR("Validation failed", "Validation failed")
+        return(validationLogR6$logTibble)
+    }
+
+    usagiTibble |>
+        writeUsagiFile(pathToValidatedUsagiFile)
+
+    return(validationLogR6$logTibble)
 }
 
 
 
-.applyValidationRules <- function(fileTibble, validations, validationLogTibble) {
+.applyValidationRules <- function(fileTibble = NULL, validations, validationLogR6) {
     validationSummary <- validate::summary(validations) |> tibble::as_tibble()
     if ("name" %in% names(validationSummary)) {
         validationSummary <- validationSummary |>
@@ -408,17 +460,17 @@ validateUsagiFile <- function(
     for (i in 1:nrow(validationSummary)) {
         row <- validationSummary[i, ]
         if (row$error) {
-            validationLogTibble$FATAL(
+            validationLogR6$FATAL(
                 row$name,
                 "Validation failed"
             )
         } else if (row$fails > 0) {
-            validationLogTibble$ERROR(
+            validationLogR6$ERROR(
                 row$name,
                 paste("Number of failed rules: ", row$fails)
             )
         } else {
-            validationLogTibble$SUCCESS(
+            validationLogR6$SUCCESS(
                 row$name,
                 ""
             )
@@ -427,7 +479,7 @@ validateUsagiFile <- function(
 
     # get failed rules with row numbers
     failedRulesRows <- validate::values(validations) |> tibble::as_tibble()
-    if (nrow(failedRulesRows) > 0) {
+    if (nrow(failedRulesRows) > 0 && !is.null(fileTibble)) {
         failedRulesRows <- failedRulesRows |>
             dplyr::mutate_all(~ dplyr::if_else(!.x, dplyr::row_number(), as.integer(NA))) |>
             tidyr::pivot_longer(cols = tidyr::everything(), names_to = "name", values_to = "row", values_drop_na = TRUE) |>
@@ -447,5 +499,5 @@ validateUsagiFile <- function(
         }
     }
 
-    return(list(fileTibble = fileTibble, validationLogTibble = validationLogTibble))
+    return(list(fileTibble = fileTibble, validationLogR6 = validationLogR6))
 }
