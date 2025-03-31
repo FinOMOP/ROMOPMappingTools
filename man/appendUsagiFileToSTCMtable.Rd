@@ -10,7 +10,8 @@ appendUsagiFileToSTCMtable(
   connection,
   vocabularyDatabaseSchema,
   sourceToConceptMapTable,
-  includeMappingStatus = "APPROVED",
+  includeConcepts = c("APPROVED", "UNCHECKED", "INVALID_TARGET"),
+  includeMappings = c("APPROVED"),
   skipValidation = TRUE,
   sourceConceptIdOffset = 0
 )
@@ -26,8 +27,11 @@ appendUsagiFileToSTCMtable(
 
 \item{sourceToConceptMapTable}{Name of source to concept map table}
 
-\item{includeMappingStatus}{Vector of mapping statuses to include. Must be subset of:
+\item{includeConcepts}{Vector of mapping statuses to include. Must be subset of:
 "APPROVED", "UNCHECKED", "FLAGGED", "INEXACT", "INVALID_TARGET"}
+
+\item{includeMappings}{Vector of mapping statuses to include. Must be subset of:
+"APPROVED", "UNCHECKED", "FLAGGED", "INVALID_TARGET"}
 
 \item{skipValidation}{Whether to skip validation of the Usagi file (default: TRUE)}
 

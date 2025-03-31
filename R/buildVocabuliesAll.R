@@ -12,7 +12,6 @@
 #' @param pathToVocabularyFolder Path to folder containing vocabulary files
 #' @param connectionDetails DatabaseConnector connection details object
 #' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
-#' @param pathToCodeCountsFolder Path to folder containing code counts files
 #' @param validationResultsFolder Folder where validation results will be saved
 #' @param sourceToConceptMapTable Optional name of source to concept map table
 #'
@@ -25,14 +24,12 @@ buildVocabulariesAll <- function(
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
-    pathToCodeCountsFolder,
     validationResultsFolder,
     sourceToConceptMapTable = NULL) {
     # validate parameters
     pathToVocabularyFolder |> checkmate::assertDirectory()
     connectionDetails |> checkmate::assertClass("ConnectionDetails")
     vocabularyDatabaseSchema |> checkmate::assertString()
-    pathToCodeCountsFolder |> checkmate::assertDirectory()
     validationResultsFolder |> checkmate::assertDirectory()
     sourceToConceptMapTable |> checkmate::assertString(null.ok = TRUE)
 
@@ -49,7 +46,7 @@ buildVocabulariesAll <- function(
     )
 
     # if there are errors at this point stop
-    if (validationLogTibble |> dplyr::filter(type != "SUCCESS") |> nrow() > 0) {
+    if (validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() > 0) {
         message("Errors found in the vocabulary folder")
         return(validationLogTibble)
     }
@@ -168,16 +165,12 @@ buildVocabulariesAll <- function(
     validationLogTibbledqd <- validateCDMtablesWithDQD(
         connectionDetails = connectionDetails,
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-        validationResultsFolder = validationResultsFolder
+        validationResultsFolder = tempdir()
     )
-
 
     validationLogTibble <- dplyr::bind_rows(validationLogTibble, validationLogTibbledqd) |>
         dplyr::select(context, type, step, message)
 
-
-    # save validation log tibble
-    validationLogTibble |> readr::write_csv(file.path(validationResultsFolder, "validationLogTibble.csv"), na = "")
 
     return(validationLogTibble)
 }

@@ -70,7 +70,7 @@ plotTableMappingStatus <- function(mapping_status) {
 
   columns_list[["source_vocabulary_id"]] <- reactable::colDef(name = "Vocabulary")
 
-
+  
   columns_list[["str_mapped"]] <- reactable::colDef(
     name = "Mapping progress",
     cell =  function(value){.tip_reactable_cell(value, row_names = c("mapped: ", "no mapped: "), unit_names = rep(" codes", 2) )},
@@ -94,14 +94,15 @@ plotTableMappingStatus <- function(mapping_status) {
     align = "left"
   )
 
+
   # create table
-  table <- code_counts_table |>
+  table <- code_counts_table |> 
     reactable::reactable(
       pagination = FALSE,
       #
       columns = columns_list
     )
-
+  
   return(table)
 
 }
@@ -116,7 +117,6 @@ plotTableMappingStatus <- function(mapping_status) {
     string_values, colors = NULL,
     height ="60%", width ="95%",
     background_color = "#FFFFFF", text_color =  "#FFFFFF"){
-
 
   if(is.na(string_values)){return("")}
   values<-  stringr::str_split(string_values, "-")[[1]] |> as.double()
@@ -170,7 +170,7 @@ plotTableMappingStatus <- function(mapping_status) {
   if(only_percent==FALSE){
     text <- stringr::str_c(
       row_names,
-      scales::number(values, scale_cut = scales::cut_short_scale()),
+      scales::number(values, scale_cut = scales::cut_si('')),
       unit_names,
       rep(" (", n_rows),
       scales::percent(per_values, accuracy = 0.01 ),
