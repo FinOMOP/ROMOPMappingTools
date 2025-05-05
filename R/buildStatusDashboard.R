@@ -10,7 +10,7 @@
 #' @return A validation log tibble
 #'
 #' @importFrom dplyr select mutate filter if_else
-#' @importFrom rmarkdown render
+#' @importFrom rmarkdown
 #' @importFrom reactable reactable
 #' @importFrom shiny div
 #'
