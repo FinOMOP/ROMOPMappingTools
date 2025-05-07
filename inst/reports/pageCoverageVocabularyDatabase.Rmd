@@ -1,0 +1,48 @@
+---
+title: "Coverage of Vocabulary in Database"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+params: 
+  summaryTableForVocabularyAndDatabase: NULL
+  targetVocabularyId: NULL
+  databaseName: NULL
+---
+
+
+```{r}
+library(flexdashboard)
+
+summaryTableForVocabularyAndDatabase <- params$summaryTableForVocabularyAndDatabase
+targetVocabularyId <- params$targetVocabularyId
+databaseName <- params$databaseName
+
+# Update title dynamically
+if(!is.null(targetVocabularyId) && !is.null(databaseName)) {
+  title <- paste0("Coverage of ", targetVocabularyId, " in ", databaseName)
+  htmltools::tags$script(paste0("document.title = '", title, "';"))
+}
+
+```
+
+
+Databases Coverage
+=====================================
+
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Summary
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+### Mapping 
+
+```{r}
+if(!is.null(summaryTableForVocabularyAndDatabase)){
+  .plotSummaryTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)
+}
+
+```
+

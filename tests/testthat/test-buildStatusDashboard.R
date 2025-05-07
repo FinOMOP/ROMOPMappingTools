@@ -46,3 +46,98 @@ test_that("buildStatusDashboard works", {
     # check the validation results folder
     expect_true(file.exists(output_file_html))
 })
+
+
+
+test_that("internal functions works", {
+    # Set up test data
+    pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
+    pathToCodeCountsFolder <- system.file("testdata/CODE_COUNTS", package = "ROMOPMappingTools")
+    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+    withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+    vocabularyDatabaseSchema <- "main"
+    validationResultsFolder <- file.path(tempdir(), "validationResults")
+    dir.create(validationResultsFolder, showWarnings = FALSE, recursive = TRUE)
+    withr::defer(unlink(validationResultsFolder, recursive = TRUE))
+
+    # Create connection details for test database
+    connectionDetails <- DatabaseConnector::createConnectionDetails(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+
+    # Run function
+    suppressWarnings(
+        validationLogTibble <- buildVocabulariesAll(
+            pathToVocabularyFolder = pathToVocabularyFolder,
+            connectionDetails = connectionDetails,
+            vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+            validationResultsFolder = validationResultsFolder
+        )
+    )
+
+    sourceVocabularyId <- c("ICD10fi")
+    targetVocabularyIds <- c("ICD10", "ICD10fi")
+    vocabularyDatabaseSchema <- "main"
+    databaseName <- "FinnGenDF10"
+    #
+    # - getDatabaseSummaryForVocabulary
+    #
+    databaseSummary <- .getDatabaseSummaryForVocabulary(
+        connectionDetails = connectionDetails,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+        targetVocabularyIds = targetVocabularyIds
+    )
+
+    # Check that all columns in databaseSummary have values
+    expect_true(all(colnames(databaseSummary) |>
+        purrr::map_lgl(~ !all(is.na(databaseSummary[[.x]])))))
+
+    #
+    # - getCodeCountsForVocabulary
+    #
+    codeCounts <- .getCodeCountsForVocabularyAndDatabase(
+        pathToCodeCountsFolder = pathToCodeCountsFolder,
+        sourceVocabularyId = sourceVocabularyId,
+        databaseName = databaseName
+    )
+
+    # Check that all columns in codeCounts have values
+    expect_true(all(colnames(codeCounts) |>
+        purrr::map_lgl(~ !all(is.na(codeCounts[[.x]])))))
+
+    #
+    # - getUsagiSummaryForVocabulary
+    #
+    usagiSummary <- .getUsagiSummaryForVocabulary(
+        pathToVocabularyFolder = pathToVocabularyFolder,
+        sourceVocabularyId = sourceVocabularyId
+    )   
+
+    # Check that all columns in usagiSummary have values
+    expect_true(all(colnames(usagiSummary) |>
+        purrr::map_lgl(~ !all(is.na(usagiSummary[[.x]])))))
+
+
+    #
+    # - getSummaryTableForVocabularyAndDatabase
+    #
+    summaryTableForVocabularyAndDatabase <- .getSummaryTableForVocabularyAndDatabase(
+        pathToCodeCountsFolder = pathToCodeCountsFolder,
+        pathToVocabularyFolder = pathToVocabularyFolder,
+        connectionDetails = connectionDetails,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+        sourceVocabularyId = sourceVocabularyId,
+        targetVocabularyIds = targetVocabularyIds,
+        databaseName = databaseName
+    )
+
+    outputCoverageVocabularyDatabaseHtml <- .pageSummaryTableForVocabularyAndDatabase(
+        summaryTableForVocabularyAndDatabase = summaryTableForVocabularyAndDatabase,
+        targetVocabularyId = sourceVocabularyId,
+        databaseName = databaseName
+    )
+
+    expect_true(file.exists(outputCoverageVocabularyDatabaseHtml))
+    
+})

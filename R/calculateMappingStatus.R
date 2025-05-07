@@ -66,46 +66,7 @@ calculateMappingStatus <- function(
     #
     # - Get info of the mappings from the OMOP vocabulary
     #
-    connection <- DatabaseConnector::connect(connectionDetails)
 
-    sql <- "
-      SELECT
-        c.vocabulary_id AS vocabulary_id,
-        c.concept_code AS concept_code,
-        c.concept_name AS concept_name,
-        cs.concept_synonym_name AS concept_name_fi,
-        c.concept_id AS concept_id,
-        cr.concept_id_2 AS concept_id_2
-      FROM (
-        SELECT * FROM @vocabulary_database_schema.CONCEPT
-        WHERE vocabulary_id IN (@list_vocabulary_ids)
-      ) AS c
-      LEFT JOIN (
-        SELECT concept_id_1, concept_id_2  FROM @vocabulary_database_schema.CONCEPT_RELATIONSHIP
-        WHERE relationship_id = 'Maps to'
-      ) AS cr
-        ON c.concept_id = cr.concept_id_1
-      LEFT JOIN (
-        SELECT concept_id, concept_synonym_name  FROM @vocabulary_database_schema.CONCEPT_SYNONYM
-        WHERE language_concept_id == 4181730
-      ) AS cs
-        ON c.concept_id = cs.concept_id
-  "
-
-    listVocabularyIds <- vocabulariesCoverageTibble |>
-        dplyr::pull(target_vocabulary_ids) |>
-        unique()
-
-    sql <- SqlRender::render(
-        sql = sql,
-        vocabulary_database_schema = vocabularyDatabaseSchema,
-        list_vocabulary_ids = paste0("'", listVocabularyIds, "'") |> paste0(collapse = ", ")
-    )
-    sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
-
-    vocabulariesDBInfo <- DatabaseConnector::dbGetQuery(connection, sql) |> tibble::as_tibble()
-
-    DatabaseConnector::disconnect(connection)
 
 
     concepts_to_match <- vocabulariesCoverageTibble |>
