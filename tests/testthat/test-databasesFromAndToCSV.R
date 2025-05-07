@@ -1,4 +1,4 @@
-testthat::test_that("databaseVocabularyTablesToCSVFiles", {
+testthat::test_that("duckdbToOMOPVocabularyCSVs", {
     pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
     withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     pathToOMOPVocabularyCSVsFolder <- tempdir()
@@ -11,7 +11,7 @@ testthat::test_that("databaseVocabularyTablesToCSVFiles", {
     )
     on.exit(DatabaseConnector::disconnect(connection))
 
-    databaseVocabularyTablesToCSVFiles(
+    duckdbToOMOPVocabularyCSVs(
         connection = connection,
         vocabularyDatabaseSchema = "main",
         OMOPVocabularyTableNames = NULL,
