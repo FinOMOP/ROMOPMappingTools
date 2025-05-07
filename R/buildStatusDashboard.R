@@ -10,7 +10,6 @@
 #' @return A validation log tibble
 #'
 #' @importFrom dplyr select mutate filter if_else
-#' @importFrom rmarkdown
 #' @importFrom reactable reactable
 #' @importFrom shiny div
 #'
@@ -20,6 +19,11 @@ buildStatusDashboard <- function(
     connectionDetails,
     vocabularyDatabaseSchema,
     output_file_html = file.path(tempdir(), "MappingStatusDashboard.html")) {
+
+  if (!requireNamespace("rmarkdown", quietly = TRUE)) {
+    stop("The 'rmarkdown' package is required but not installed. Please install it.")
+  }
+
   #
   # Validate parameters
   #
