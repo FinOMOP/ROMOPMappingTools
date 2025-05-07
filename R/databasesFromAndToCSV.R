@@ -73,7 +73,7 @@ omopVocabularyCSVsToDuckDB <- function(
 
 
 #' Export vocabulary tables from a database to CSV files
-#' 
+#'
 #' @param connection DatabaseConnector connection object to the database containing vocabulary tables
 #' @param vocabularyDatabaseSchema Schema name where vocabulary tables are located
 #' @param OMOPVocabularyTableNames Vector of vocabulary table names to export. If NULL, exports standard set.
@@ -84,7 +84,7 @@ omopVocabularyCSVsToDuckDB <- function(
 #'
 #' @return No return value, called for side effects
 #' @export
-databaseVocabularyTablesToCSVFiles <- function(
+duckdbToOMOPVocabularyCSVs <- function(
     connection,
     vocabularyDatabaseSchema,
     OMOPVocabularyTableNames,
@@ -124,19 +124,27 @@ databaseVocabularyTablesToCSVFiles <- function(
 
     for (table_name in OMOPVocabularyTableNames) {
         message("Exporting table: ", table_name)
-        table <- DatabaseConnector::dbReadTable(connection, table_name |> stringr::str_to_lower())
-        table <- table |> dplyr::rename_all(tolower)
-        table  <- table  |> dplyr::mutate(
-            dplyr::across(
-                dplyr::where(~inherits(., "Date")),
-                ~format(., "%Y%m%d")
-            )
-        )
-    
+        out_path <- file.path(pathToOMOPVocabularyCSVsFolder, paste0(table_name, ".csv"))
         
-        table |> readr::write_tsv(
-            file.path(pathToOMOPVocabularyCSVsFolder, paste0(table_name, ".csv")), 
-            na = ""
+        col_info <- DBI::dbGetQuery(
+            connection,
+            paste0("PRAGMA table_info(", table_name, ");")
         )
+        cols <- col_info$name
+        date_cols <- col_info$name[grepl("^date$", tolower(col_info$type))]
+        
+        select_cols <- sapply(cols, function(col) {
+            if (col %in% date_cols) {
+                paste0("STRFTIME('%Y%m%d', ", col, ") AS ", col)
+            } else {
+                col
+            }
+        })
+
+        select_sql <- paste(select_cols, collapse = ", ")
+        sql <- paste0("COPY (SELECT ", select_sql, " FROM ", table_name, ") TO '", out_path, "' (HEADER, DELIM '\t');")
+        DatabaseConnector::dbExecute(connection, sql)
     }
+
+    DatabaseConnector::disconnect(connection)
 }
