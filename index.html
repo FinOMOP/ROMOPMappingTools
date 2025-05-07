@@ -60,33 +60,31 @@
 <!-- badges: start -->
 
 <p><img src="https://github.com/FinOMOP/ROMOPMappingTools/assets/54809193/6c195491-eceb-447c-86c9-86d66b8ee63d"></p>
-<p>ROMOPMappingTools provides the functions needed to maintain a repository with mappings of local medical vocabularies to OMOP standard vocabularies.</p>
-<p>It allows to :</p>
-<ul>
-<li>Transform multiple mapping files in usagi-extended format to the OMOP vocabulary tables</li>
-<li>Append created OMOP vocabulary tables to OMOP vocabulary tables downloaded from Athena</li>
-<li>Run QC on the input an output files</li>
-<li>Given the code’s frequency from one or more local databases calculates how well a OMOP vocabulary covers the medical events</li>
-<li>Create a interactive dashboard to show the above results</li>
-</ul>
-<p><a href="https://finomop.github.io/ROMOPMappingTools/%CF%80">See vignettes for details</a>.</p>
-<div class="section level2">
-<h2 id="example-of-a-mapping-repository">Example of a mapping repository<a class="anchor" aria-label="anchor" href="#example-of-a-mapping-repository"></a>
-</h2>
-<p>This package contains only the functions to process the input files. How the files and repository are organized is independent of this package.</p>
-<p>As an example we show an demo version of the repo and folder structure we use for maintaining the mapping files in FinOMOP: <a href="https://github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test" class="external-link">FinOMOP_OMOP_vocabulary_test</a>. Check also the documentation part: <a href="https://github.com/FinOMOP/FinOMOP_OMOP_vocabulary_test/blob/development/DOCUMENTATION/README.md" class="external-link">FinOMOP_OMOP_vocabulary_test/DOCUMENTATION</a></p>
-<p>Following diagram summarizes how FinOMOP uses ROMOPMappingTools to maintaining their mappings:</p>
-<p><img src="./.img/romopmappingtools.svg"></p>
+<p>ROMOPMappingTools provides functions to validate, update, and summarize multiple Usagi mapping files, as well as to transform them into the OMOP vocabulary tables.</p>
+<p>Functions can be use at three different levels:</p>
 <ol style="list-style-type: decimal">
-<li>A <code>VOCABULARIES</code> folder contains a subfolder for each local vocabulary with a <code>usagi.csv</code> and an <code>info.csv</code> mapping files, as well as a configuration file.</li>
-<li>ROMOPMappingTools validate correctness of the mapping files and transform them into OMOP vocabulary tables. Local codes receive concept_ids over the 2 billion.</li>
-<li>ROMOPMappingTools appends the newly created OMOP vocabulary tables to the OMOP vocabulary tables downloaded from Athena.</li>
-<li>Merged local and international OMOP vocabulary tables can be directly input into the ETL.</li>
-<li>Additionally, the repository has a <code>CODE_COUNTS</code> folder with code counts from multiple databases and configuration files.</li>
-<li>ROMOPMappingTools validate correctness of the code count files and use these to assess how well the new OMOP vocabulary covers the events in each database.</li>
-<li>ROMOPMappingTools creates a <code>Status dashboard</code> that summarizes the results, and publish it as <a href="https://finomop.github.io/FinOMOP_OMOP_vocabulary_test/StatusReport/dashboard.html" class="external-link">Github page</a>.</li>
+<li>Working with individual mapping files
+<ul>
+<li>Validate Usagi mapping files: conceptIds exist in the OMOP vocabulary, domain combinations are correct, etc.</li>
+<li>Update Usagi mapping : Automatically fixes mapping in that become obsolete due to new OMOP vocabulary releases.</li>
+</ul>
+</li>
+<li>Working with multiple mapping files
+<ul>
+<li>Validate, and update multiple mapping files at once.</li>
+<li>Transform and append a group of Usagi mapping files to OMOP vocabulary tables: Concept, concept_relationship, and concept_ancestor tables.</li>
+<li>Run DQD on the new OMOP vocabulary tables.</li>
+<li>Build a status dashboard to show the progress of multiple mapping files.</li>
+</ul>
+</li>
+<li>Working with in multiple mapping files in a github repository
+<ul>
+<li>Create github action workflows to automatically validate Usagi files in each pull request.</li>
+<li>Create github action workflows to automatically update the progress dashboard when a pull request is merged.</li>
+</ul>
+</li>
 </ol>
-</div>
+<p><a href="https://finomop.github.io/ROMOPMappingTools/">See vignettes for details</a>. <a href="https://github.com/FinOMOP/FinOMOP_mappings" class="external-link">See FimOMOP repository for an example of how to use the package in a github repository</a>.</p>
 </div>
   </main><aside class="col-md-3"><div class="license">
 <h2 data-toc-skip>License</h2>
@@ -108,7 +106,7 @@
 <div class="developers">
 <h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
-<li>Javier Gracia-Tabuenca <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-2455-0598" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Javier Gracia-Tabuenca <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-2455-0598" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a>  </li>
 </ul>
 </div>
 
@@ -128,7 +126,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>
