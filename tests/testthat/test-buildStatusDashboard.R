@@ -88,7 +88,7 @@ test_that("internal functions works", {
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         targetVocabularyIds = targetVocabularyIds
     )
-
+    
     # Check that all columns in databaseSummary have values
     expect_true(all(colnames(databaseSummary) |>
         purrr::map_lgl(~ !all(is.na(databaseSummary[[.x]])))))

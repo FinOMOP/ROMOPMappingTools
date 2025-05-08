@@ -82,7 +82,7 @@ buildStatusDashboard <- function(
   )
 
 
-  modalWithMermaidPath <- system.file("reports", "modalWithMermaid.html", package = "ROMOPMappingTools")  
+  modalWithMermaidPath <- system.file("reports", "modalWithMermaid.html", package = "ROMOPMappingTools")
   modalWithMermaid <- readChar(modalWithMermaidPath, file.info(modalWithMermaidPath)$size)
   outputFileHtml <- readChar(outputFileHtmlPath, file.info(outputFileHtmlPath)$size)
   outputFileHtml <- outputFileHtml |>
@@ -428,7 +428,7 @@ buildStatusDashboard <- function(
         c2.vocabulary_id AS target_vocabulary_id,
         c2.concept_code AS target_code,
         c2.concept_name AS target_concept_name,
-        c2.concept_id AS target_concept_id
+        c2.concept_id AS target_concept_id  
       FROM (
         SELECT * FROM @vocabulary_database_schema.CONCEPT
         WHERE vocabulary_id IN (@list_vocabulary_ids)
@@ -449,13 +449,51 @@ buildStatusDashboard <- function(
   )
   sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
 
-  vocabulariesDBInfo <- DatabaseConnector::dbGetQuery(connection, sql) |>
+  databaseSummary <- DatabaseConnector::dbGetQuery(connection, sql) |>
     tibble::as_tibble() |>
     dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
 
+  # get children
+  sql <- "
+    SELECT
+      c.concept_id,
+      crp.child_concept_id
+    FROM (
+      SELECT * FROM @vocabulary_database_schema.CONCEPT
+      WHERE vocabulary_id IN (@list_vocabulary_ids)
+    ) AS c
+    LEFT JOIN (
+      SELECT
+          concept_id_1 AS child_concept_id,
+          concept_id_2 AS concept_id
+      FROM @vocabulary_database_schema.CONCEPT_RELATIONSHIP
+      WHERE relationship_id = 'Subsumes'
+    ) AS crp
+    ON c.concept_id = crp.concept_id
+  "
+
+  sql <- SqlRender::render(
+    sql = sql,
+    vocabulary_database_schema = vocabularyDatabaseSchema,
+    list_vocabulary_ids = paste0("'", targetVocabularyIds, "'") |> paste0(collapse = ", ")
+  )
+  sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
+
+  conceptChild <- DatabaseConnector::dbGetQuery(connection, sql) |>
+    tibble::as_tibble() |>
+    dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
+
+    
+
+
+  # merge
+  databaseSummary <- databaseSummary |>
+    dplyr::left_join(conceptParent, by = c("sourceConceptId" = "conceptId")) |>
+    dplyr::left_join(conceptChild, by = c("sourceConceptId" = "conceptId"))
+
   DatabaseConnector::disconnect(connection)
 
-  return(vocabulariesDBInfo)
+  return(databaseSummary)
 }
 
 .getUsagiSummaryForVocabulary <- function(
@@ -494,3 +532,132 @@ buildStatusDashboard <- function(
 
   return(usagiSummaryTibble)
 }
+
+get_full_family_tree_with_distance <- function(relations, conceptId) {
+  # relations: a tibble with columns conceptId (parent) and childConceptId (child)
+  # conceptId: the root conceptId to start from
+
+  # Downward (children)
+  result <- tibble::tibble(
+    parentConceptId = numeric(),
+    childConceptId = numeric(),
+    distance = integer()
+  )
+  queue <- list(list(id = conceptId, dist = 0))
+  visited <- c()
+  while (length(queue) > 0) {
+    current <- queue[[1]]
+    queue <- queue[-1]
+    if (current$id %in% visited) next
+    visited <- c(visited, current$id)
+    children <- relations %>%
+      dplyr::filter(conceptId == current$id) %>%
+      dplyr::pull(childConceptId)
+    if (length(children) > 0) {
+      result <- dplyr::bind_rows(
+        result,
+        tibble::tibble(
+          parentConceptId = current$id,
+          childConceptId = children,
+          distance = current$dist + 1
+        )
+      )
+      queue <- c(queue, lapply(children, function(child) list(id = child, dist = current$dist + 1)))
+    }
+  }
+
+  # Upward (parents)
+  result_up <- tibble::tibble(
+    parentConceptId = numeric(),
+    childConceptId = numeric(),
+    distance = integer()
+  )
+  queue <- list(list(id = conceptId, dist = 0))
+  visited <- c()
+  while (length(queue) > 0) {
+    current <- queue[[1]]
+    queue <- queue[-1]
+    if (current$id %in% visited) next
+    visited <- c(visited, current$id)
+    parents <- relations %>%
+      dplyr::filter(childConceptId == current$id) %>%
+      dplyr::pull(conceptId)
+    if (length(parents) > 0) {
+      result_up <- dplyr::bind_rows(
+        result_up,
+        tibble::tibble(
+          parentConceptId = parents,
+          childConceptId = current$id,
+          distance = current$dist - 1
+        )
+      )
+      queue <- c(queue, lapply(parents, function(parent) list(id = parent, dist = current$dist - 1)))
+    }
+  }
+
+  # Combine, and add the root node itself
+  result <- dplyr::bind_rows(
+    result_up,
+    result,
+    tibble::tibble(
+      parentConceptId = NA,
+      childConceptId = conceptId,
+      distance = 0
+    )
+  )
+  return(result)
+}
+
+
+
+
+#' Create a Mermaid plot from a family tree tibble
+#'
+#' @param family_tree A tibble with columns parentConceptId, childConceptId, and distance
+#' @return A string containing the Mermaid diagram code
+family_tree_to_mermaid <- function(family_tree, info, conceptId) {
+
+  # Start the Mermaid graph definition
+  mermaid_lines <- c("graph TD")
+
+  # For each row, add an edge from parent to child
+  for (i in seq_len(nrow(family_tree))) {
+    parent <- family_tree$parentConceptId[i]
+    child <- family_tree$childConceptId[i]
+    mermaid_lines <- c(mermaid_lines, sprintf("  %s --> %s", parent, child))
+  }
+
+  # Combine into a single string
+  mermaid_code <- paste(mermaid_lines, collapse = "\n")
+
+  # Add info to the graph
+  conceptIds  <- c(family_tree$parentConceptId, family_tree$childConceptId) |> unique()
+  info <- databaseSummary |> 
+    dplyr::filter(sourceConceptId %in% conceptIds) |> 
+    dplyr::select(sourceConceptId,sourceCode, sourceConceptName, sourceVocabularyId) |> 
+    dplyr::distinct() |> 
+    dplyr::mutate(
+      label = dplyr::if_else(
+        sourceConceptId == {{ conceptId }},
+        paste0(sourceConceptId, "{{", sourceCode,  "<br>", sourceVocabularyId, "}}"),
+        paste0(sourceConceptId, "[", sourceCode,  "<br>", sourceVocabularyId, "]")
+      )
+    )
+
+  info_labels <- info |> dplyr::pull(label) |> paste0(collapse = "\n") 
+
+  mermaid_code <- paste0(mermaid_code, "\n", info_labels)
+
+  return(mermaid_code)
+}
+
+code <- 45533778
+
+family_tree  <- get_full_family_tree_with_distance(conceptChild, code)
+family_tree  <- family_tree |>
+dplyr::filter(!is.na(childConceptId) & !is.na(parentConceptId)) |>
+dplyr::mutate(distance = -distance) 
+
+mermaid_code <- family_tree_to_mermaid(family_tree, databaseSummary, code)
+
+mermaid_code |> cat()
