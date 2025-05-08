@@ -20,7 +20,7 @@ buildStatusDashboard <- function(
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
-    output_file_html = file.path(tempdir(), "MappingStatusDashboard.html")) {
+    outputFileHtmlPath = file.path(tempdir(), "MappingStatusDashboard.html")) {
   #
   # Validate parameters
   #
@@ -28,7 +28,7 @@ buildStatusDashboard <- function(
   pathToCodeCountsFolder |> checkmate::assert_directory_exists()
   connectionDetails |> checkmate::assert_class(c("ConnectionDetails"))
   vocabularyDatabaseSchema |> checkmate::assert_character()
-  output_file_html |> checkmate::assert_character()
+  outputFileHtmlPath |> checkmate::assert_character()
 
 
   #
@@ -55,7 +55,7 @@ buildStatusDashboard <- function(
     params = list(
       mapping_status = mappingStatus
     ),
-    output_file = output_file_html
+    output_file = outputFileHtmlPath
   )
 
 
@@ -64,92 +64,259 @@ buildStatusDashboard <- function(
 
 
 
-.pageSummaryTableForVocabularyAndDatabase <- function(
-  summaryTableForVocabularyAndDatabase, 
-  targetVocabularyId,
-  databaseName
-  ) {
-
+.pageCoverageVocabularyDatabase <- function(
+    summaryTableForVocabularyAndDatabase,
+    sourceVocabularyId,
+    databaseName) {
   inputTemplate <- system.file("reports", "pageCoverageVocabularyDatabase.Rmd", package = "ROMOPMappingTools")
-  outputCoverageVocabularyDatabaseHtml <- file.path(tempdir(), "pageCoverageVocabularyDatabase.html")
+  outputFileHtmlPath <- file.path(tempdir(), "pageCoverageVocabularyDatabase.html")
 
   rmarkdown::render(
     input = inputTemplate,
     params = list(
       summaryTableForVocabularyAndDatabase = summaryTableForVocabularyAndDatabase,
-      targetVocabularyId = targetVocabularyId, 
+      sourceVocabularyId = sourceVocabularyId,
       databaseName = databaseName
     ),
-    output_file = outputCoverageVocabularyDatabaseHtml
+    output_file = outputFileHtmlPath
   )
 
-  return(outputCoverageVocabularyDatabaseHtml)
-  
+
+  modalWithMermaidPath <- system.file("reports", "modalWithMermaid.html", package = "ROMOPMappingTools")  
+  modalWithMermaid <- readChar(modalWithMermaidPath, file.info(modalWithMermaidPath)$size)
+  outputFileHtml <- readChar(outputFileHtmlPath, file.info(outputFileHtmlPath)$size)
+  outputFileHtml <- outputFileHtml |>
+    stringr::str_remove("</body>") |>
+    stringr::str_remove("</html>") |>
+    paste0(modalWithMermaid) |>
+    paste0("</body>") |>
+    paste0("</html>")
+
+  writeLines(outputFileHtml, outputFileHtmlPath)
+
+  return(outputFileHtmlPath)
 }
 
-.plotSummaryTableForVocabularyAndDatabase <- function(summaryTableForVocabularyAndDatabase) {
+.plotSummaryTableForVocabularyAndDatabase <- function(
+    summaryTableForVocabularyAndDatabase,
+    colors = list(
+      invalid = "#EC6173",
+      unmapped = "#F1AE4A",
+      mapsTo = "#51A350",
+      grey = "#AAAAAA"
+    )) {
+  toPlot <- summaryTableForVocabularyAndDatabase |>
+    dplyr::mutate(
+      statusColor = dplyr::case_when(
+        status == "INVALID" ~ colors$invalid,
+        status == "UNMAPPED" ~ colors$unmapped,
+        status == "MAPS TO" ~ colors$mapsTo
+      ),
+    ) |>
+    dplyr::group_by(sourceCode) |>
+    dplyr::mutate(
+      nMapsTo = dplyr::n_distinct(targetConceptId)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::distinct(sourceCode, .keep_all = TRUE) |>
+    dplyr::mutate(
+      status = dplyr::if_else(status == "MAPS TO", paste0(status, " ", nMapsTo), status)
+    ) |>
+    dplyr::group_by(status, statusColor) |>
+    dplyr::summarize(
+      n = dplyr::n(),
+      nEvents = sum(nEvents, na.rm = TRUE)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      pEvents = nEvents / sum(nEvents) * 100,
+      order = dplyr::case_when(
+        stringr::str_detect(status, "MAPS TO") ~ as.numeric(stringr::str_extract(status, "\\d+$")),
+        stringr::str_detect(status, "UNMAPPED") ~ 200,
+        stringr::str_detect(status, "INVALID") ~ 300,
+        TRUE ~ 0
+      )
+    ) |>
+    dplyr::arrange(order) |>
+    dplyr::select(order, status, statusColor, n, nEvents, pEvents)
 
-  greyColor <- "#AAAAAA"
+  columns <- list(
+    # Status
+    order = reactable::colDef(
+      name = "Status",
+      maxWidth = 150,
+      html = TRUE,
+      cell = function(value, index) {
+        status <- toPlot$status[index]
+        statusColor <- toPlot$statusColor[index]
+        paste0("<span style='color: ", statusColor, ";'>", status, "</span>")
+      }
+    ),
+    status = reactable::colDef(
+      show = FALSE
+    ),
+    statusColor = reactable::colDef(
+      show = FALSE
+    ),
+    # N codes
+    n = reactable::colDef(
+      name = "N codes",
+      maxWidth = 100
+    ),
+    nEvents = reactable::colDef(
+      name = "N Events",
+    ),
+    pEvents = reactable::colDef(
+      name = "% Events",
+      format = reactable::colFormat(digits = 2, suffix = "%")
+    )
+  )
+
+  toPlot |> reactable::reactable(
+    columns = columns,
+    resizable = TRUE,
+    sortable = TRUE,
+    defaultPageSize = 10
+  )
+}
+
+
+.plotTableForVocabularyAndDatabase <- function(
+    summaryTableForVocabularyAndDatabase,
+    colors = list(
+      invalid = "#EC6173",
+      unmapped = "#F1AE4A",
+      mapsTo = "#51A350",
+      grey = "#AAAAAA"
+    )) {
   athenaUrl <- "https://athena.ohdsi.org/search-terms/terms/"
 
   toPlot <- summaryTableForVocabularyAndDatabase |>
-  dplyr::mutate(
-    n_events = dplyr::if_else(is.na(n_events) | n_events < 0, 0, n_events),
-    p_events = n_events / sum(n_events) * 100,
-    statusColor = dplyr::case_when(
-      status == "INVALID" ~ "#EC6173",
-      status == "UNMAPPED" ~ "#F1AE4A",
-      status == "MAPS TO" ~ "#51A350"
-    ),
-  ) |>
-    dplyr::group_by(source_code) |>
     dplyr::mutate(
-      nMapsTo = dplyr::n_distinct(target_concept_id)
+      nEvents = dplyr::if_else(is.na(nEvents) | nEvents < 0, 0, nEvents),
+      pEvents = nEvents / sum(nEvents) * 100,
+      statusColor = dplyr::case_when(
+        status == "INVALID" ~ colors$invalid,
+        status == "UNMAPPED" ~ colors$unmapped,
+        status == "MAPS TO" ~ colors$mapsTo
+      ),
+    ) |>
+    dplyr::group_by(sourceCode) |>
+    dplyr::mutate(
+      nMapsTo = dplyr::n_distinct(targetConceptId)
     ) |>
     dplyr::ungroup() |>
-  dplyr::transmute(
-    sourceCode = paste0(source_code, " <br><span style='color:", greyColor,"'> (", source_vocabulary_id, ")</span>"),
-    sourceName = source_concept_name,
-    status = dplyr::if_else(status == "MAPS TO", paste0(status, " ", nMapsTo), status),
-    status = paste0("<span style='color: ",statusColor,";'>",status,"</span>", dplyr::if_else(!is.na(equivalence), paste0(" <br><span style='color:", greyColor,"'> (", equivalence, ")</span>"), "")),
-    targetCode = dplyr::if_else(!is.na(target_concept_id), paste0(target_code, " <br><span style='color:", greyColor,"'> (", target_vocabulary_id, ")</span>"), ""),
-    targetName = dplyr::if_else(!is.na(target_concept_name), paste0("<a href='", athenaUrl, target_concept_id, "' target='_blank'>", target_concept_name, "</a>"), ""),
-    n_events = paste0(n_events, " <br><span style='color:", greyColor,"'> (", round(p_events, 2), "%)</span>"),
-    statusSetBy = statusSetBy
-  ) |> 
-  dplyr::arrange(dplyr::desc(n_events))
+    dplyr::transmute(
+      sourceCode = sourceCode,
+      sourceVocabularyId = sourceVocabularyId,
+      sourceName = sourceConceptName,
+      status = dplyr::if_else(status == "MAPS TO", paste0(status, " ", nMapsTo), status),
+      statusColor = statusColor,
+      targetCode = targetCode,
+      equivalence = equivalence,
+      targetVocabularyId = targetVocabularyId,
+      targetName = dplyr::if_else(!is.na(targetConceptName), paste0("<a href='", athenaUrl, targetConceptId, "' target='_blank'>", targetConceptName, "</a>"), ""),
+      nEvents = nEvents,
+      pEvents = pEvents,
+      statusSetBy = statusSetBy,
+      #
+      mermaidPlot = "graph TD<br>  A[Start] --> B{Is it working?}<br>  B -- Yes --> C[Great!]<br>  B -- No --> D[Check again]"
+    ) |>
+    dplyr::arrange(dplyr::desc(nEvents))
 
   columns <- list(
+    # Source Code
     sourceCode = reactable::colDef(
-      name = paste0("Source Code<br><span style='color:", greyColor,"'>(Vocabulary)</span>"),
+      name = paste0("Source Code<br><span style='color:", colors$grey, "'>(Vocabulary)</span>"),
       maxWidth = 120,
-      html = TRUE
+      html = TRUE,
+      cell = function(value, index) {
+        sourceCode <- toPlot$sourceCode[index]
+        sourceVocabularyId <- toPlot$sourceVocabularyId[index]
+        paste0(sourceCode, " <br><span style='color:", colors$grey, "'> (", sourceVocabularyId, ")</span>")
+      }
     ),
+    sourceVocabularyId = reactable::colDef(show = FALSE),
+    # Source Name
     sourceName = reactable::colDef(
       name = "Source Name",
     ),
+    # Status
     status = reactable::colDef(
-      name = paste0("Status<br><span style='color:", greyColor,"'>(Equivalence)</span>"),
+      name = paste0("Status<br><span style='color:", colors$grey, "'>(Equivalence)</span>"),
       maxWidth = 150,
-      html = TRUE
+      html = TRUE,
+      cell = function(value, index) {
+        status <- toPlot$status[index]
+        statusColor <- toPlot$statusColor[index]
+        equivalence <- toPlot$equivalence[index]
+        toPrint <- paste0("<span style='color: ", statusColor, ";'>", status, "</span>")
+        if (!is.na(equivalence)) {
+          toPrint <- paste0(toPrint, "<br><span style='color:", colors$grey, "'> (", equivalence, ")</span>")
+        }
+        toPrint
+      }
     ),
+    statusColor = reactable::colDef(
+      show = FALSE
+    ),
+    equivalence = reactable::colDef(
+      show = FALSE
+    ),
+    # Target Code
     targetCode = reactable::colDef(
-      name = paste0("Target Code<br><span style='color:", greyColor,"'>(Vocabulary)</span>"),
-      maxWidth = 120,
-      html = TRUE
+      name = paste0("Target Code<br><span style='color:", colors$grey, "'>(Vocabulary)</span>"),
+      maxWidth = 150,
+      html = TRUE,
+      cell = function(value, index) {
+        targetCode <- toPlot$targetCode[index]
+        targetVocabularyId <- toPlot$targetVocabularyId[index]
+        if (is.na(targetCode)) {
+          return("")
+        }
+        paste0(targetCode, " <br><span style='color:", colors$grey, "'> (", targetVocabularyId, ")</span>")
+      }
     ),
+    targetVocabularyId = reactable::colDef(
+      show = FALSE
+    ),
+    # Target Name
     targetName = reactable::colDef(
       name = "Target Name",
       html = TRUE
     ),
-    n_events = reactable::colDef(
-      name = paste0("N Events<br><span style='color:", greyColor,"'>(%)</span>"),
+    # N Events
+    nEvents = reactable::colDef(
+      name = paste0("N Events<br><span style='color:", colors$grey, "'>(%)</span>"),
       maxWidth = 100,
-      html = TRUE
+      html = TRUE,
+      cell = function(value, index) {
+        nEvents <- toPlot$nEvents[index]
+        pEvents <- toPlot$pEvents[index]
+        paste0(nEvents, " <br><span style='color:", colors$grey, "'> (", round(pEvents, 2), "%)</span>")
+      }
     ),
+    pEvents = reactable::colDef(
+      show = FALSE
+    ),
+    # Status Set By
     statusSetBy = reactable::colDef(
       name = "Status Set By",
       maxWidth = 200,
+    ),
+    # Mermaid Plot
+    mermaidPlot = reactable::colDef(
+      name = "Mermaid Plot",
+      html = TRUE,
+      cell = function(value, index) {
+        btn_id <- paste0("show-mermaid-", index)
+        # Escape the Mermaid code for JS
+        mermaid_code <- gsub("'", "\\\\'", toPlot$mermaidPlot[index])
+        sprintf(
+          "<a href='#' id='%s' onclick=\"showMermaidModal('%s')\">Show Mermaid Plot</a>",
+          btn_id, mermaid_code
+        )
+      }
     )
   )
 
@@ -160,7 +327,6 @@ buildStatusDashboard <- function(
     filterable = TRUE,
     defaultPageSize = 10
   )
-
 }
 
 .getSummaryTableForVocabularyAndDatabase <- function(
@@ -170,9 +336,7 @@ buildStatusDashboard <- function(
     vocabularyDatabaseSchema,
     sourceVocabularyId,
     targetVocabularyIds,
-    databaseName
-) {
-
+    databaseName) {
   databaseSummary <- .getDatabaseSummaryForVocabulary(
     connectionDetails = connectionDetails,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema,
@@ -191,28 +355,24 @@ buildStatusDashboard <- function(
   )
 
   summaryTableForVocabularyAndDatabase <- databaseSummary |>
-    dplyr::full_join(codeCounts, by = c("source_vocabulary_id" = "source_vocabulary_id", "source_code" = "source_code")) |>
-    dplyr::left_join(usagiSummary, by = c("source_concept_id" = "source_concept_id", "target_concept_id" = "target_concept_id")) |>
+    dplyr::full_join(codeCounts |> dplyr::select(-sourceVocabularyId), by = c("sourceCode" = "sourceCode")) |>
+    dplyr::left_join(usagiSummary, by = c("sourceConceptId" = "sourceConceptId", "targetConceptId" = "targetConceptId")) |>
     dplyr::mutate(
       status = dplyr::case_when(
-        is.na(source_concept_id) ~ "INVALID",
-        is.na(target_concept_id) ~ "UNMAPPED",
+        is.na(sourceConceptId) ~ "INVALID",
+        is.na(targetConceptId) ~ "UNMAPPED",
         TRUE ~ "MAPS TO"
       )
     )
 
   return(summaryTableForVocabularyAndDatabase)
-
-
 }
 
 
 .getCodeCountsForVocabularyAndDatabase <- function(
     pathToCodeCountsFolder,
     sourceVocabularyId,
-    databaseName
-) {
-
+    databaseName) {
   databaseCoverageTibble <- file.path(pathToCodeCountsFolder, "databases_coverage.csv") |>
     readr::read_csv()
 
@@ -220,10 +380,11 @@ buildStatusDashboard <- function(
     dplyr::filter(database_name == databaseName)
 
   codeCountsTibble <- file.path(pathToCodeCountsFolder, databaseCoverageTibble |> dplyr::pull(path_to_code_counts_file)) |>
-    readr::read_csv()
+    readr::read_csv() |>
+    dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
 
   codeCountsTibble <- codeCountsTibble |>
-    dplyr::filter(source_vocabulary_id == sourceVocabularyId)
+    dplyr::filter(sourceVocabularyId == {{ sourceVocabularyId }})
 
   # for (i in 1:nrow(databaseCoverageTibble)) {
   #   databaseName <- databaseCoverageTibble$database_name[i]
@@ -255,8 +416,7 @@ buildStatusDashboard <- function(
 .getDatabaseSummaryForVocabulary <- function(
     connectionDetails,
     vocabularyDatabaseSchema,
-    targetVocabularyIds
-  ) {
+    targetVocabularyIds) {
   connection <- DatabaseConnector::connect(connectionDetails)
 
   sql <- "
@@ -289,7 +449,9 @@ buildStatusDashboard <- function(
   )
   sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
 
-  vocabulariesDBInfo <- DatabaseConnector::dbGetQuery(connection, sql) |> tibble::as_tibble()
+  vocabulariesDBInfo <- DatabaseConnector::dbGetQuery(connection, sql) |>
+    tibble::as_tibble() |>
+    dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
 
   DatabaseConnector::disconnect(connection)
 
@@ -303,7 +465,7 @@ buildStatusDashboard <- function(
     readr::read_csv()
 
   usagiFilePath <- vocabulariesTibble |>
-    dplyr::filter(source_vocabulary_id == sourceVocabularyId)  |>
+    dplyr::filter(source_vocabulary_id == sourceVocabularyId) |>
     dplyr::pull(path_to_usagi_file)
 
   usagiTibble <- readUsagiFile(file.path(pathToVocabularyFolder, usagiFilePath))
@@ -313,15 +475,15 @@ buildStatusDashboard <- function(
       dplyr::mutate(`ADD_INFO:validationMessages` = "")
   }
 
-  if(  !("ADD_INFO:autoUpdatingInfo" %in% colnames(usagiTibble))) {
+  if (!("ADD_INFO:autoUpdatingInfo" %in% colnames(usagiTibble))) {
     usagiTibble <- usagiTibble |>
       dplyr::mutate(`ADD_INFO:autoUpdatingInfo` = "")
   }
 
   usagiSummaryTibble <- usagiTibble |>
     dplyr::select(
-      source_concept_id = `ADD_INFO:sourceConceptId`,
-      target_concept_id = conceptId,
+      sourceConceptId = `ADD_INFO:sourceConceptId`,
+      targetConceptId = conceptId,
       statusSetBy,
       statusSetOn,
       mappingStatus,
@@ -332,4 +494,3 @@ buildStatusDashboard <- function(
 
   return(usagiSummaryTibble)
 }
-

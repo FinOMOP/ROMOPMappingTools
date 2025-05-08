@@ -5,7 +5,7 @@ output:
     orientation: rows
 params: 
   summaryTableForVocabularyAndDatabase: NULL
-  targetVocabularyId: NULL
+  sourceVocabularyId: NULL
   databaseName: NULL
 ---
 
@@ -14,35 +14,38 @@ params:
 library(flexdashboard)
 
 summaryTableForVocabularyAndDatabase <- params$summaryTableForVocabularyAndDatabase
-targetVocabularyId <- params$targetVocabularyId
+sourceVocabularyId <- params$sourceVocabularyId
 databaseName <- params$databaseName
 
-# Update title dynamically
-if(!is.null(targetVocabularyId) && !is.null(databaseName)) {
-  title <- paste0("Coverage of ", targetVocabularyId, " in ", databaseName)
-  htmltools::tags$script(paste0("document.title = '", title, "';"))
-}
-
+# Update tab title
+title <- paste0(sourceVocabularyId, " in ", databaseName)
+htmltools::tags$script(paste0("document.title = '", title, "';"))
 ```
 
-
-Databases Coverage
-=====================================
-
-
-Sidebar {.sidebar data-width=300}
------------------------------------------------------------------------
-### Summary
+```{r, results='asis'}
+# Update Dashboar title
+cat(paste0("# ", sourceVocabularyId, " in ", databaseName, "\n"))
+```
 
 
 Column {.tabset}
 -----------------------------------------------------------------------
-### Mapping 
+### Mappings
 
 ```{r}
-if(!is.null(summaryTableForVocabularyAndDatabase)){
-  .plotSummaryTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)
-}
+colors <- list(
+  invalid = "#EC6173",
+  unmapped = "#F1AE4A",
+  mapsTo = "#51A350",
+  grey = "#AAAAAA"
+)
 
+.plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase, colors)
 ```
 
+### Summary
+
+```{r}
+.plotSummaryTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase, colors)
+```
+ 

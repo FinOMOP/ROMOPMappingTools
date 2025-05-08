@@ -132,12 +132,18 @@ test_that("internal functions works", {
         databaseName = databaseName
     )
 
-    outputCoverageVocabularyDatabaseHtml <- .pageSummaryTableForVocabularyAndDatabase(
+    #
+    # - .pageSummaryTableForVocabularyAndDatabase
+    #
+
+    outputCoverageVocabularyDatabaseHtmlPath <- .pageCoverageVocabularyDatabase(
         summaryTableForVocabularyAndDatabase = summaryTableForVocabularyAndDatabase,
-        targetVocabularyId = sourceVocabularyId,
-        databaseName = databaseName
+        sourceVocabularyId = sourceVocabularyId,
+        databaseName = databaseName    
     )
 
     expect_true(file.exists(outputCoverageVocabularyDatabaseHtml))
+
+
     
 })
