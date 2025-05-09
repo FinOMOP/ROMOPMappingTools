@@ -1,0 +1,72 @@
+---
+title: "Vocabulary"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+params: 
+  summaryTableForVocabularyAndDatabaseList: NULL
+  usagiTibble: NULL
+  sourceVocabularyId: NULL
+---
+
+
+```{r setup}
+library(flexdashboard)
+
+summaryTableForVocabularyAndDatabaseList <- params$summaryTableForVocabularyAndDatabaseList
+usagiTibble <- params$usagiTibble
+sourceVocabularyId <- params$sourceVocabularyId
+
+# Update tab title
+title <- paste0(sourceVocabularyId)
+htmltools::tags$script(paste0("document.title = '", title, "';"))
+
+usagiColors <- list(
+  flagged = "#EC6173",
+  unchecked = "#F1AE4A",
+  approved = "#51A350",
+  inexact = "#AAAAAA"
+)
+
+coverageColors <- list(
+  invalid = "#EC6173",
+  unmapped = "#F1AE4A",
+  mapsTo = "#51A350",
+  grey = "#AAAAAA"
+)
+
+```
+
+
+Info
+=====================================
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Info
+Help text here
+
+Column {.tabset}
+-----------------------------------------------------------------------
+### Coverage
+
+NEWS.md file here
+
+
+Usagi file
+=====================================
+
+Column {.tabset}
+-----------------------------------------------------------------------
+### Summary
+
+```{r usagiSummary}
+.plotSummaryTableForUsagiFile(usagiTibble, usagiColors)
+```
+
+### Usagi file
+
+```{r usagiFile}
+  .plotTableForUsagiFile(usagiTibble, usagiColors)
+```
+

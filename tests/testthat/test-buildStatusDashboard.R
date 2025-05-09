@@ -80,6 +80,7 @@ test_that("internal functions works", {
     targetVocabularyIds <- c("ICD10", "ICD10fi")
     vocabularyDatabaseSchema <- "main"
     databaseName <- "FinnGenDF10"
+    pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
     #
     # - getDatabaseSummaryForVocabulary
     #
@@ -133,17 +134,64 @@ test_that("internal functions works", {
     )
 
     #
+    # - .plotTableForUsagiFile
+    #
+    usagiTibble <- readUsagiFile(pathToUsagiFile)
+    plotTable <- .plotTableForUsagiFile(usagiTibble)
+    expect_s3_class(plotTable, "reactable")
+
+    plotSummaryTable <- .plotSummaryTableForUsagiFile(usagiTibble)
+    expect_s3_class(plotSummaryTable, "reactable")
+
+    #
     # - .pageSummaryTableForVocabularyAndDatabase
     #
 
+    summaryTableForVocabularyAndDatabaseList <- list(
+        "FinnGenDF10" = summaryTableForVocabularyAndDatabase
+    )
+
     outputCoverageVocabularyDatabaseHtmlPath <- .pageCoverageVocabularyDatabase(
-        summaryTableForVocabularyAndDatabase = summaryTableForVocabularyAndDatabase,
-        sourceVocabularyId = sourceVocabularyId,
-        databaseName = databaseName    
+        summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
+        usagiTibble = usagiTibble,
+        sourceVocabularyId = sourceVocabularyId
     )
 
     expect_true(file.exists(outputCoverageVocabularyDatabaseHtml))
 
-
     
 })
+
+
+test_that(".plotTableForUsagiFile works", {
+
+    pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+
+    usagiTibble <- readUsagiFile(pathToUsagiFile)
+    plotTable <- .plotTableForUsagiFile(usagiTibble)
+
+    expect_s3_class(plotTable, "reactable")
+
+    plotSummaryTable <- .plotSummaryTableForUsagiFile(usagiTibble)
+    expect_s3_class(plotSummaryTable, "reactable")
+
+
+})
+
+for (database in names(summaryTableForVocabularyAndDatabaseList)) {
+  cat(paste0( database, "\n"))
+  cat(paste0("=====================================\n"))
+
+    summaryTableForVocabularyAndDatabase <- summaryTableForVocabularyAndDatabaseList[[database]]
+
+  cat("Column {.tabset}\n")
+  cat("-----------------------------------------------------------------------\n")
+
+  cat("### Summary\n")
+  .plotSummaryTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)
+
+  cat("### Coverage\n")
+  .plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)
+
+  
+}

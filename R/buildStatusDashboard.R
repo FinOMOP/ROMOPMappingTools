@@ -65,34 +65,50 @@ buildStatusDashboard <- function(
 
 
 .pageCoverageVocabularyDatabase <- function(
-    summaryTableForVocabularyAndDatabase,
-    sourceVocabularyId,
-    databaseName) {
-  inputTemplate <- system.file("reports", "pageCoverageVocabularyDatabase.Rmd", package = "ROMOPMappingTools")
-  outputFileHtmlPath <- file.path(tempdir(), "pageCoverageVocabularyDatabase.html")
+    summaryTableForVocabularyAndDatabaseList,
+    usagiTibble,
+    sourceVocabularyId) {
+  inputTemplate <- system.file("reports", "pageVocabulary.Rmd", package = "ROMOPMappingTools")
+  cleanSourceVocabularyId <- sourceVocabularyId |> stringr::str_replace_all("[^[:alnum:]]", "")
+  outputFileHtmlPath <- file.path(tempdir(), paste0(cleanSourceVocabularyId, ".html"))
+
+  # TEMP: the result='asis' is not working for the for loop, make here
+  # 1. Read the template file
+  template_content <- readLines(inputTemplate)
+
+  # 2. Define your code block as a string (beAdded)
+  for (database in names(summaryTableForVocabularyAndDatabaseList)) {
+    template_content <- template_content |>
+      append(database) |>
+      append(("=====================================\n")) |>
+      append(("```{r}\n")) |>
+      append(paste0("summaryTableForVocabularyAndDatabase <- summaryTableForVocabularyAndDatabaseList[['", database, "']]\n")) |>
+      append(("```\n")) |>
+      append(("Column {.tabset}")) |>
+      append(("-----------------------------------------------------------------------\n")) |>
+      append(("### Summary\n")) |>
+      append(("```{r}\n")) |>
+      append((".plotSummaryTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)\n")) |>
+      append(("```\n")) |>
+      append(("### Coverage\n")) |>
+      append(("```{r}\n")) |>
+      append((".plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)\n")) |>
+      append(("```\n"))
+  }
+
+  # 4. Write the modified template to a new file
+  tempTemplatePath <- file.path(tempdir(), paste0(cleanSourceVocabularyId, ".Rmd"))
+  writeLines(template_content, tempTemplatePath)
 
   rmarkdown::render(
-    input = inputTemplate,
+    input = tempTemplatePath,
     params = list(
-      summaryTableForVocabularyAndDatabase = summaryTableForVocabularyAndDatabase,
-      sourceVocabularyId = sourceVocabularyId,
-      databaseName = databaseName
+      summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
+      usagiTibble = usagiTibble,
+      sourceVocabularyId = sourceVocabularyId
     ),
     output_file = outputFileHtmlPath
   )
-
-
-  modalWithMermaidPath <- system.file("reports", "modalWithMermaid.html", package = "ROMOPMappingTools")
-  modalWithMermaid <- readChar(modalWithMermaidPath, file.info(modalWithMermaidPath)$size)
-  outputFileHtml <- readChar(outputFileHtmlPath, file.info(outputFileHtmlPath)$size)
-  outputFileHtml <- outputFileHtml |>
-    stringr::str_remove("</body>") |>
-    stringr::str_remove("</html>") |>
-    paste0(modalWithMermaid) |>
-    paste0("</body>") |>
-    paste0("</html>")
-
-  writeLines(outputFileHtml, outputFileHtmlPath)
 
   return(outputFileHtmlPath)
 }
@@ -329,6 +345,106 @@ buildStatusDashboard <- function(
   )
 }
 
+
+.plotTableForUsagiFile <- function(
+    usagiTibble,
+    colors = list(
+      flagged = "#EC6173",
+      unchecked = "#F1AE4A",
+      approved = "#51A350",
+      inexact = "#AAAAAA"
+    )) {
+  toPlot <- usagiTibble |>
+    dplyr::mutate(
+      statusColor = dplyr::case_when(
+        mappingStatus == "FLAGGED" ~ colors$flagged,
+        mappingStatus == "UNCHECKED" ~ colors$unchecked,
+        mappingStatus == "APPROVED" ~ colors$approved,
+        mappingStatus == "INEXACT" ~ colors$inexact
+      )
+    )
+
+  # Always include required columns
+  columns <- list(
+    mappingStatus = reactable::colDef(
+      name = "Mapping Status",
+      maxWidth = 120,
+      html = TRUE,
+      cell = function(value, index) {
+        statusColor <- toPlot$statusColor[index]
+        paste0("<span style='color: ", statusColor, ";'>", value, "</span>")
+      }
+    ),
+    statusColor = reactable::colDef(show = FALSE)
+  )
+
+  reactable::reactable(
+    toPlot,
+    columns = columns,
+    resizable = TRUE,
+    filterable = TRUE,
+    defaultPageSize = 10
+  )
+}
+
+.plotSummaryTableForUsagiFile <- function(
+    usagiTibble,
+    colors = list(
+      flagged = "#EC6173",
+      unchecked = "#F1AE4A",
+      approved = "#51A350",
+      inexact = "#AAAAAA"
+    )) {
+  toPlot <- usagiTibble |>
+    dplyr::group_by(mappingStatus, statusSetBy) |>
+    dplyr::summarise(
+      n = dplyr::n()
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::mutate(
+      p = n / sum(n) * 100,
+      statusColor = dplyr::case_when(
+        mappingStatus == "FLAGGED" ~ colors$flagged,
+        mappingStatus == "UNCHECKED" ~ colors$unchecked,
+        mappingStatus == "APPROVED" ~ colors$approved,
+        mappingStatus == "INEXACT" ~ colors$inexact
+      )
+    ) |>
+    dplyr::arrange(dplyr::desc(n))
+  columns <- list(
+    mappingStatus = reactable::colDef(
+      name = "Mapping Status",
+      maxWidth = 120,
+      html = TRUE,
+      cell = function(value, index) {
+        statusColor <- toPlot$statusColor[index]
+        paste0("<span style='color: ", statusColor, ";'>", value, "</span>")
+      }
+    ),
+    statusColor = reactable::colDef(show = FALSE),
+    statusSetBy = reactable::colDef(
+      name = "Status Set By",
+      maxWidth = 120
+    ),
+    n = reactable::colDef(
+      name = "N Codes",
+      maxWidth = 100
+    ),
+    p = reactable::colDef(
+      name = "% Codes",
+      maxWidth = 100,
+      format = reactable::colFormat(digits = 2, suffix = "%")
+    )
+  )
+
+  reactable::reactable(
+    toPlot,
+    columns = columns,
+    resizable = TRUE,
+    defaultPageSize = 10
+  )
+}
+
 .getSummaryTableForVocabularyAndDatabase <- function(
     pathToCodeCountsFolder,
     pathToVocabularyFolder,
@@ -386,29 +502,6 @@ buildStatusDashboard <- function(
   codeCountsTibble <- codeCountsTibble |>
     dplyr::filter(sourceVocabularyId == {{ sourceVocabularyId }})
 
-  # for (i in 1:nrow(databaseCoverageTibble)) {
-  #   databaseName <- databaseCoverageTibble$database_name[i]
-  #   codeCountsTibble <- file.path(pathToCodeCountsFolder, databaseCoverageTibble$path_to_code_counts_file[i]) |>
-  #     readr::read_csv()
-
-  #   codeCountsTibble <- codeCountsTibble |>
-  #     dplyr::filter(source_vocabulary_id == sourceVocabularyId) |>
-  #     dplyr::mutate(database_name = databaseName) |>
-  #     dplyr::select(database_name, source_vocabulary_id, source_code, n_events)
-
-  #   vocabularyCodeCountsTibble <- vocabularyCodeCountsTibble |>
-  #     dplyr::bind_rows(codeCountsTibble)
-  # }
-
-  # vocabularyCodeCountsTibble <- vocabularyCodeCountsTibble |>
-  #   dplyr::mutate(n_events = dplyr::if_else(n_events < 0, 0, n_events)) |>
-  #   dplyr::group_by(database_name) |>
-  #   dplyr::mutate(p_events = n_events / sum(n_events) * 100) |>
-  #   dplyr::ungroup() |>
-  #   dplyr::group_by(source_vocabulary_id, source_code) |>
-  #   dplyr::mutate(p_events_all = sum(p_events) / dplyr::n_distinct(database_name)) |>
-  #   dplyr::ungroup() |>
-  #   dplyr::nest_by(source_vocabulary_id, source_code, p_events_all)
 
   return(codeCountsTibble)
 }
@@ -428,7 +521,7 @@ buildStatusDashboard <- function(
         c2.vocabulary_id AS target_vocabulary_id,
         c2.concept_code AS target_code,
         c2.concept_name AS target_concept_name,
-        c2.concept_id AS target_concept_id  
+        c2.concept_id AS target_concept_id
       FROM (
         SELECT * FROM @vocabulary_database_schema.CONCEPT
         WHERE vocabulary_id IN (@list_vocabulary_ids)
@@ -453,43 +546,40 @@ buildStatusDashboard <- function(
     tibble::as_tibble() |>
     dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
 
-  # get children
-  sql <- "
-    SELECT
-      c.concept_id,
-      crp.child_concept_id
-    FROM (
-      SELECT * FROM @vocabulary_database_schema.CONCEPT
-      WHERE vocabulary_id IN (@list_vocabulary_ids)
-    ) AS c
-    LEFT JOIN (
-      SELECT
-          concept_id_1 AS child_concept_id,
-          concept_id_2 AS concept_id
-      FROM @vocabulary_database_schema.CONCEPT_RELATIONSHIP
-      WHERE relationship_id = 'Subsumes'
-    ) AS crp
-    ON c.concept_id = crp.concept_id
-  "
+  # # get children
+  # sql <- "
+  #   SELECT
+  #     c.concept_id,
+  #     crp.child_concept_id
+  #   FROM (
+  #     SELECT * FROM @vocabulary_database_schema.CONCEPT
+  #     WHERE vocabulary_id IN (@list_vocabulary_ids)
+  #   ) AS c
+  #   LEFT JOIN (
+  #     SELECT
+  #         concept_id_1 AS concept_id,
+  #         concept_id_2 AS child_concept_id
+  #     FROM @vocabulary_database_schema.CONCEPT_RELATIONSHIP
+  #     WHERE relationship_id = 'Subsumes'
+  #   ) AS crp
+  #   ON c.concept_id = crp.concept_id
+  # "
 
-  sql <- SqlRender::render(
-    sql = sql,
-    vocabulary_database_schema = vocabularyDatabaseSchema,
-    list_vocabulary_ids = paste0("'", targetVocabularyIds, "'") |> paste0(collapse = ", ")
-  )
-  sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
+  # sql <- SqlRender::render(
+  #   sql = sql,
+  #   vocabulary_database_schema = vocabularyDatabaseSchema,
+  #   list_vocabulary_ids = paste0("'", targetVocabularyIds, "'") |> paste0(collapse = ", ")
+  # )
+  # sql <- SqlRender::translate(sql, targetDialect = connectionDetails$dbms)
 
-  conceptChild <- DatabaseConnector::dbGetQuery(connection, sql) |>
-    tibble::as_tibble() |>
-    dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
+  # conceptChild <- DatabaseConnector::dbGetQuery(connection, sql) |>
+  #   tibble::as_tibble() |>
+  #   dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
 
-    
-
-
-  # merge
-  databaseSummary <- databaseSummary |>
-    dplyr::left_join(conceptParent, by = c("sourceConceptId" = "conceptId")) |>
-    dplyr::left_join(conceptChild, by = c("sourceConceptId" = "conceptId"))
+  # # merge
+  # databaseSummary <- databaseSummary |>
+  #   dplyr::left_join(conceptParent, by = c("sourceConceptId" = "conceptId")) |>
+  #   dplyr::left_join(conceptChild, by = c("sourceConceptId" = "conceptId"))
 
   DatabaseConnector::disconnect(connection)
 
@@ -533,131 +623,160 @@ buildStatusDashboard <- function(
   return(usagiSummaryTibble)
 }
 
-get_full_family_tree_with_distance <- function(relations, conceptId) {
-  # relations: a tibble with columns conceptId (parent) and childConceptId (child)
-  # conceptId: the root conceptId to start from
+# get_full_family_tree_with_distance_recursive <- function(relations, conceptId) {
+#   # General recursive helper
+#   traverse_tree <- function(relations, node, dist, visited, from_col, to_col, dist_step) {
+#     if (node %in% visited) return(tibble::tibble(parentConceptId = numeric(), childConceptId = numeric(), distance = integer()))
+#     next_nodes <- relations %>%
+#       dplyr::filter(.data[[from_col]] == node) %>%
+#       dplyr::pull(.data[[to_col]])
+#     if (length(next_nodes) == 0) return(tibble::tibble(parentConceptId = numeric(), childConceptId = numeric(), distance = integer()))
+#     if (from_col == "conceptId") {
+#       # Downward: parent -> child
+#       result <- tibble::tibble(parentConceptId = node, childConceptId = next_nodes, distance = dist)
+#     } else {
+#       # Upward: parent <- child
+#       result <- tibble::tibble(parentConceptId = next_nodes, childConceptId = node, distance = dist)
+#     }
+#     for (n in next_nodes) {
+#       result <- dplyr::bind_rows(result, traverse_tree(relations, n, dist + dist_step, c(visited, node), from_col, to_col, dist_step))
+#     }
+#     return(result)
+#   }
 
-  # Downward (children)
-  result <- tibble::tibble(
-    parentConceptId = numeric(),
-    childConceptId = numeric(),
-    distance = integer()
-  )
-  queue <- list(list(id = conceptId, dist = 0))
-  visited <- c()
-  while (length(queue) > 0) {
-    current <- queue[[1]]
-    queue <- queue[-1]
-    if (current$id %in% visited) next
-    visited <- c(visited, current$id)
-    children <- relations %>%
-      dplyr::filter(conceptId == current$id) %>%
-      dplyr::pull(childConceptId)
-    if (length(children) > 0) {
-      result <- dplyr::bind_rows(
-        result,
-        tibble::tibble(
-          parentConceptId = current$id,
-          childConceptId = children,
-          distance = current$dist + 1
-        )
-      )
-      queue <- c(queue, lapply(children, function(child) list(id = child, dist = current$dist + 1)))
-    }
-  }
+#   # Upward (parents): from childConceptId to conceptId, distance -1
+#   result_up <- traverse_tree(relations, conceptId, -1, c(), "childConceptId", "conceptId", -1)
+#   # Downward (children): from conceptId to childConceptId, distance +1
+#   result_down <- traverse_tree(relations, conceptId, 1, c(), "conceptId", "childConceptId", 1)
 
-  # Upward (parents)
-  result_up <- tibble::tibble(
-    parentConceptId = numeric(),
-    childConceptId = numeric(),
-    distance = integer()
-  )
-  queue <- list(list(id = conceptId, dist = 0))
-  visited <- c()
-  while (length(queue) > 0) {
-    current <- queue[[1]]
-    queue <- queue[-1]
-    if (current$id %in% visited) next
-    visited <- c(visited, current$id)
-    parents <- relations %>%
-      dplyr::filter(childConceptId == current$id) %>%
-      dplyr::pull(conceptId)
-    if (length(parents) > 0) {
-      result_up <- dplyr::bind_rows(
-        result_up,
-        tibble::tibble(
-          parentConceptId = parents,
-          childConceptId = current$id,
-          distance = current$dist - 1
-        )
-      )
-      queue <- c(queue, lapply(parents, function(parent) list(id = parent, dist = current$dist - 1)))
-    }
-  }
-
-  # Combine, and add the root node itself
-  result <- dplyr::bind_rows(
-    result_up,
-    result,
-    tibble::tibble(
-      parentConceptId = NA,
-      childConceptId = conceptId,
-      distance = 0
-    )
-  )
-  return(result)
-}
+#   # Combine
+#   result <- dplyr::bind_rows(result_up, result_down)
+#   return(result)
+# }
 
 
+# family_tree  <- get_full_family_tree_with_distance_recursive(conceptChild, code)
+
+# #' Create a Mermaid plot from a family tree tibble
+# #'
+# #' @param family_tree A tibble with columns parentConceptId, childConceptId, and distance
+# #' @return A string containing the Mermaid diagram code
+# family_tree_to_mermaid <- function(family_tree, info, conceptId) {
+
+#   # Start the Mermaid graph definition
+#   mermaid_lines <- c("graph TD")
+
+#   # For each row, add an edge from parent to child
+#   for (i in seq_len(nrow(family_tree))) {
+#     parent <- family_tree$parentConceptId[i]
+#     child <- family_tree$childConceptId[i]
+#     mermaid_lines <- c(mermaid_lines, sprintf("  %s --> %s", parent, child))
+#   }
+
+#   # Combine into a single string
+#   mermaid_code <- paste(mermaid_lines, collapse = "\n")
+
+#   # Add info to the graph
+#   conceptIds  <- c(family_tree$parentConceptId, family_tree$childConceptId) |> unique()
+#   info <- databaseSummary |>
+#     dplyr::filter(sourceConceptId %in% conceptIds) |>
+#     dplyr::select(sourceConceptId,sourceCode, sourceConceptName, sourceVocabularyId) |>
+#     dplyr::distinct() |>
+#     dplyr::mutate(
+#       label = dplyr::if_else(
+#         sourceConceptId == {{ conceptId }},
+#         paste0(sourceConceptId, "{{", sourceCode,  "<br>", sourceVocabularyId, "}}"),
+#         paste0(sourceConceptId, "[", sourceCode,  "<br>", sourceVocabularyId, "]")
+#       )
+#     )
+
+#   info_labels <- info |> dplyr::pull(label) |> paste0(collapse = "\n")
+
+#   mermaid_code <- paste0(mermaid_code, "\n", info_labels)
+
+#   return(mermaid_code)
+# }
+
+# code <- 45533778
+
+# family_tree  <- get_full_family_tree_with_distance_recursive(conceptChild, code)
 
 
-#' Create a Mermaid plot from a family tree tibble
-#'
-#' @param family_tree A tibble with columns parentConceptId, childConceptId, and distance
-#' @return A string containing the Mermaid diagram code
-family_tree_to_mermaid <- function(family_tree, info, conceptId) {
+# mermaid_code <- family_tree_to_mermaid(family_tree, databaseSummary, code)
 
-  # Start the Mermaid graph definition
-  mermaid_lines <- c("graph TD")
+# mermaid_code |> cat()
 
-  # For each row, add an edge from parent to child
-  for (i in seq_len(nrow(family_tree))) {
-    parent <- family_tree$parentConceptId[i]
-    child <- family_tree$childConceptId[i]
-    mermaid_lines <- c(mermaid_lines, sprintf("  %s --> %s", parent, child))
-  }
 
-  # Combine into a single string
-  mermaid_code <- paste(mermaid_lines, collapse = "\n")
+# # Install required packages
+# install.packages("jsonlite")
+# install.packages("base64enc")
 
-  # Add info to the graph
-  conceptIds  <- c(family_tree$parentConceptId, family_tree$childConceptId) |> unique()
-  info <- databaseSummary |> 
-    dplyr::filter(sourceConceptId %in% conceptIds) |> 
-    dplyr::select(sourceConceptId,sourceCode, sourceConceptName, sourceVocabularyId) |> 
-    dplyr::distinct() |> 
-    dplyr::mutate(
-      label = dplyr::if_else(
-        sourceConceptId == {{ conceptId }},
-        paste0(sourceConceptId, "{{", sourceCode,  "<br>", sourceVocabularyId, "}}"),
-        paste0(sourceConceptId, "[", sourceCode,  "<br>", sourceVocabularyId, "]")
-      )
-    )
+# library(jsonlite)
+# library(base64enc)
 
-  info_labels <- info |> dplyr::pull(label) |> paste0(collapse = "\n") 
+# # Define your Mermaid diagram
+# mermaid_code <- "
+# graph TD
+#   A[Start] --> B{Decision}
+#   B -->|Yes| C[Do something]
+#   B -->|No| D[Do something else]
+#   C --> E[End]
+#   D --> E
+# "
 
-  mermaid_code <- paste0(mermaid_code, "\n", info_labels)
+# # Compress using raw DEFLATE
+# compressed <- memCompress(charToRaw(mermaid_code), type = "gzip")
 
-  return(mermaid_code)
-}
+# # Drop the GZIP header/footer (only use raw DEFLATE)
+# # Header is 10 bytes, footer is 8 bytes
+# deflate_raw <- compressed[11:(length(compressed) - 8)]
 
-code <- 45533778
+# # Base64 encode
+# b64 <- base64encode(deflate_raw)
 
-family_tree  <- get_full_family_tree_with_distance(conceptChild, code)
-family_tree  <- family_tree |>
-dplyr::filter(!is.na(childConceptId) & !is.na(parentConceptId)) |>
-dplyr::mutate(distance = -distance) 
+# # Make URL-safe (Base64url encoding)
+# b64url <- chartr("+/", "-_", gsub("=+$", "", b64))
 
-mermaid_code <- family_tree_to_mermaid(family_tree, databaseSummary, code)
+# # Create final URL
+# url <- paste0("https://mermaid.live/edit#pako:", b64url)
 
-mermaid_code |> cat()
+# # Output the URL
+# cat("Open this URL:\n", url, "\n")
+
+
+
+
+# # Install required package
+# install.packages("V8")
+
+# library(V8)
+# ctx <- v8()
+
+# # Load pako.js (needed for deflate)
+# ctx$source("https://cdn.jsdelivr.net/npm/pako@2.1.0/dist/pako.min.js")
+
+# # Mermaid code
+# mermaid_code <- "
+# graph TD
+#   A[Start] --> B{Decision}
+#   B -->|Yes| C[Do something]
+#   B -->|No| D[Do something else]
+#   C --> E[End]
+#   D --> E
+# "
+
+# # Define JS to compress and base64 encode in URL-safe format
+# js_code <- sprintf("
+#   const input = `%s`;
+#   const compressed = pako.deflate(input, { level: 9 });
+#   const base64 = btoa(String.fromCharCode.apply(null, compressed));
+#   const urlSafe = base64.replace(/\\+/g, '-').replace(/\\//g, '_').replace(/=+$/, '');
+#   urlSafe;
+# ", gsub("`", "\\`", mermaid_code))  # Escape backticks
+
+# # Run JS and get result
+# compressed_encoded <- ctx$eval(js_code)
+
+# # Final Mermaid Live URL
+# url <- paste0("https://mermaid.live/edit#pako:", compressed_encoded)
+# cat("Mermaid Live Editor URL:\n", url, "\n")

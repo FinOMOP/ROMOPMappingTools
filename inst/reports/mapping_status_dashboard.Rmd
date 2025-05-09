@@ -47,7 +47,6 @@ Exactly what events fall in each category can be explored by selecting the vocab
 Hover over the bars to see details.
 
 
-
 Column {.tabset}
 -----------------------------------------------------------------------
 
