@@ -27,29 +27,40 @@ test_that("buildStatusDashboard works", {
 
     output_file_html <- file.path(validationResultsFolder, "MappingStatusDashboard.html")
 
-    # TODO: there is a warning that needs to be fixed
-    suppressWarnings(
-        validationLogTibble <- buildStatusDashboard(
-            pathToCodeCountsFolder = pathToCodeCountsFolder,
-            connectionDetails = connectionDetails,
-            vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-            output_file_html = output_file_html
-        )
+
+    outputFileHtmlPath <- buildStatusDashboard(
+        pathToCodeCountsFolder = pathToCodeCountsFolder,
+        pathToVocabularyFolder = pathToVocabularyFolder,
+        connectionDetails = connectionDetails,
+        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+        outputFolderPath = validationResultsFolder
     )
 
-    # Check results
-    validationLogTibble |>
-        dplyr::filter(type == "ERROR") |>
-        nrow() |>
-        expect_equal(0)
 
     # check the validation results folder
-    expect_true(file.exists(output_file_html))
+    expect_true(file.exists(outputFileHtmlPath))
 })
 
 
+test_that(".pageSummaryAllVocabularies works", {
+    outputFolderPath <- tempdir()
 
-test_that("internal functions works", {
+    summaryAllVocabularies <- tibble::tribble(
+        ~vocabularyId, ~mantainedBy, ~strMapped, ~FinnGenDF10, ~HUS,
+        "ATC", "OMOP", NA, "100-500-10", "0-15033-15033",
+        "ICD10fi", "OMOP+FinnOMOP", "3494-11", "0-12758-12758", "0-15033-15033",
+        "UNITfi", "FinnOMOP", "173-4", NA, "173-1512-14937"
+    )
+
+    plotTable <- .plotTableSummaryAllVocabularies(summaryAllVocabularies)
+    expect_s3_class(plotTable, "reactable")
+
+    outputFileHtmlPath <- .pageSummaryAllVocabularies(summaryAllVocabularies, outputFolderPath)
+    expect_true(file.exists(outputFileHtmlPath))
+})
+
+
+test_that("internal functions for .pageCoverageVocabularyDatabase works", {
     # Set up test data
     pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
     pathToCodeCountsFolder <- system.file("testdata/CODE_COUNTS", package = "ROMOPMappingTools")
@@ -81,6 +92,7 @@ test_that("internal functions works", {
     vocabularyDatabaseSchema <- "main"
     databaseName <- "FinnGenDF10"
     pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
+    pathToNewFile <- system.file("testdata/VOCABULARIES/ICD10fi/NEWS.md", package = "ROMOPMappingTools")
     #
     # - getDatabaseSummaryForVocabulary
     #
@@ -89,7 +101,7 @@ test_that("internal functions works", {
         vocabularyDatabaseSchema = vocabularyDatabaseSchema,
         targetVocabularyIds = targetVocabularyIds
     )
-    
+
     # Check that all columns in databaseSummary have values
     expect_true(all(colnames(databaseSummary) |>
         purrr::map_lgl(~ !all(is.na(databaseSummary[[.x]])))))
@@ -113,7 +125,7 @@ test_that("internal functions works", {
     usagiSummary <- .getUsagiSummaryForVocabulary(
         pathToVocabularyFolder = pathToVocabularyFolder,
         sourceVocabularyId = sourceVocabularyId
-    )   
+    )
 
     # Check that all columns in usagiSummary have values
     expect_true(all(colnames(usagiSummary) |>
@@ -146,52 +158,17 @@ test_that("internal functions works", {
     #
     # - .pageSummaryTableForVocabularyAndDatabase
     #
-
     summaryTableForVocabularyAndDatabaseList <- list(
         "FinnGenDF10" = summaryTableForVocabularyAndDatabase
     )
 
-    outputCoverageVocabularyDatabaseHtmlPath <- .pageCoverageVocabularyDatabase(
+    outputCoverageVocabularyDatabaseHtmlPath <- .pageCoverageVocabularyDatabases(
         summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
         usagiTibble = usagiTibble,
-        sourceVocabularyId = sourceVocabularyId
+        sourceVocabularyId = sourceVocabularyId,
+        pathToNewFile = pathToNewFile,
+        outputFolderPath = validationResultsFolder
     )
 
-    expect_true(file.exists(outputCoverageVocabularyDatabaseHtml))
-
-    
+    expect_true(file.exists(outputCoverageVocabularyDatabaseHtmlPath))
 })
-
-
-test_that(".plotTableForUsagiFile works", {
-
-    pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
-
-    usagiTibble <- readUsagiFile(pathToUsagiFile)
-    plotTable <- .plotTableForUsagiFile(usagiTibble)
-
-    expect_s3_class(plotTable, "reactable")
-
-    plotSummaryTable <- .plotSummaryTableForUsagiFile(usagiTibble)
-    expect_s3_class(plotSummaryTable, "reactable")
-
-
-})
-
-for (database in names(summaryTableForVocabularyAndDatabaseList)) {
-  cat(paste0( database, "\n"))
-  cat(paste0("=====================================\n"))
-
-    summaryTableForVocabularyAndDatabase <- summaryTableForVocabularyAndDatabaseList[[database]]
-
-  cat("Column {.tabset}\n")
-  cat("-----------------------------------------------------------------------\n")
-
-  cat("### Summary\n")
-  .plotSummaryTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)
-
-  cat("### Coverage\n")
-  .plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)
-
-  
-}

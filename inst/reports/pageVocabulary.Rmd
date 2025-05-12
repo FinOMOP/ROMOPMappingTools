@@ -7,6 +7,7 @@ params:
   summaryTableForVocabularyAndDatabaseList: NULL
   usagiTibble: NULL
   sourceVocabularyId: NULL
+  pathToNewFile: NULL
 ---
 
 
@@ -16,7 +17,7 @@ library(flexdashboard)
 summaryTableForVocabularyAndDatabaseList <- params$summaryTableForVocabularyAndDatabaseList
 usagiTibble <- params$usagiTibble
 sourceVocabularyId <- params$sourceVocabularyId
-
+pathToNewFile <- params$pathToNewFile
 # Update tab title
 title <- paste0(sourceVocabularyId)
 htmltools::tags$script(paste0("document.title = '", title, "';"))
@@ -44,13 +45,36 @@ Info
 Sidebar {.sidebar data-width=300}
 -----------------------------------------------------------------------
 ### Info
-Help text here
+This page shows the mapping status and coverage statistics for the `r sourceVocabularyId` vocabulary.
+
+The page is divided into three main sections:
+
+1. **Info** - This section contains:
+   - This overview
+   - The NEWS.md file showing version history and changes
+
+2. **Usagi file** - Shows the mapping progress:
+   - Summary statistics of mapped concepts
+   - Detailed table of all source codes and their mappings
+
+3. **Coverage** - Shows usage statistics per database:
+   - Summary view with overall metrics
+   - Detailed coverage statistics
+
 
 Column {.tabset}
 -----------------------------------------------------------------------
-### Coverage
+### NEWS.md
 
-NEWS.md file here
+```{r news}
+if (!is.null(pathToNewFile)) {
+  news <- readLines(pathToNewFile)
+  news <- news |>
+    paste0(collapse = "\n") |>
+    htmltools::htmlEscape()
+  cat(news)
+}
+```
 
 
 Usagi file
@@ -61,12 +85,16 @@ Column {.tabset}
 ### Summary
 
 ```{r usagiSummary}
-.plotSummaryTableForUsagiFile(usagiTibble, usagiColors)
+if (!is.null(usagiTibble)) {
+  .plotSummaryTableForUsagiFile(usagiTibble, usagiColors)
+}
 ```
 
 ### Usagi file
 
 ```{r usagiFile}
+if (!is.null(usagiTibble)) {
   .plotTableForUsagiFile(usagiTibble, usagiColors)
+}
 ```
 

@@ -3,24 +3,32 @@
 #' This function generates a status dashboard for mapping status.
 #'
 #' @param pathToCodeCountsFolder Path to folder containing code counts files
+#' @param pathToVocabularyFolder Path to folder containing vocabulary files
 #' @param connectionDetails DatabaseConnector connection details object
 #' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
-#' @param output_file_html The path to the output HTML file
+#' @param outputFolderPath The path to the output folder for HTML output
 #'
-#' @return A validation log tibble
+#' @return Path to the output HTML file
 #'
-#' @importFrom dplyr select mutate filter if_else
-#' @importFrom rmarkdown
-#' @importFrom reactable reactable
+#' @importFrom checkmate assert_directory_exists assert_class assert_character
+#' @importFrom readr read_csv
+#' @importFrom dplyr filter distinct bind_rows select mutate left_join full_join rename_with case_when group_by ungroup summarize transmute pull arrange if_else n_distinct
+#' @importFrom tibble tibble as_tibble
+#' @importFrom rmarkdown render
+#' @importFrom reactable reactable colDef colFormat
 #' @importFrom shiny div
-#'
+#' @importFrom stringr str_split str_c str_detect str_extract
+#' @importFrom scales number percent cut_si
+#' @importFrom tippy tippy
+#' @importFrom SqlRender snakeCaseToCamelCase render translate
+#' @importFrom DatabaseConnector connect disconnect dbGetQuery
 #' @export
 buildStatusDashboard <- function(
     pathToCodeCountsFolder,
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
-    outputFileHtmlPath = file.path(tempdir(), "MappingStatusDashboard.html")) {
+    outputFolderPath = tempdir()) {
   #
   # Validate parameters
   #
@@ -28,53 +36,352 @@ buildStatusDashboard <- function(
   pathToCodeCountsFolder |> checkmate::assert_directory_exists()
   connectionDetails |> checkmate::assert_class(c("ConnectionDetails"))
   vocabularyDatabaseSchema |> checkmate::assert_character()
-  outputFileHtmlPath |> checkmate::assert_character()
+  if (!dir.exists(outputFolderPath)) {
+    dir.create(outputFolderPath, recursive = TRUE)
+  }
 
 
   #
   # Function
   #
+  vocabulariesCoverageTibble <- readr::read_csv(pathToCodeCountsFolder |> file.path("vocabularies_coverage.csv"), show_col_types = FALSE)
+  vocabulariesCoverageTibble <- vocabulariesCoverageTibble |>
+    dplyr::filter(!ignore)
 
-  # validate code counts folder
-  validationLogTibble <- validateCodeCountsFolder(
-    pathToCodeCountsFolder = pathToCodeCountsFolder
-  )
+  vocabulariesTibble <- readr::read_csv(pathToVocabularyFolder |> file.path("vocabularies.csv"), show_col_types = FALSE)
 
-  if (validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() > 0) {
-    return(validationLogTibble)
+  summaryAllVocabularies <- tibble::tibble()
+  for (i in 1:nrow(vocabulariesCoverageTibble)) {
+    sourceVocabularyId <- vocabulariesCoverageTibble$source_vocabulary_id[i]
+    targetVocabularyIds <- vocabulariesCoverageTibble$target_vocabulary_ids[i]
+    targetVocabularyIds <- stringr::str_split(targetVocabularyIds, "\\|") |> unlist()
+    mantainedBy <- vocabulariesCoverageTibble$mantained_by[i]
+
+    vocabularyTibble <- vocabulariesTibble |>
+      dplyr::filter(source_vocabulary_id == sourceVocabularyId)
+
+    # get usagi tibble and make summary string
+    usagiTibble <- NULL
+    strMapped <- NA_character_
+    if (nrow(vocabularyTibble) != 0) {
+      usagiTibble <- readUsagiFile(file.path(pathToVocabularyFolder, vocabularyTibble$path_to_usagi_file[1]))
+      nMapped <- usagiTibble |>
+        dplyr::distinct(sourceCode, .keep_all = TRUE) |>
+        dplyr::filter(mappingStatus == "APPROVED") |>
+        nrow()
+      nUnmapped <- usagiTibble |>
+        dplyr::distinct(sourceCode, .keep_all = TRUE) |>
+        dplyr::filter(mappingStatus != "APPROVED") |>
+        nrow()
+      strMapped <- paste0(nMapped, "-", nUnmapped)
+    }
+
+    # get summary table for all databases
+    summaryTableForVocabularyAndDatabaseList <- .getSummaryListForVocabulary(
+      pathToCodeCountsFolder = pathToCodeCountsFolder,
+      pathToVocabularyFolder = pathToVocabularyFolder,
+      connectionDetails = connectionDetails,
+      vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+      sourceVocabularyId = sourceVocabularyId,
+      targetVocabularyIds = targetVocabularyIds
+    )
+
+    # build page for coverage of all databases
+    .pageCoverageVocabularyDatabases(
+        summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
+        usagiTibble = usagiTibble,
+        sourceVocabularyId = sourceVocabularyId,
+        outputFolderPath = outputFolderPath
+    )
+  
+    # create summary for all databases
+    summaryVocabulary <- tibble::tibble(
+      vocabularyId = sourceVocabularyId,
+      mantainedBy = mantainedBy,
+      strMapped = strMapped
+    )
+
+    for (databaseName in names(summaryTableForVocabularyAndDatabaseList)) {
+      summaryTableForVocabularyAndDatabase <- summaryTableForVocabularyAndDatabaseList[[databaseName]]
+
+      nMapped <- summaryTableForVocabularyAndDatabase |>
+        dplyr::distinct(sourceCode, .keep_all = TRUE) |>
+        dplyr::filter(status == "MAPS TO") |>
+        nrow()
+
+      nUnmapped <- summaryTableForVocabularyAndDatabase |>
+        dplyr::distinct(sourceCode, .keep_all = TRUE) |>
+        dplyr::filter(status == "UNMAPPED") |>
+        nrow()
+
+      nInvalid <- summaryTableForVocabularyAndDatabase |>
+        dplyr::distinct(sourceCode, .keep_all = TRUE) |>
+        dplyr::filter(status == "INVALID") |>
+        nrow()
+
+      strCoverage <- paste0(nMapped, "-", nUnmapped, "-", nInvalid)
+
+      summaryVocabulary[[databaseName]] <- strCoverage
+
+    }
+
+    # add summary for all databases to summary for all vocabularies
+    summaryAllVocabularies <- summaryAllVocabularies |>
+      dplyr::bind_rows(summaryVocabulary)
   }
 
-  # calculate mapping status
-  mappingStatus <- calculateMappingStatus(
-    pathToCodeCountsFolder = pathToCodeCountsFolder,
-    connectionDetails = connectionDetails,
-    vocabularyDatabaseSchema = vocabularyDatabaseSchema
-  )
+  outputFileHtmlPath <- .pageSummaryAllVocabularies(summaryAllVocabularies, outputFolderPath)
 
-  rmarkdown::render(system.file("reports", "mapping_status_dashboard.Rmd", package = "ROMOPMappingTools"),
-    params = list(
-      mapping_status = mappingStatus
-    ),
+  return(outputFileHtmlPath)
+}
+
+
+#' Render summary page for all vocabularies
+#'
+#' @param summaryAllVocabularies Tibble with summary for all vocabularies
+#' @param outputFolderPath Output folder path
+#' @return Path to the output HTML file
+#' @importFrom rmarkdown render
+.pageSummaryAllVocabularies <- function(
+    summaryAllVocabularies,
+    outputFolderPath) {
+  inputTemplate <- system.file("reports", "pageAllVocabularies.Rmd", package = "ROMOPMappingTools")
+  outputFileHtmlPath <- file.path(outputFolderPath, paste0("index.html"))
+
+  rmarkdown::render(
+    input = inputTemplate,
+    params = list(summaryAllVocabularies = summaryAllVocabularies),
     output_file = outputFileHtmlPath
   )
 
+  return(outputFileHtmlPath)
+}
 
-  return(validationLogTibble)
+#' Plot summary table for all vocabularies
+#'
+#' @param summaryAllVocabularies Tibble with summary for all vocabularies
+#' @param colors List of colors for bar chart
+#' @return A reactable table object
+#' @importFrom reactable reactable colDef
+#' @importFrom shiny div
+.plotTableSummaryAllVocabularies <- function(
+    summaryAllVocabularies,
+    colors = list(
+      invalid = "#EC6173",
+      unmapped = "#F1AE4A",
+      mapsTo = "#51A350",
+      grey = "#AAAAAA"
+    )) {
+  # build columns
+
+  bar_colors <- c("#51A350", "#F1AE4A", "#EC6173")
+  row_names <- c("standar code: ", "non-standar code: ", "not found code: ")
+  unit_names <- rep(" events", 3)
+
+  columns_list <- list(
+    vocabularyId = reactable::colDef(
+      name = "Vocabulary",
+      maxWidth = 150, 
+      cell = function(value) {
+        paste0("<a href='./", value, ".html' target='_blank'>", value, "</a>")
+      },
+      html = TRUE
+    ),
+    mantainedBy = reactable::colDef(name = "Maintained by"),
+    strMapped = reactable::colDef(
+      name = "Mapping progress",
+      cell = function(value, index) {
+        vocabularyId <- summaryAllVocabularies[index, "vocabularyId"]
+        paste0(
+          "<a href='./", vocabularyId, ".html#usagi-file' target='_blank' style='text-decoration: none;'>",
+          .tip_reactable_cell(value, row_names = c("mapped: ", "no mapped: "), unit_names = rep(" codes", 2)),
+          "</a>"
+        )
+      },
+      style = function(value) {
+        .background_bar_reactable_style(value, colors = c("#0000CC", "#E0E0E0"), height = "30%")
+      },
+      align = "left",
+      html = TRUE
+    )
+  )
+
+  databaseNames <- setdiff(names(summaryAllVocabularies), c("mantainedBy", "vocabularyId", "strMapped"))
+  for (db_name in databaseNames) {
+    columns_list[[db_name]] <- reactable::colDef(
+      name = paste("Coverage", db_name),
+      cell = function(value) {
+        .tip_reactable_cell(value, row_names = row_names, unit_names = unit_names)
+      },
+      style = function(value) {
+        .background_bar_reactable_style(value, colors = bar_colors)
+      },
+      align = "left"
+    )
+  }
+
+  # columns_list[["all_databases"]] <- reactable::colDef(
+  #   name = "TOTAL",
+  #   cell = function(value) {
+  #     .tip_reactable_cell(value, row_names = row_names, unit_names = unit_names, only_percent = TRUE)
+  #   },
+  #   style = function(value) {
+  #     .background_bar_reactable_style(value, colors = bar_colors)
+  #   },
+  #   align = "left"
+  # )
+
+
+  # create table
+  table <- summaryAllVocabularies |>
+    reactable::reactable(
+      pagination = FALSE,
+      #
+      columns = columns_list
+    )
+
+  return(table)
 }
 
 
 
-.pageCoverageVocabularyDatabase <- function(
+
+# Render a bar chart in the background of the cell
+#' Render a bar chart in the background of the cell
+#'
+#' @param string_values String with values separated by '-'
+#' @param colors Vector of colors
+#' @param height Height of the bar
+#' @param width Width of the bar
+#' @param background_color Background color
+#' @param text_color Text color
+#' @return A list of CSS style properties
+#' @importFrom stringr str_split
+.background_bar_reactable_style <- function(
+    string_values, colors = NULL,
+    height = "60%", width = "95%",
+    background_color = "#FFFFFF", text_color = "#FFFFFF") {
+  if (is.na(string_values)) {
+    return("")
+  }
+  values <- stringr::str_split(string_values, "-")[[1]] |> as.double()
+  per_values <- values / sum(values) * 100
+  per_values <- c(0, per_values)
+
+  if (is.null(colors)) {
+    colors <- RColorBrewer::brewer.pal(length(string_values), "Set3")
+  }
+  colors <- c(colors, background_color)
+
+  gradient_str <- ""
+  for (i in 1:(length(per_values) - 1)) {
+    gradient_str <- paste0(
+      gradient_str,
+      colors[i], " ", per_values[i], "%, ",
+      colors[i], " ", sum(per_values[1:(i + 1)]), "%, "
+    )
+  }
+  gradient_str <- paste(gradient_str, background_color)
+
+  list(
+    backgroundImage = paste0("linear-gradient(to right, ", gradient_str, ")"),
+    backgroundSize = paste(width, height),
+    backgroundRepeat = "no-repeat",
+    backgroundPosition = "center",
+    color = text_color
+  )
+}
+
+
+#' Tooltip for reactable cell
+#'
+#' @param string_values String with values separated by '-'
+#' @param row_names Row names for tooltip
+#' @param unit_names Unit names for tooltip
+#' @param only_percent Logical, show only percent
+#' @return A shiny div with tippy tooltip
+#' @importFrom stringr str_split str_c
+#' @importFrom shiny div
+#' @importFrom tippy tippy
+#' @importFrom scales number percent
+.tip_reactable_cell <- function(
+    string_values,
+    row_names = NULL, unit_names = NULL, only_percent = FALSE) {
+  if (is.na(string_values)) {
+    return("")
+  }
+  values <- stringr::str_split(string_values, "-")[[1]] |> as.double()
+  per_values <- values / sum(values)
+
+  n_rows <- length(values)
+
+  if (is.null(row_names)) {
+    row_names <- rep("", n_rows)
+  }
+
+  if (is.null(unit_names)) {
+    unit_names <- rep("", n_rows)
+  }
+
+
+  if (only_percent == FALSE) {
+    text <- stringr::str_c(
+      row_names,
+      scales::number(values, scale_cut = scales::cut_si("")),
+      unit_names,
+      rep(" (", n_rows),
+      scales::percent(per_values, accuracy = 0.01),
+      rep(") ", n_rows)
+    )
+  } else {
+    text <- stringr::str_c(
+      row_names,
+      scales::percent(per_values, accuracy = 0.01)
+    )
+  }
+
+  text <- text |> stringr::str_c(collapse = "<br>")
+
+  shiny::div(
+    tippy::tippy(
+      text = paste(rep("&nbsp;", 36), collapse = " "),
+      tooltip = paste0("<span style='font-size:16px;'>", text, "<span>"),
+      allowHTML = TRUE,
+      theme = "light",
+      arrow = TRUE
+    )
+  )
+}
+
+
+#' Render coverage page for a vocabulary and its databases
+#'
+#' @param summaryTableForVocabularyAndDatabaseList List of summary tables
+#' @param usagiTibble Usagi tibble
+#' @param sourceVocabularyId Source vocabulary ID
+#' @param outputFolderPath Output folder path
+#' @return Path to the output HTML file
+#' @importFrom rmarkdown render
+.pageCoverageVocabularyDatabases <- function(
     summaryTableForVocabularyAndDatabaseList,
     usagiTibble,
-    sourceVocabularyId) {
+    sourceVocabularyId,
+    outputFolderPath,
+    pathToNewFile) {
+  summaryTableForVocabularyAndDatabaseList |> checkmate::assert_list()
+  usagiTibble |> checkmate::assert_tibble(null.ok = TRUE)
+  sourceVocabularyId |> checkmate::assert_string()
+  outputFolderPath |> checkmate::assert_directory()
+  pathToNewFile |> checkmate::assert_file_exists()
+
   inputTemplate <- system.file("reports", "pageVocabulary.Rmd", package = "ROMOPMappingTools")
-  cleanSourceVocabularyId <- sourceVocabularyId |> stringr::str_replace_all("[^[:alnum:]]", "")
-  outputFileHtmlPath <- file.path(tempdir(), paste0(cleanSourceVocabularyId, ".html"))
+  outputFileHtmlPath <- file.path(outputFolderPath, paste0(sourceVocabularyId, ".html"))
 
   # TEMP: the result='asis' is not working for the for loop, make here
   # 1. Read the template file
   template_content <- readLines(inputTemplate)
+
+  template_content[2] <- paste0("title: '", sourceVocabularyId, "'")
 
   # 2. Define your code block as a string (beAdded)
   for (database in names(summaryTableForVocabularyAndDatabaseList)) {
@@ -97,7 +404,7 @@ buildStatusDashboard <- function(
   }
 
   # 4. Write the modified template to a new file
-  tempTemplatePath <- file.path(tempdir(), paste0(cleanSourceVocabularyId, ".Rmd"))
+  tempTemplatePath <- tempfile(fileext = ".Rmd")
   writeLines(template_content, tempTemplatePath)
 
   rmarkdown::render(
@@ -105,7 +412,8 @@ buildStatusDashboard <- function(
     params = list(
       summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
       usagiTibble = usagiTibble,
-      sourceVocabularyId = sourceVocabularyId
+      sourceVocabularyId = sourceVocabularyId,
+      pathToNewFile = pathToNewFile
     ),
     output_file = outputFileHtmlPath
   )
@@ -113,6 +421,12 @@ buildStatusDashboard <- function(
   return(outputFileHtmlPath)
 }
 
+#' Plot summary table for a vocabulary and database
+#'
+#' @param summaryTableForVocabularyAndDatabase Tibble with summary
+#' @param colors List of colors
+#' @return A reactable table object
+#' @importFrom reactable reactable colDef colFormat
 .plotSummaryTableForVocabularyAndDatabase <- function(
     summaryTableForVocabularyAndDatabase,
     colors = list(
@@ -197,6 +511,12 @@ buildStatusDashboard <- function(
 }
 
 
+#' Plot detailed table for a vocabulary and database
+#'
+#' @param summaryTableForVocabularyAndDatabase Tibble with summary
+#' @param colors List of colors
+#' @return A reactable table object
+#' @importFrom reactable reactable colDef colFormat
 .plotTableForVocabularyAndDatabase <- function(
     summaryTableForVocabularyAndDatabase,
     colors = list(
@@ -234,9 +554,7 @@ buildStatusDashboard <- function(
       targetName = dplyr::if_else(!is.na(targetConceptName), paste0("<a href='", athenaUrl, targetConceptId, "' target='_blank'>", targetConceptName, "</a>"), ""),
       nEvents = nEvents,
       pEvents = pEvents,
-      statusSetBy = statusSetBy,
-      #
-      mermaidPlot = "graph TD<br>  A[Start] --> B{Is it working?}<br>  B -- Yes --> C[Great!]<br>  B -- No --> D[Check again]"
+      statusSetBy = statusSetBy
     ) |>
     dplyr::arrange(dplyr::desc(nEvents))
 
@@ -319,21 +637,21 @@ buildStatusDashboard <- function(
     statusSetBy = reactable::colDef(
       name = "Status Set By",
       maxWidth = 200,
-    ),
-    # Mermaid Plot
-    mermaidPlot = reactable::colDef(
-      name = "Mermaid Plot",
-      html = TRUE,
-      cell = function(value, index) {
-        btn_id <- paste0("show-mermaid-", index)
-        # Escape the Mermaid code for JS
-        mermaid_code <- gsub("'", "\\\\'", toPlot$mermaidPlot[index])
-        sprintf(
-          "<a href='#' id='%s' onclick=\"showMermaidModal('%s')\">Show Mermaid Plot</a>",
-          btn_id, mermaid_code
-        )
-      }
     )
+    # Mermaid Plot
+    # mermaidPlot = reactable::colDef(
+    #   name = "Mermaid Plot",
+    #   html = TRUE,
+    #   cell = function(value, index) {
+    #     btn_id <- paste0("show-mermaid-", index)
+    #     # Escape the Mermaid code for JS
+    #     mermaid_code <- gsub("'", "\\\\'", toPlot$mermaidPlot[index])
+    #     sprintf(
+    #       "<a href='#' id='%s' onclick=\"showMermaidModal('%s')\">Show Mermaid Plot</a>",
+    #       btn_id, mermaid_code
+    #     )
+    #   }
+    # )
   )
 
   reactable::reactable(
@@ -346,6 +664,12 @@ buildStatusDashboard <- function(
 }
 
 
+#' Plot Usagi file table
+#'
+#' @param usagiTibble Usagi tibble
+#' @param colors List of colors
+#' @return A reactable table object
+#' @importFrom reactable reactable colDef
 .plotTableForUsagiFile <- function(
     usagiTibble,
     colors = list(
@@ -387,6 +711,12 @@ buildStatusDashboard <- function(
   )
 }
 
+#' Plot summary table for Usagi file
+#'
+#' @param usagiTibble Usagi tibble
+#' @param colors List of colors
+#' @return A reactable table object
+#' @importFrom reactable reactable colDef colFormat
 .plotSummaryTableForUsagiFile <- function(
     usagiTibble,
     colors = list(
@@ -395,6 +725,10 @@ buildStatusDashboard <- function(
       approved = "#51A350",
       inexact = "#AAAAAA"
     )) {
+  usagiTibble |> checkmate::assert_tibble()
+  colors |> checkmate::assert_list()
+  colors |> names() |> checkmate::assert_subset(c("flagged", "unchecked", "approved", "inexact"))
+
   toPlot <- usagiTibble |>
     dplyr::group_by(mappingStatus, statusSetBy) |>
     dplyr::summarise(
@@ -445,6 +779,57 @@ buildStatusDashboard <- function(
   )
 }
 
+#' Get summary list for a vocabulary
+#'
+#' @param pathToCodeCountsFolder Path to code counts folder
+#' @param pathToVocabularyFolder Path to vocabulary folder
+#' @param connectionDetails Connection details
+#' @param vocabularyDatabaseSchema Vocabulary database schema
+#' @param sourceVocabularyId Source vocabulary ID
+#' @param targetVocabularyIds Target vocabulary IDs
+#' @return List of summary tables for each database
+#' @importFrom readr read_csv
+#' @importFrom dplyr filter
+.getSummaryListForVocabulary <- function(
+    pathToCodeCountsFolder,
+    pathToVocabularyFolder,
+    connectionDetails,
+    vocabularyDatabaseSchema,
+    sourceVocabularyId,
+    targetVocabularyIds) {
+  summaryTableForVocabularyAndDatabaseList <- list()
+
+  databaseCoverageTibble <- file.path(pathToCodeCountsFolder, "databases_coverage.csv") |>
+    readr::read_csv() |>
+    dplyr::filter(!ignore)
+
+  for (databaseName in databaseCoverageTibble$database_name) {
+    summaryTableForVocabularyAndDatabaseList[[databaseName]] <- .getSummaryTableForVocabularyAndDatabase(
+      pathToCodeCountsFolder = pathToCodeCountsFolder,
+      pathToVocabularyFolder = pathToVocabularyFolder,
+      connectionDetails = connectionDetails,
+      vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+      sourceVocabularyId = sourceVocabularyId,
+      targetVocabularyIds = targetVocabularyIds,
+      databaseName = databaseName
+    )
+  }
+
+  return(summaryTableForVocabularyAndDatabaseList)
+}
+
+
+#' Get summary table for a vocabulary and database
+#'
+#' @param pathToCodeCountsFolder Path to code counts folder
+#' @param pathToVocabularyFolder Path to vocabulary folder
+#' @param connectionDetails Connection details
+#' @param vocabularyDatabaseSchema Vocabulary database schema
+#' @param sourceVocabularyId Source vocabulary ID
+#' @param targetVocabularyIds Target vocabulary IDs
+#' @param databaseName Database name
+#' @return Summary table as a tibble
+#' @importFrom dplyr full_join left_join mutate case_when
 .getSummaryTableForVocabularyAndDatabase <- function(
     pathToCodeCountsFolder,
     pathToVocabularyFolder,
@@ -453,6 +838,14 @@ buildStatusDashboard <- function(
     sourceVocabularyId,
     targetVocabularyIds,
     databaseName) {
+  pathToCodeCountsFolder |> checkmate::assert_directory()
+  pathToVocabularyFolder |> checkmate::assert_directory()
+  connectionDetails |> checkmate::assert_class("ConnectionDetails")
+  vocabularyDatabaseSchema |> checkmate::assert_string()
+  sourceVocabularyId |> checkmate::assert_string()
+  targetVocabularyIds |> checkmate::assert_character()
+  databaseName |> checkmate::assert_string()
+
   databaseSummary <- .getDatabaseSummaryForVocabulary(
     connectionDetails = connectionDetails,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema,
@@ -469,9 +862,9 @@ buildStatusDashboard <- function(
     pathToVocabularyFolder = pathToVocabularyFolder,
     sourceVocabularyId = sourceVocabularyId
   )
-
-  summaryTableForVocabularyAndDatabase <- databaseSummary |>
-    dplyr::full_join(codeCounts |> dplyr::select(-sourceVocabularyId), by = c("sourceCode" = "sourceCode")) |>
+  
+  summaryTableForVocabularyAndDatabase <- codeCounts |>
+    dplyr::full_join(databaseSummary |> dplyr::select(-sourceVocabularyId), by = c("sourceCode" = "sourceCode")) |>
     dplyr::left_join(usagiSummary, by = c("sourceConceptId" = "sourceConceptId", "targetConceptId" = "targetConceptId")) |>
     dplyr::mutate(
       status = dplyr::case_when(
@@ -485,10 +878,23 @@ buildStatusDashboard <- function(
 }
 
 
+#' Get code counts for a vocabulary and database
+#'
+#' @param pathToCodeCountsFolder Path to code counts folder
+#' @param sourceVocabularyId Source vocabulary ID
+#' @param databaseName Database name
+#' @return Code counts tibble
+#' @importFrom readr read_csv
+#' @importFrom dplyr filter rename_with pull
 .getCodeCountsForVocabularyAndDatabase <- function(
     pathToCodeCountsFolder,
     sourceVocabularyId,
     databaseName) {
+
+  pathToCodeCountsFolder |> checkmate::assert_directory()
+  sourceVocabularyId |> checkmate::assert_string()
+  databaseName |> checkmate::assert_string()
+
   databaseCoverageTibble <- file.path(pathToCodeCountsFolder, "databases_coverage.csv") |>
     readr::read_csv()
 
@@ -499,18 +905,33 @@ buildStatusDashboard <- function(
     readr::read_csv() |>
     dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
 
+  a <- sourceVocabularyId
   codeCountsTibble <- codeCountsTibble |>
-    dplyr::filter(sourceVocabularyId == {{ sourceVocabularyId }})
+    dplyr::filter(sourceVocabularyId == a)
 
 
   return(codeCountsTibble)
 }
 
+#' Get database summary for a vocabulary
+#'
+#' @param connectionDetails Connection details
+#' @param vocabularyDatabaseSchema Vocabulary database schema
+#' @param targetVocabularyIds Target vocabulary IDs
+#' @return Database summary tibble
+#' @importFrom DatabaseConnector connect disconnect dbGetQuery
+#' @importFrom SqlRender render translate
+#' @importFrom tibble as_tibble
+#' @importFrom dplyr rename_with left_join
 .getDatabaseSummaryForVocabulary <- function(
     connectionDetails,
     vocabularyDatabaseSchema,
     targetVocabularyIds) {
   connection <- DatabaseConnector::connect(connectionDetails)
+
+  connectionDetails  |> checkmate::assert_class("ConnectionDetails")
+  vocabularyDatabaseSchema |> checkmate::assert_string()
+  targetVocabularyIds |> checkmate::assert_character()
 
   sql <- "
       SELECT
@@ -534,7 +955,7 @@ buildStatusDashboard <- function(
       LEFT JOIN  @vocabulary_database_schema.CONCEPT AS c2
         ON cr.concept_id_2 = c2.concept_id
   "
-
+  
   sql <- SqlRender::render(
     sql = sql,
     vocabulary_database_schema = vocabularyDatabaseSchema,
@@ -586,11 +1007,36 @@ buildStatusDashboard <- function(
   return(databaseSummary)
 }
 
+#' Get Usagi summary for a vocabulary
+#'
+#' @param pathToVocabularyFolder Path to vocabulary folder
+#' @param sourceVocabularyId Source vocabulary ID
+#' @return Usagi summary tibble
+#' @importFrom readr read_csv
+#' @importFrom dplyr filter select mutate pull
 .getUsagiSummaryForVocabulary <- function(
     pathToVocabularyFolder,
     sourceVocabularyId) {
+  pathToVocabularyFolder |> checkmate::assert_directory()
+  sourceVocabularyId |> checkmate::assert_string()
+
   vocabulariesTibble <- file.path(pathToVocabularyFolder, "vocabularies.csv") |>
     readr::read_csv()
+
+  if (!(sourceVocabularyId %in% vocabulariesTibble$source_vocabulary_id)) {
+    usagiSummaryTibble <- tibble::tibble(
+      sourceConceptId = integer(),
+      targetConceptId = integer(),
+      statusSetBy = character(),
+      statusSetOn = character(),
+      mappingStatus = character(),
+      equivalence = character(),
+      validationMessages = character(),
+      autoUpdatingInfo = character(),
+      .rows = 0
+    )
+    return(usagiSummaryTibble)
+  }
 
   usagiFilePath <- vocabulariesTibble |>
     dplyr::filter(source_vocabulary_id == sourceVocabularyId) |>
@@ -657,10 +1103,6 @@ buildStatusDashboard <- function(
 
 # family_tree  <- get_full_family_tree_with_distance_recursive(conceptChild, code)
 
-# #' Create a Mermaid plot from a family tree tibble
-# #'
-# #' @param family_tree A tibble with columns parentConceptId, childConceptId, and distance
-# #' @return A string containing the Mermaid diagram code
 # family_tree_to_mermaid <- function(family_tree, info, conceptId) {
 
 #   # Start the Mermaid graph definition
