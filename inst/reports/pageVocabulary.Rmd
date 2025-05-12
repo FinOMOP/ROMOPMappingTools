@@ -7,7 +7,7 @@ params:
   summaryTableForVocabularyAndDatabaseList: NULL
   usagiTibble: NULL
   sourceVocabularyId: NULL
-  pathToNewsFile: NULL
+  newsFile: NULL
 ---
 
 
@@ -17,7 +17,7 @@ library(flexdashboard)
 summaryTableForVocabularyAndDatabaseList <- params$summaryTableForVocabularyAndDatabaseList
 usagiTibble <- params$usagiTibble
 sourceVocabularyId <- params$sourceVocabularyId
-pathToNewsFile <- params$pathToNewsFile
+newsFile <- params$newsFile
 # Update tab title
 title <- paste0(sourceVocabularyId)
 htmltools::tags$script(paste0("document.title = '", title, "';"))
@@ -67,12 +67,8 @@ Column {.tabset}
 ### NEWS.md
 
 ```{r news}
-if (!is.null(pathToNewsFile)) {
-  news <- readLines(pathToNewsFile)
-  news <- news |>
-    paste0(collapse = "\n") |>
-    htmltools::htmlEscape()
-  cat(news)
+if (!is.null(newsFile)) {
+  newsFile  |> htmltools::htmlEscape() |> cat()
 }
 ```
 

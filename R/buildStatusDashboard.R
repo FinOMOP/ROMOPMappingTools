@@ -34,6 +34,7 @@ buildStatusDashboard <- function(
   #
 
   pathToCodeCountsFolder |> checkmate::assert_directory_exists()
+  pathToVocabularyFolder |> checkmate::assert_directory_exists()
   connectionDetails |> checkmate::assert_class(c("ConnectionDetails"))
   vocabularyDatabaseSchema |> checkmate::assert_character()
   if (!dir.exists(outputFolderPath)) {
@@ -52,6 +53,8 @@ buildStatusDashboard <- function(
 
   summaryAllVocabularies <- tibble::tibble()
   for (i in 1:nrow(vocabulariesCoverageTibble)) {
+    message("Processing vocabulary: ", vocabulariesCoverageTibble$source_vocabulary_id[i])
+
     sourceVocabularyId <- vocabulariesCoverageTibble$source_vocabulary_id[i]
     targetVocabularyIds <- vocabulariesCoverageTibble$target_vocabulary_ids[i]
     targetVocabularyIds <- stringr::str_split(targetVocabularyIds, "\\|") |> unlist()
@@ -105,22 +108,27 @@ buildStatusDashboard <- function(
     )
 
     for (databaseName in names(summaryTableForVocabularyAndDatabaseList)) {
+      message("Processing database: ", databaseName)
+      
       summaryTableForVocabularyAndDatabase <- summaryTableForVocabularyAndDatabaseList[[databaseName]]
 
       nMapped <- summaryTableForVocabularyAndDatabase |>
         dplyr::distinct(sourceCode, .keep_all = TRUE) |>
         dplyr::filter(status == "MAPS TO") |>
-        nrow()
+        dplyr::pull(nEvents) |>
+        sum(na.rm = TRUE)
 
       nUnmapped <- summaryTableForVocabularyAndDatabase |>
         dplyr::distinct(sourceCode, .keep_all = TRUE) |>
         dplyr::filter(status == "UNMAPPED") |>
-        nrow()
+        dplyr::pull(nEvents) |>
+        sum(na.rm = TRUE)
 
       nInvalid <- summaryTableForVocabularyAndDatabase |>
         dplyr::distinct(sourceCode, .keep_all = TRUE) |>
         dplyr::filter(status == "INVALID") |>
-        nrow()
+        dplyr::pull(nEvents) |>
+        sum(na.rm = TRUE)
 
       strCoverage <- paste0(nMapped, "-", nUnmapped, "-", nInvalid)
 
@@ -411,13 +419,21 @@ buildStatusDashboard <- function(
   tempTemplatePath <- tempfile(fileext = ".Rmd")
   writeLines(template_content, tempTemplatePath)
 
+  # read news file
+  if (!is.null(pathToNewsFile)) {
+    newsFile <- readLines(pathToNewsFile) |>
+      paste0(collapse = "\n") 
+  } else {
+    newsFile <- NULL
+  }
+  
   rmarkdown::render(
     input = tempTemplatePath,
     params = list(
       summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
       usagiTibble = usagiTibble,
       sourceVocabularyId = sourceVocabularyId,
-      pathToNewsFile = pathToNewsFile
+      newsFile = newsFile
     ),
     output_file = outputFileHtmlPath
   )
@@ -804,11 +820,11 @@ buildStatusDashboard <- function(
   summaryTableForVocabularyAndDatabaseList <- list()
 
   databaseCoverageTibble <- file.path(pathToCodeCountsFolder, "databases_coverage.csv") |>
-    readr::read_csv() |>
+    readr::read_csv(show_col_types = FALSE) |>
     dplyr::filter(!ignore)
 
   for (databaseName in databaseCoverageTibble$database_name) {
-    summaryTableForVocabularyAndDatabaseList[[databaseName]] <- .getSummaryTableForVocabularyAndDatabase(
+    summaryTableForVocabularyAndDatabase <- .getSummaryTableForVocabularyAndDatabase(
       pathToCodeCountsFolder = pathToCodeCountsFolder,
       pathToVocabularyFolder = pathToVocabularyFolder,
       connectionDetails = connectionDetails,
@@ -817,6 +833,10 @@ buildStatusDashboard <- function(
       targetVocabularyIds = targetVocabularyIds,
       databaseName = databaseName
     )
+
+    if (!is.null(summaryTableForVocabularyAndDatabase)) {
+      summaryTableForVocabularyAndDatabaseList[[databaseName]] <- summaryTableForVocabularyAndDatabase
+    }
   }
 
   return(summaryTableForVocabularyAndDatabaseList)
@@ -849,17 +869,21 @@ buildStatusDashboard <- function(
   sourceVocabularyId |> checkmate::assert_string()
   targetVocabularyIds |> checkmate::assert_character()
   databaseName |> checkmate::assert_string()
+  
+  codeCounts <- .getCodeCountsForVocabularyAndDatabase(
+    pathToCodeCountsFolder = pathToCodeCountsFolder,
+    sourceVocabularyId = sourceVocabularyId,
+    databaseName = databaseName
+  )
+
+  if (nrow(codeCounts) == 0) {
+    return(NULL)
+  }
 
   databaseSummary <- .getDatabaseSummaryForVocabulary(
     connectionDetails = connectionDetails,
     vocabularyDatabaseSchema = vocabularyDatabaseSchema,
     targetVocabularyIds = targetVocabularyIds
-  )
-
-  codeCounts <- .getCodeCountsForVocabularyAndDatabase(
-    pathToCodeCountsFolder = pathToCodeCountsFolder,
-    sourceVocabularyId = sourceVocabularyId,
-    databaseName = databaseName
   )
 
   usagiSummary <- .getUsagiSummaryForVocabulary(
@@ -900,13 +924,13 @@ buildStatusDashboard <- function(
   databaseName |> checkmate::assert_string()
 
   databaseCoverageTibble <- file.path(pathToCodeCountsFolder, "databases_coverage.csv") |>
-    readr::read_csv()
+    readr::read_csv(show_col_types = FALSE)
 
   databaseCoverageTibble <- databaseCoverageTibble |>
     dplyr::filter(database_name == databaseName)
 
   codeCountsTibble <- file.path(pathToCodeCountsFolder, databaseCoverageTibble |> dplyr::pull(path_to_code_counts_file)) |>
-    readr::read_csv() |>
+    readr::read_csv(show_col_types = FALSE) |>
     dplyr::rename_with(SqlRender::snakeCaseToCamelCase)
 
   a <- sourceVocabularyId
@@ -1025,7 +1049,7 @@ buildStatusDashboard <- function(
   sourceVocabularyId |> checkmate::assert_string()
 
   vocabulariesTibble <- file.path(pathToVocabularyFolder, "vocabularies.csv") |>
-    readr::read_csv()
+    readr::read_csv(show_col_types = FALSE)
 
   if (!(sourceVocabularyId %in% vocabulariesTibble$source_vocabulary_id)) {
     usagiSummaryTibble <- tibble::tibble(
