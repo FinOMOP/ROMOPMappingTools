@@ -14,7 +14,6 @@
 #' @importFrom readr read_csv
 #' @importFrom dplyr filter distinct bind_rows select mutate left_join full_join rename_with case_when group_by ungroup summarize transmute pull arrange if_else n_distinct
 #' @importFrom tibble tibble as_tibble
-#' @importFrom rmarkdown render
 #' @importFrom reactable reactable colDef colFormat
 #' @importFrom shiny div
 #' @importFrom stringr str_split str_c str_detect str_extract
@@ -56,15 +55,17 @@ buildStatusDashboard <- function(
     targetVocabularyIds <- vocabulariesCoverageTibble$target_vocabulary_ids[i]
     targetVocabularyIds <- stringr::str_split(targetVocabularyIds, "\\|") |> unlist()
     mantainedBy <- vocabulariesCoverageTibble$mantained_by[i]
-
+    
     vocabularyTibble <- vocabulariesTibble |>
       dplyr::filter(source_vocabulary_id == sourceVocabularyId)
 
     # get usagi tibble and make summary string
     usagiTibble <- NULL
+    pathToNewsFile <- NULL
     strMapped <- NA_character_
     if (nrow(vocabularyTibble) != 0) {
       usagiTibble <- readUsagiFile(file.path(pathToVocabularyFolder, vocabularyTibble$path_to_usagi_file[1]))
+      pathToNewsFile <- file.path(pathToVocabularyFolder, vocabularyTibble$path_to_news_file[1])
       nMapped <- usagiTibble |>
         dplyr::distinct(sourceCode, .keep_all = TRUE) |>
         dplyr::filter(mappingStatus == "APPROVED") |>
@@ -91,7 +92,8 @@ buildStatusDashboard <- function(
         summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
         usagiTibble = usagiTibble,
         sourceVocabularyId = sourceVocabularyId,
-        outputFolderPath = outputFolderPath
+        outputFolderPath = outputFolderPath,
+        pathToNewsFile = pathToNewsFile
     )
   
     # create summary for all databases
@@ -141,7 +143,6 @@ buildStatusDashboard <- function(
 #' @param summaryAllVocabularies Tibble with summary for all vocabularies
 #' @param outputFolderPath Output folder path
 #' @return Path to the output HTML file
-#' @importFrom rmarkdown render
 .pageSummaryAllVocabularies <- function(
     summaryAllVocabularies,
     outputFolderPath) {
@@ -360,19 +361,21 @@ buildStatusDashboard <- function(
 #' @param usagiTibble Usagi tibble
 #' @param sourceVocabularyId Source vocabulary ID
 #' @param outputFolderPath Output folder path
+#' @param pathToNewsFile Path to the NEWS.md file
 #' @return Path to the output HTML file
-#' @importFrom rmarkdown render
 .pageCoverageVocabularyDatabases <- function(
     summaryTableForVocabularyAndDatabaseList,
     usagiTibble,
     sourceVocabularyId,
     outputFolderPath,
-    pathToNewFile) {
+    pathToNewsFile) {
   summaryTableForVocabularyAndDatabaseList |> checkmate::assert_list()
   usagiTibble |> checkmate::assert_tibble(null.ok = TRUE)
   sourceVocabularyId |> checkmate::assert_string()
   outputFolderPath |> checkmate::assert_directory()
-  pathToNewFile |> checkmate::assert_file_exists()
+  if (!is.null(pathToNewsFile)) {
+    pathToNewsFile |> checkmate::assert_file_exists()
+  }
 
   inputTemplate <- system.file("reports", "pageVocabulary.Rmd", package = "ROMOPMappingTools")
   outputFileHtmlPath <- file.path(outputFolderPath, paste0(sourceVocabularyId, ".html"))
@@ -413,7 +416,7 @@ buildStatusDashboard <- function(
       summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
       usagiTibble = usagiTibble,
       sourceVocabularyId = sourceVocabularyId,
-      pathToNewFile = pathToNewFile
+      pathToNewsFile = pathToNewsFile
     ),
     output_file = outputFileHtmlPath
   )

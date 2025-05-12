@@ -28,12 +28,15 @@ test_that("buildStatusDashboard works", {
     output_file_html <- file.path(validationResultsFolder, "MappingStatusDashboard.html")
 
 
-    outputFileHtmlPath <- buildStatusDashboard(
-        pathToCodeCountsFolder = pathToCodeCountsFolder,
-        pathToVocabularyFolder = pathToVocabularyFolder,
-        connectionDetails = connectionDetails,
-        vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-        outputFolderPath = validationResultsFolder
+    # TMP warning
+    suppressWarnings(
+        outputFileHtmlPath <- buildStatusDashboard(
+            pathToCodeCountsFolder = pathToCodeCountsFolder,
+            pathToVocabularyFolder = pathToVocabularyFolder,
+            connectionDetails = connectionDetails,
+            vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+            outputFolderPath = validationResultsFolder
+        )
     )
 
 
@@ -92,7 +95,7 @@ test_that("internal functions for .pageCoverageVocabularyDatabase works", {
     vocabularyDatabaseSchema <- "main"
     databaseName <- "FinnGenDF10"
     pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
-    pathToNewFile <- system.file("testdata/VOCABULARIES/ICD10fi/NEWS.md", package = "ROMOPMappingTools")
+    pathToNewsFile <- system.file("testdata/VOCABULARIES/ICD10fi/NEWS.md", package = "ROMOPMappingTools")
     #
     # - getDatabaseSummaryForVocabulary
     #
@@ -166,7 +169,7 @@ test_that("internal functions for .pageCoverageVocabularyDatabase works", {
         summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
         usagiTibble = usagiTibble,
         sourceVocabularyId = sourceVocabularyId,
-        pathToNewFile = pathToNewFile,
+        pathToNewsFile = pathToNewsFile,
         outputFolderPath = validationResultsFolder
     )
 
