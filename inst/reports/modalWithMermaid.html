@@ -1,0 +1,61 @@
+
+<!-- Mermaid Modal -->
+<div id="mermaid-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; margin:5vh auto; padding:20px; border-radius:8px; max-width:700px; position:relative;">
+      <button onclick="closeMermaidModal()" style="position:absolute; top:10px; right:10px;">Close</button>
+      <div id="mermaid-container">
+        <div id="mermaid-diagram"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mermaid JS -->
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <script>
+    if (typeof mermaid !== 'undefined') {
+    mermaid.initialize({ startOnLoad: false });
+  }
+  
+  function showMermaidModal(mermaidCode) {
+    // Convert <br> and <br/> to newlines
+    mermaidCode = mermaidCode.replace(/<br\s*\/?>/gi, '\n');
+  
+    console.log('Raw input to showMermaidModal:', mermaidCode);
+  
+    document.getElementById('mermaid-modal').style.display = 'flex';
+    var diagram = document.getElementById('mermaid-diagram');
+    // Clear previous content
+    diagram.innerHTML = '';
+  
+    // Create a unique id for the new diagram
+    var uniqueId = 'mermaid-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+    var mermaidDiv = document.createElement('div');
+    mermaidDiv.className = 'mermaid';
+    mermaidDiv.id = uniqueId;
+    mermaidDiv.innerHTML = mermaidCode; // Use innerText to avoid HTML parsing
+  
+    diagram.appendChild(mermaidDiv);
+  
+    // Render the diagram
+    if (typeof mermaid !== 'undefined') {
+      mermaid.init(undefined, '#' + uniqueId);
+    }
+  }
+  
+  function closeMermaidModal() {
+    document.getElementById('mermaid-modal').style.display = 'none';
+    document.getElementById('mermaid-diagram').innerHTML = '';
+  }
+  
+  // Optional: close modal when clicking outside
+  if (typeof window !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', function() {
+      var modal = document.getElementById('mermaid-modal');
+      if (modal) {
+        modal.addEventListener('click', function(e) {
+          if (e.target === this) closeMermaidModal();
+        });
+      }
+    });
+  }
+  </script>

@@ -4,7 +4,7 @@ output:
   flexdashboard::flex_dashboard:
     orientation: rows
 params: 
-  mapping_status: NULL
+  summaryAllVocabularies: NULL
 ---
 
 
@@ -13,7 +13,7 @@ library(flexdashboard)
 ```
 
 ```{r}
-mapping_status <- params$mapping_status
+summaryAllVocabularies <- params$summaryAllVocabularies
 ```
 
 
@@ -47,43 +47,11 @@ Exactly what events fall in each category can be explored by selecting the vocab
 Hover over the bars to see details.
 
 
-
 Column {.tabset}
 -----------------------------------------------------------------------
 
 ### Summary
 
 ```{r}
-if(!is.null(mapping_status)){
-  plotTableMappingStatus(mapping_status)
-}
-
-```
-
-```{r results='asis'}
-if(!is.null(mapping_status)){
-  
-  valid_source_vocabulary_id <- mapping_status$code_counts_matched |>
-    dplyr::distinct(source_vocabulary_id) |>
-    dplyr::pull(source_vocabulary_id)
-  
-  for(source_vocabulary_id in valid_source_vocabulary_id){
-    
-    cat("### ", source_vocabulary_id, "\n")
-    
-    shiny::div(
-      tryCatch({
-        plotTableVocabularyStatus(mapping_status, source_vocabulary_id)
-      }, error = function(e) {
-        if(stringr::str_detect(e$message, "Each row of output must be identified")){
-          return("ERROR, THE VOCABULARY HAS DUPLICATED SOURCE CODES !!!")
-        }else{
-          return(e$message)
-        }
-      } )
-    ) |>
-      print()
-  }
-  
-}
+  .plotTableSummaryAllVocabularies(summaryAllVocabularies)
 ```
