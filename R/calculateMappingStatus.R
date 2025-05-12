@@ -66,6 +66,9 @@ calculateMappingStatus <- function(
     #
     # - Get info of the mappings from the OMOP vocabulary
     #
+    #
+    # - Get info of the mappings from the OMOP vocabulary
+    #
     connection <- DatabaseConnector::connect(connectionDetails)
 
     sql <- "
@@ -106,8 +109,6 @@ calculateMappingStatus <- function(
     vocabulariesDBInfo <- DatabaseConnector::dbGetQuery(connection, sql) |> tibble::as_tibble()
 
     DatabaseConnector::disconnect(connection)
-
-
     concepts_to_match <- vocabulariesCoverageTibble |>
         dplyr::mutate(vocabulary_id = target_vocabulary_ids) |>
         dplyr::left_join(

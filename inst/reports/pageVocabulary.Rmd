@@ -1,0 +1,100 @@
+---
+title: "Vocabulary"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+params: 
+  summaryTableForVocabularyAndDatabaseList: NULL
+  usagiTibble: NULL
+  sourceVocabularyId: NULL
+  pathToNewsFile: NULL
+---
+
+
+```{r setup}
+library(flexdashboard)
+
+summaryTableForVocabularyAndDatabaseList <- params$summaryTableForVocabularyAndDatabaseList
+usagiTibble <- params$usagiTibble
+sourceVocabularyId <- params$sourceVocabularyId
+pathToNewsFile <- params$pathToNewsFile
+# Update tab title
+title <- paste0(sourceVocabularyId)
+htmltools::tags$script(paste0("document.title = '", title, "';"))
+
+usagiColors <- list(
+  flagged = "#EC6173",
+  unchecked = "#F1AE4A",
+  approved = "#51A350",
+  inexact = "#AAAAAA"
+)
+
+coverageColors <- list(
+  invalid = "#EC6173",
+  unmapped = "#F1AE4A",
+  mapsTo = "#51A350",
+  grey = "#AAAAAA"
+)
+
+```
+
+
+Info
+=====================================
+
+Sidebar {.sidebar data-width=300}
+-----------------------------------------------------------------------
+### Info
+This page shows the mapping status and coverage statistics for the `r sourceVocabularyId` vocabulary.
+
+The page is divided into three main sections:
+
+1. **Info** - This section contains:
+   - This overview
+   - The NEWS.md file showing version history and changes
+
+2. **Usagi file** - Shows the mapping progress:
+   - Summary statistics of mapped concepts
+   - Detailed table of all source codes and their mappings
+
+3. **Coverage** - Shows usage statistics per database:
+   - Summary view with overall metrics
+   - Detailed coverage statistics
+
+
+Column {.tabset}
+-----------------------------------------------------------------------
+### NEWS.md
+
+```{r news}
+if (!is.null(pathToNewsFile)) {
+  news <- readLines(pathToNewsFile)
+  news <- news |>
+    paste0(collapse = "\n") |>
+    htmltools::htmlEscape()
+  cat(news)
+}
+```
+
+
+Usagi file
+=====================================
+
+Column {.tabset}
+-----------------------------------------------------------------------
+### Summary
+
+```{r usagiSummary}
+if (!is.null(usagiTibble)) {
+  .plotSummaryTableForUsagiFile(usagiTibble, usagiColors)
+}
+```
+
+### Usagi file
+
+```{r usagiFile}
+if (!is.null(usagiTibble)) {
+  .plotTableForUsagiFile(usagiTibble, usagiColors)
+}
+```
+
