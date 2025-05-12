@@ -4,7 +4,9 @@
 \alias{helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB}
 \title{Create a Temporary Copy of the OMOP Vocabulary DuckDB}
 \usage{
-helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB(
+  pathToFullOMOPVocabularyCSVsFolder = NULL
+)
 }
 \value{
 A character string containing the path to the temporary copy of the DuckDB file

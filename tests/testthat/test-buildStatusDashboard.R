@@ -41,7 +41,6 @@ test_that("buildStatusDashboard works", {
             outputFolderPath = validationResultsFolder
         )
     )
-f
 
     # check the validation results folder
     expect_true(file.exists(outputFileHtmlPath))
