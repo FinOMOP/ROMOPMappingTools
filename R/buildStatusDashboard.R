@@ -28,6 +28,7 @@ buildStatusDashboard <- function(
     connectionDetails,
     vocabularyDatabaseSchema,
     outputFolderPath = tempdir()) {
+
   #
   # Validate parameters
   #
