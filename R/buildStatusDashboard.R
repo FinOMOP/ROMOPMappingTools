@@ -99,7 +99,7 @@ buildStatusDashboard <- function(
         usagiTibble = usagiTibble,
         sourceVocabularyId = sourceVocabularyId,
         outputFolderPath = outputFolderPath,
-        newsFile = newsFile
+        pathToNewsFile = pathToNewsFile
     )
   
     # create summary for all databases
