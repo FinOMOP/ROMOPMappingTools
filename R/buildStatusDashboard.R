@@ -70,6 +70,8 @@ buildStatusDashboard <- function(
     if (nrow(vocabularyTibble) != 0) {
       usagiTibble <- readUsagiFile(file.path(pathToVocabularyFolder, vocabularyTibble$path_to_usagi_file[1]))
       pathToNewsFile <- file.path(pathToVocabularyFolder, vocabularyTibble$path_to_news_file[1])
+      newsFile <- readLines(pathToNewsFile) |>
+        paste0(collapse = "\n")
       nMapped <- usagiTibble |>
         dplyr::distinct(sourceCode, .keep_all = TRUE) |>
         dplyr::filter(mappingStatus == "APPROVED") |>
@@ -97,7 +99,7 @@ buildStatusDashboard <- function(
         usagiTibble = usagiTibble,
         sourceVocabularyId = sourceVocabularyId,
         outputFolderPath = outputFolderPath,
-        pathToNewsFile = pathToNewsFile
+        newsFile = newsFile
     )
   
     # create summary for all databases
