@@ -1,8 +1,11 @@
 test_that("buildStatusDashboard works", {
     # Set up test data
-    pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
-    pathToCodeCountsFolder <- system.file("testdata/CODE_COUNTS", package = "ROMOPMappingTools")
-    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+    pathToVocabularyFolder <- setup_pathToVocabularyFolder
+    pathToCodeCountsFolder <- setup_pathToCodeCountsFolder
+    pathToFullOMOPVocabularyCSVsFolder  <- setup_pathToFullOMOPVocabularyCSVsFolder
+    pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB(
+        pathToFullOMOPVocabularyCSVsFolder = setup_pathToFullOMOPVocabularyCSVsFolder
+    )
     withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
     vocabularyDatabaseSchema <- "main"
     validationResultsFolder <- file.path(tempdir(), "validationResults")
@@ -38,7 +41,6 @@ test_that("buildStatusDashboard works", {
             outputFolderPath = validationResultsFolder
         )
     )
-
 
     # check the validation results folder
     expect_true(file.exists(outputFileHtmlPath))
