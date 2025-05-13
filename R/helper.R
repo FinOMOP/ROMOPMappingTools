@@ -2,6 +2,7 @@
 #'
 #' This function creates a temporary copy of the OMOP vocabulary DuckDB file from the package's test data.
 #'
+#' @param pathToFullOMOPVocabularyCSVsFolder A character string containing the path to the full OMOP vocabulary CSVs folder.
 #' @return A character string containing the path to the temporary copy of the DuckDB file
 #' @export
 #'

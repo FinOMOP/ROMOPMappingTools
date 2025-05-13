@@ -8,6 +8,9 @@ helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB(
   pathToFullOMOPVocabularyCSVsFolder = NULL
 )
 }
+\arguments{
+\item{pathToFullOMOPVocabularyCSVsFolder}{A character string containing the path to the full OMOP vocabulary CSVs folder.}
+}
 \value{
 A character string containing the path to the temporary copy of the DuckDB file
 }
