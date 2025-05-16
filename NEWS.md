@@ -1,3 +1,7 @@
+# ROMOPMappingTools 2.0.2
+
+- Fix updating reporting
+
 # ROMOPMappingTools v2.0.1
 
 - Refactored the Dashboard build process

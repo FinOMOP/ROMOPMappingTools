@@ -1,6 +1,6 @@
 Package: ROMOPMappingTools
 Title: Tools for Working with OMOP CDM Mappings
-Version: 2.0.1
+Version: 2.0.2
 Authors@R: 
     person("Javier", "Gracia-Tabuenca", , "javier.graciatabuenca@tuni.fi", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-2455-0598"))
