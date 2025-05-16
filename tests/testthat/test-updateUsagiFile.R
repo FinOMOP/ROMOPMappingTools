@@ -230,6 +230,11 @@ test_that("test updateUsagiFile detects if the mappings are out of date", {
   expect_equal(c("UNCHECKED"))
   updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated by usagi 1 reamap to mapped")) |> dplyr::pull(statusSetBy) |> 
   expect_equal(c("Automatic update"))
+
+  #Updated in the pass
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated in the pass")) |> nrow() |> expect_equal(1)
+  updatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "Updated in the pass")) |> dplyr::pull(`ADD_INFO:autoUpdatingInfo`) |> 
+  expect_equal("2025-03-27 | conceptName changed from Aortography to Angiography of aorta")
 })
 
 

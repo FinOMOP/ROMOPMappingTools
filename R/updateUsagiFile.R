@@ -106,21 +106,9 @@ updateUsagiFile <- function(
 
     usagiTibble <- dplyr::bind_rows(usagiTibbleNoUpdated, usagiTibbleUpdated)
 
-    # Check if auto updating info column exists and rename it
-    if ("ADD_INFO:autoUpdatingInfo" %in% usagiTibbleColumns) {
-        usagiTibble <- usagiTibble |>
-            dplyr::rename(autoUpdatingInfo = `ADD_INFO:autoUpdatingInfo`)
-    } else {
-        usagiTibble <- usagiTibble |>
-            dplyr::mutate(autoUpdatingInfo = "")
-    }
-
-    if (appendOrClearAutoUpdatingInfo == "clear") {
-        usagiTibble <- usagiTibble |>
-            dplyr::mutate(
-                autoUpdatingInfo = ""
-            )
-    }
+    # Create a new column autoUpdatingInfo
+    usagiTibble <- usagiTibble |>
+        dplyr::mutate(autoUpdatingInfo = "")
 
 
     # - update conceptIds: Find possible updates for the conceps that became non-standard
@@ -340,14 +328,36 @@ updateUsagiFile <- function(
         usagiTibble <- usagiTibble |>
             dplyr::select(-hasChangedConceptName)
     }
-
+    
     #
     # end
     #
-    usagiTibble |>
+    usagiTibble <- usagiTibble |>
         dplyr::select(-action, -hasChangendConceptId) |>
-        dplyr::mutate(autoUpdatingInfo = ifelse(autoUpdatingInfo == "", autoUpdatingInfo, paste0(lubridate::today(), autoUpdatingInfo))) |>
-        dplyr::rename(`ADD_INFO:autoUpdatingInfo` = autoUpdatingInfo) |>
+        dplyr::mutate(autoUpdatingInfo = ifelse(autoUpdatingInfo == "", autoUpdatingInfo, paste0(lubridate::today(), autoUpdatingInfo)))
+        
+    # if ADD_INFO:autoUpdatingInfo dont exist make it
+    if (!("ADD_INFO:autoUpdatingInfo" %in% usagiTibbleColumns)) {
+        usagiTibble <- usagiTibble |>
+            dplyr::mutate(`ADD_INFO:autoUpdatingInfo` = "")
+    } 
+
+    #if appendOrClearAutoUpdatingInfo is append, add the autoUpdatingInfo to the existing column
+    if (appendOrClearAutoUpdatingInfo == "append") {
+        usagiTibble <- usagiTibble |>
+            dplyr::mutate(`ADD_INFO:autoUpdatingInfo` = dplyr::case_when(
+                `ADD_INFO:autoUpdatingInfo` == "" | is.na(`ADD_INFO:autoUpdatingInfo`) ~ autoUpdatingInfo, 
+                autoUpdatingInfo == "" | is.na(autoUpdatingInfo) ~ `ADD_INFO:autoUpdatingInfo`,
+                (autoUpdatingInfo != "" | !is.na(autoUpdatingInfo)) & (`ADD_INFO:autoUpdatingInfo` != "" | !is.na(`ADD_INFO:autoUpdatingInfo`)) ~ paste0(autoUpdatingInfo, " | ", `ADD_INFO:autoUpdatingInfo`),
+                TRUE ~ ""
+            ))
+    } else {
+        usagiTibble <- usagiTibble |>
+            dplyr::mutate(`ADD_INFO:autoUpdatingInfo` = autoUpdatingInfo)
+    }
+
+    usagiTibble |>
+        dplyr::select(-autoUpdatingInfo) |>
         #dplyr::distinct(sourceCode, conceptId, .keep_all = TRUE) |> # may be that a mapping with a correct and incorrect, the incorrect is remaped to the same as the correct one
         writeUsagiFile(pathToUpdatedUsagiFile)
 
