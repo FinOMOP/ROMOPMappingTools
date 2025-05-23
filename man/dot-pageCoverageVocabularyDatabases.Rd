@@ -9,7 +9,8 @@
   usagiTibble,
   sourceVocabularyId,
   outputFolderPath,
-  pathToNewsFile
+  pathToNewsFile,
+  fileIssueRepo = ""
 )
 }
 \arguments{
@@ -22,6 +23,8 @@
 \item{outputFolderPath}{Output folder path}
 
 \item{pathToNewsFile}{Path to the NEWS.md file}
+
+\item{fileIssueRepo}{The repository to file issues to}
 }
 \value{
 Path to the output HTML file

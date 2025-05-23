@@ -7,7 +7,8 @@
 .plotTableForVocabularyAndDatabase(
   summaryTableForVocabularyAndDatabase,
   colors = list(invalid = "#EC6173", unmapped = "#F1AE4A", mapsTo = "#51A350", grey =
-    "#AAAAAA")
+    "#AAAAAA"),
+  fileIssueRepo = ""
 )
 }
 \arguments{

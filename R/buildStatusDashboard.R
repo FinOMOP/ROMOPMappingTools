@@ -7,6 +7,7 @@
 #' @param connectionDetails DatabaseConnector connection details object
 #' @param vocabularyDatabaseSchema Schema containing the vocabulary tables
 #' @param outputFolderPath The path to the output folder for HTML output
+#' @param fileIssueRepo The repository to file issues to
 #'
 #' @return Path to the output HTML file
 #'
@@ -27,7 +28,9 @@ buildStatusDashboard <- function(
     pathToVocabularyFolder,
     connectionDetails,
     vocabularyDatabaseSchema,
-    outputFolderPath = tempdir()) {
+    outputFolderPath = tempdir(),
+    fileIssueRepo = ""
+    ) {
 
   #
   # Validate parameters
@@ -97,7 +100,8 @@ buildStatusDashboard <- function(
         usagiTibble = usagiTibble,
         sourceVocabularyId = sourceVocabularyId,
         outputFolderPath = outputFolderPath,
-        pathToNewsFile = pathToNewsFile
+        pathToNewsFile = pathToNewsFile,
+        fileIssueRepo = fileIssueRepo
     )
   
     # create summary for all databases
@@ -371,6 +375,7 @@ buildStatusDashboard <- function(
 #' @param sourceVocabularyId Source vocabulary ID
 #' @param outputFolderPath Output folder path
 #' @param pathToNewsFile Path to the NEWS.md file
+#' @param fileIssueRepo The repository to file issues to
 #' @return Path to the output HTML file
 .pageCoverageVocabularyDatabases <- function(
     summaryTableForVocabularyAndDatabaseList,
@@ -539,6 +544,7 @@ buildStatusDashboard <- function(
 #'
 #' @param summaryTableForVocabularyAndDatabase Tibble with summary
 #' @param colors List of colors
+#' @param fileIssueRepo The repository to file issues to
 #' @return A reactable table object
 #' @importFrom reactable reactable colDef colFormat
 .plotTableForVocabularyAndDatabase <- function(
