@@ -9,7 +9,8 @@ buildStatusDashboard(
   pathToVocabularyFolder,
   connectionDetails,
   vocabularyDatabaseSchema,
-  outputFolderPath = tempdir()
+  outputFolderPath = tempdir(),
+  fileIssueRepo = ""
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ buildStatusDashboard(
 \item{vocabularyDatabaseSchema}{Schema containing the vocabulary tables}
 
 \item{outputFolderPath}{The path to the output folder for HTML output}
+
+\item{fileIssueRepo}{The repository to file issues to}
 }
 \value{
 Path to the output HTML file
