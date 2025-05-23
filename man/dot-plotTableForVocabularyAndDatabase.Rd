@@ -15,6 +15,8 @@
 \item{summaryTableForVocabularyAndDatabase}{Tibble with summary}
 
 \item{colors}{List of colors}
+
+\item{fileIssueRepo}{The repository to file issues to}
 }
 \value{
 A reactable table object
