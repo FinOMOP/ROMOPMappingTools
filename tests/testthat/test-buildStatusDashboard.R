@@ -172,7 +172,8 @@ test_that("internal functions for .pageCoverageVocabularyDatabase works", {
         usagiTibble = usagiTibble,
         sourceVocabularyId = sourceVocabularyId,
         pathToNewsFile = pathToNewsFile,
-        outputFolderPath = validationResultsFolder
+        outputFolderPath = validationResultsFolder,
+        fileIssueRepo = "FinOMOP/ROMOPMappingTools"
     )
 
     expect_true(file.exists(outputCoverageVocabularyDatabaseHtmlPath))
