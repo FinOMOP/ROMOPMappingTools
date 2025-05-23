@@ -377,7 +377,9 @@ buildStatusDashboard <- function(
     usagiTibble,
     sourceVocabularyId,
     outputFolderPath,
-    pathToNewsFile) {
+    pathToNewsFile, 
+    fileIssueRepo = ""
+    ) {
   summaryTableForVocabularyAndDatabaseList |> checkmate::assert_list()
   usagiTibble |> checkmate::assert_tibble(null.ok = TRUE)
   sourceVocabularyId |> checkmate::assert_string()
@@ -411,7 +413,7 @@ buildStatusDashboard <- function(
       append(("```\n")) |>
       append(("### Coverage\n")) |>
       append(("```{r}\n")) |>
-      append((".plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase)\n")) |>
+      append((".plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase, fileIssueRepo = fileIssueRepo)\n")) |>
       append(("```\n"))
   }
 
@@ -433,7 +435,8 @@ buildStatusDashboard <- function(
       summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
       usagiTibble = usagiTibble,
       sourceVocabularyId = sourceVocabularyId,
-      newsFile = newsFile
+      newsFile = newsFile,
+      fileIssueRepo = fileIssueRepo
     ),
     output_file = outputFileHtmlPath
   )
@@ -454,7 +457,8 @@ buildStatusDashboard <- function(
       unmapped = "#F1AE4A",
       mapsTo = "#51A350",
       grey = "#AAAAAA"
-    )) {
+    )
+  ) {
   toPlot <- summaryTableForVocabularyAndDatabase |>
     dplyr::mutate(
       statusColor = dplyr::case_when(
@@ -544,7 +548,9 @@ buildStatusDashboard <- function(
       unmapped = "#F1AE4A",
       mapsTo = "#51A350",
       grey = "#AAAAAA"
-    )) {
+    ),
+    fileIssueRepo = ""
+  ) {
   athenaUrl <- "https://athena.ohdsi.org/search-terms/terms/"
 
   toPlot <- summaryTableForVocabularyAndDatabase |>
@@ -562,6 +568,14 @@ buildStatusDashboard <- function(
       nMapsTo = dplyr::n_distinct(targetConceptId)
     ) |>
     dplyr::ungroup() |>
+    # Create a string of target concept ids and names
+    dplyr::group_by(sourceCode) |>
+    dplyr::mutate(
+      targetConceptIds_str = paste0(targetConceptId, collapse = " | "),
+      targetConceptNames_str = paste0(targetConceptName, collapse = " | "),
+      targetVocabularyIds_str = paste0(targetVocabularyId, collapse = " | ")
+    ) |>
+    dplyr::ungroup() |>
     dplyr::transmute(
       sourceCode = sourceCode,
       sourceVocabularyId = sourceVocabularyId,
@@ -574,7 +588,10 @@ buildStatusDashboard <- function(
       targetName = dplyr::if_else(!is.na(targetConceptName), paste0("<a href='", athenaUrl, targetConceptId, "' target='_blank'>", targetConceptName, "</a>"), ""),
       nEvents = nEvents,
       pEvents = pEvents,
-      statusSetBy = statusSetBy
+      statusSetBy = statusSetBy, 
+      fileIssue = paste0("<a href='", 
+        URLencode(paste0("https://github.com/", fileIssueRepo, "/issues/new?title=Issue with", sourceCode, " (", sourceVocabularyId, ")&body=Source code: ", sourceCode, "\nSource vocabulary: ", sourceVocabularyId, "\nSource concept name: ", sourceConceptName, "\nSource concept id: ", sourceConceptId, "\n\nStatus: ", status, "\n\nTarget concept ids: ", targetConceptIds_str, "\nTarget concept names: ", targetConceptNames_str, "\nTarget vocabulary: ", targetVocabularyIds_str,  "\n\nPlease describe the issue hee: ")),
+       "' target='_blank'>File issue</a>")
     ) |>
     dplyr::arrange(dplyr::desc(nEvents))
 
@@ -673,6 +690,18 @@ buildStatusDashboard <- function(
     #   }
     # )
   )
+
+  if (fileIssueRepo == "") {
+    columns$fileIssue <- reactable::colDef(
+      show = FALSE
+    )
+  }else{
+    columns$fileIssue <- reactable::colDef(
+      name = "File issue",
+      maxWidth = 100,
+      html = TRUE,
+    )
+  }
 
   reactable::reactable(
     toPlot,

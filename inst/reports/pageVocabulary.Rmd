@@ -8,6 +8,7 @@ params:
   usagiTibble: NULL
   sourceVocabularyId: NULL
   newsFile: NULL
+  fileIssueRepo: ""
 ---
 
 
@@ -18,6 +19,7 @@ summaryTableForVocabularyAndDatabaseList <- params$summaryTableForVocabularyAndD
 usagiTibble <- params$usagiTibble
 sourceVocabularyId <- params$sourceVocabularyId
 newsFile <- params$newsFile
+fileIssueRepo <- params$fileIssueRepo
 # Update tab title
 title <- paste0(sourceVocabularyId)
 htmltools::tags$script(paste0("document.title = '", title, "';"))
