@@ -538,6 +538,8 @@ buildStatusDashboard <- function(
 #' Plot detailed table for a vocabulary and database
 #'
 #' @param summaryTableForVocabularyAndDatabase Tibble with summary
+#' @param databaseName Database name
+#' @param vocabularyId Vocabulary ID
 #' @param colors List of colors
 #' @param fileIssueRepo The repository to file issues to
 #' @return A reactable table object

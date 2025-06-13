@@ -36,7 +36,9 @@ Imports:
     tippy,
     knitr,
     duckdb,
-    flexdashboard
+    flexdashboard,
+    fontawesome,
+    htmltools
 Remotes:
     OHDSI/DataQualityDashboard
 Depends: 
