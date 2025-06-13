@@ -29,9 +29,7 @@ buildStatusDashboard <- function(
     connectionDetails,
     vocabularyDatabaseSchema,
     outputFolderPath = tempdir(),
-    fileIssueRepo = ""
-    ) {
-
+    fileIssueRepo = "") {
   #
   # Validate parameters
   #
@@ -62,7 +60,7 @@ buildStatusDashboard <- function(
     targetVocabularyIds <- vocabulariesCoverageTibble$target_vocabulary_ids[i]
     targetVocabularyIds <- stringr::str_split(targetVocabularyIds, "\\|") |> unlist()
     mantainedBy <- vocabulariesCoverageTibble$mantained_by[i]
-    
+
     vocabularyTibble <- vocabulariesTibble |>
       dplyr::filter(source_vocabulary_id == sourceVocabularyId)
 
@@ -98,14 +96,14 @@ buildStatusDashboard <- function(
 
     # build page for coverage of all databases
     .pageCoverageVocabularyDatabases(
-        summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
-        usagiTibble = usagiTibble,
-        sourceVocabularyId = sourceVocabularyId,
-        outputFolderPath = outputFolderPath,
-        pathToNewsFile = pathToNewsFile,
-        fileIssueRepo = fileIssueRepo
+      summaryTableForVocabularyAndDatabaseList = summaryTableForVocabularyAndDatabaseList,
+      usagiTibble = usagiTibble,
+      sourceVocabularyId = sourceVocabularyId,
+      outputFolderPath = outputFolderPath,
+      pathToNewsFile = pathToNewsFile,
+      fileIssueRepo = fileIssueRepo
     )
-  
+
     # create summary for all databases
     summaryVocabulary <- tibble::tibble(
       vocabularyId = sourceVocabularyId,
@@ -115,7 +113,7 @@ buildStatusDashboard <- function(
 
     for (databaseName in names(summaryTableForVocabularyAndDatabaseList)) {
       message("Processing database: ", databaseName)
-      
+
       summaryTableForVocabularyAndDatabase <- summaryTableForVocabularyAndDatabaseList[[databaseName]]
 
       nMapped <- summaryTableForVocabularyAndDatabase |>
@@ -139,7 +137,6 @@ buildStatusDashboard <- function(
       strCoverage <- paste0(nMapped, "-", nUnmapped, "-", nInvalid)
 
       summaryVocabulary[[databaseName]] <- strCoverage
-
     }
 
     # add summary for all databases to summary for all vocabularies
@@ -197,7 +194,7 @@ buildStatusDashboard <- function(
   columns_list <- list(
     vocabularyId = reactable::colDef(
       name = "Vocabulary",
-      maxWidth = 150, 
+      maxWidth = 150,
       cell = function(value) {
         paste0("<a href='./", value, ".html' target='_blank'>", value, "</a>")
       },
@@ -384,9 +381,8 @@ buildStatusDashboard <- function(
     usagiTibble,
     sourceVocabularyId,
     outputFolderPath,
-    pathToNewsFile, 
-    fileIssueRepo = ""
-    ) {
+    pathToNewsFile,
+    fileIssueRepo = "") {
   summaryTableForVocabularyAndDatabaseList |> checkmate::assert_list()
   usagiTibble |> checkmate::assert_tibble(null.ok = TRUE)
   sourceVocabularyId |> checkmate::assert_string()
@@ -420,7 +416,7 @@ buildStatusDashboard <- function(
       append(("```\n")) |>
       append(("### Coverage\n")) |>
       append(("```{r}\n")) |>
-      append((".plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase, fileIssueRepo = fileIssueRepo)\n")) |>
+      append(paste0(".plotTableForVocabularyAndDatabase(summaryTableForVocabularyAndDatabase, databaseName = '", database, "', vocabularyId = '", sourceVocabularyId, "', fileIssueRepo = '", fileIssueRepo, "')\n")) |>
       append(("```\n"))
   }
 
@@ -431,11 +427,11 @@ buildStatusDashboard <- function(
   # read news file
   if (!is.null(pathToNewsFile)) {
     newsFile <- readLines(pathToNewsFile) |>
-      paste0(collapse = "\n") 
+      paste0(collapse = "\n")
   } else {
     newsFile <- NULL
   }
-  
+
   rmarkdown::render(
     input = tempTemplatePath,
     params = list(
@@ -464,8 +460,7 @@ buildStatusDashboard <- function(
       unmapped = "#F1AE4A",
       mapsTo = "#51A350",
       grey = "#AAAAAA"
-    )
-  ) {
+    )) {
   toPlot <- summaryTableForVocabularyAndDatabase |>
     dplyr::mutate(
       statusColor = dplyr::case_when(
@@ -545,20 +540,23 @@ buildStatusDashboard <- function(
 #' Plot detailed table for a vocabulary and database
 #'
 #' @param summaryTableForVocabularyAndDatabase Tibble with summary
+#' @param databaseName Database name
+#' @param vocabularyId Vocabulary ID
 #' @param colors List of colors
 #' @param fileIssueRepo The repository to file issues to
 #' @return A reactable table object
 #' @importFrom reactable reactable colDef colFormat
 .plotTableForVocabularyAndDatabase <- function(
     summaryTableForVocabularyAndDatabase,
+    databaseName,
+    vocabularyId,
     colors = list(
       invalid = "#EC6173",
       unmapped = "#F1AE4A",
       mapsTo = "#51A350",
       grey = "#AAAAAA"
     ),
-    fileIssueRepo = ""
-  ) {
+    fileIssueRepo = "") {
   athenaUrl <- "https://athena.ohdsi.org/search-terms/terms/"
 
   toPlot <- summaryTableForVocabularyAndDatabase |>
@@ -593,13 +591,16 @@ buildStatusDashboard <- function(
       targetCode = targetCode,
       equivalence = equivalence,
       targetVocabularyId = targetVocabularyId,
-      targetName = dplyr::if_else(!is.na(targetConceptName), paste0("<a href='", athenaUrl, targetConceptId, "' target='_blank'>", targetConceptName, "</a>"), ""),
+      targetConceptId = targetConceptId,
+      targetName = targetConceptName,
       nEvents = nEvents,
       pEvents = pEvents,
-      statusSetBy = statusSetBy, 
-      fileIssue = paste0("<a href='", 
-        URLencode(paste0("https://github.com/", fileIssueRepo, "/issues/new?title=Issue with", sourceCode, " (", sourceVocabularyId, ")&body=Source code: ", sourceCode, "\nSource vocabulary: ", sourceVocabularyId, "\nSource concept name: ", sourceConceptName, "\nSource concept id: ", sourceConceptId, "\n\nStatus: ", status, "\n\nTarget concept ids: ", targetConceptIds_str, "\nTarget concept names: ", targetConceptNames_str, "\nTarget vocabulary: ", targetVocabularyIds_str,  "\n\nPlease describe the issue hee: ")),
-       "' target='_blank'>File issue</a>")
+      statusSetBy = statusSetBy,
+      fileIssue = paste0(
+        "<a href='",
+        URLencode(paste0("https://github.com/", fileIssueRepo, "/issues/new?title=Issue with", sourceCode, " (", sourceVocabularyId, ")&body=Source code: ", sourceCode, "\nSource vocabulary: ", sourceVocabularyId, "\nSource concept name: ", sourceConceptName, "\nSource concept id: ", sourceConceptId, "\n\nStatus: ", status, "\n\nTarget concept ids: ", targetConceptIds_str, "\nTarget concept names: ", targetConceptNames_str, "\nTarget vocabulary: ", targetVocabularyIds_str, "\n\nPlease describe the issue hee: ")),
+        "' target='_blank'>File issue</a>"
+      )
     ) |>
     dplyr::arrange(dplyr::desc(nEvents))
 
@@ -659,10 +660,23 @@ buildStatusDashboard <- function(
     targetVocabularyId = reactable::colDef(
       show = FALSE
     ),
+    # Target Concept Id
+    targetConceptId = reactable::colDef(
+      show = FALSE
+    ),
     # Target Name
     targetName = reactable::colDef(
       name = "Target Name",
-      html = TRUE
+      html = TRUE,
+      cell = function(value, index){
+        targetConceptId <- toPlot$targetConceptId[index]
+        targetName <- toPlot$targetName[index]
+        if (!is.na(targetConceptId)) {
+          paste0("<a href='", athenaUrl, targetConceptId, "' target='_blank'>", targetName, "</a>")
+        } else {
+          targetName
+        }
+      }
     ),
     # N Events
     nEvents = reactable::colDef(
@@ -703,7 +717,7 @@ buildStatusDashboard <- function(
     columns$fileIssue <- reactable::colDef(
       show = FALSE
     )
-  }else{
+  } else {
     columns$fileIssue <- reactable::colDef(
       name = "File issue",
       maxWidth = 100,
@@ -711,12 +725,23 @@ buildStatusDashboard <- function(
     )
   }
 
-  reactable::reactable(
-    toPlot,
-    columns = columns,
-    resizable = TRUE,
-    filterable = TRUE,
-    defaultPageSize = 10
+  elementId <- paste0(vocabularyId, "_for_", databaseName, "_mappings_status")
+
+  htmltools::browsable(
+    htmltools::tagList(
+      htmltools::tags$button(
+        htmltools::tagList(fontawesome::fa("download"), "Download as CSV"),
+        onclick = paste0("Reactable.downloadDataCSV('", elementId, "', '", elementId, ".csv')")
+      ),
+      reactable::reactable(
+        toPlot,
+        columns = columns,
+        resizable = TRUE,
+        filterable = TRUE,
+        defaultPageSize = 10,
+        elementId = elementId
+      )
+    )
   )
 }
 
@@ -784,7 +809,9 @@ buildStatusDashboard <- function(
     )) {
   usagiTibble |> checkmate::assert_tibble()
   colors |> checkmate::assert_list()
-  colors |> names() |> checkmate::assert_subset(c("flagged", "unchecked", "approved", "inexact"))
+  colors |>
+    names() |>
+    checkmate::assert_subset(c("flagged", "unchecked", "approved", "inexact"))
 
   toPlot <- usagiTibble |>
     dplyr::group_by(mappingStatus, statusSetBy) |>
@@ -906,7 +933,7 @@ buildStatusDashboard <- function(
   sourceVocabularyId |> checkmate::assert_string()
   targetVocabularyIds |> checkmate::assert_character()
   databaseName |> checkmate::assert_string()
-  
+
   codeCounts <- .getCodeCountsForVocabularyAndDatabase(
     pathToCodeCountsFolder = pathToCodeCountsFolder,
     sourceVocabularyId = sourceVocabularyId,
@@ -927,7 +954,7 @@ buildStatusDashboard <- function(
     pathToVocabularyFolder = pathToVocabularyFolder,
     sourceVocabularyId = sourceVocabularyId
   )
-  
+
   summaryTableForVocabularyAndDatabase <- codeCounts |>
     dplyr::full_join(databaseSummary |> dplyr::select(-sourceVocabularyId), by = c("sourceCode" = "sourceCode")) |>
     dplyr::left_join(usagiSummary, by = c("sourceConceptId" = "sourceConceptId", "targetConceptId" = "targetConceptId")) |>
@@ -955,7 +982,6 @@ buildStatusDashboard <- function(
     pathToCodeCountsFolder,
     sourceVocabularyId,
     databaseName) {
-
   pathToCodeCountsFolder |> checkmate::assert_directory()
   sourceVocabularyId |> checkmate::assert_string()
   databaseName |> checkmate::assert_string()
@@ -994,7 +1020,7 @@ buildStatusDashboard <- function(
     targetVocabularyIds) {
   connection <- DatabaseConnector::connect(connectionDetails)
 
-  connectionDetails  |> checkmate::assert_class("ConnectionDetails")
+  connectionDetails |> checkmate::assert_class("ConnectionDetails")
   vocabularyDatabaseSchema |> checkmate::assert_string()
   targetVocabularyIds |> checkmate::assert_character()
 
@@ -1020,7 +1046,7 @@ buildStatusDashboard <- function(
       LEFT JOIN  @vocabulary_database_schema.CONCEPT AS c2
         ON cr.concept_id_2 = c2.concept_id
   "
-  
+
   sql <- SqlRender::render(
     sql = sql,
     vocabulary_database_schema = vocabularyDatabaseSchema,

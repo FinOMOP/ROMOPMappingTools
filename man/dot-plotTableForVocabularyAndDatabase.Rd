@@ -6,6 +6,8 @@
 \usage{
 .plotTableForVocabularyAndDatabase(
   summaryTableForVocabularyAndDatabase,
+  databaseName,
+  vocabularyId,
   colors = list(invalid = "#EC6173", unmapped = "#F1AE4A", mapsTo = "#51A350", grey =
     "#AAAAAA"),
   fileIssueRepo = ""
@@ -13,6 +15,10 @@
 }
 \arguments{
 \item{summaryTableForVocabularyAndDatabase}{Tibble with summary}
+
+\item{databaseName}{Database name}
+
+\item{vocabularyId}{Vocabulary ID}
 
 \item{colors}{List of colors}
 
