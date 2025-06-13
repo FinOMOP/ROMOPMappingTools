@@ -1,5 +1,7 @@
 # ROMOPMappingTools 2.0.3
 
+- Added download button to vocabulary and database status tables
+
 # ROMOPMappingTools 2.0.2
 
 - Fix updating reporting
