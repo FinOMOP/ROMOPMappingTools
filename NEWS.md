@@ -1,6 +1,7 @@
 # ROMOPMappingTools 2.0.3
 
 - Added download button to vocabulary and database status tables
+- Force `ADD_INFO:validationMessages` and `ADD_INFO:autoUpdatingInfo` to be NA if they are empty
 
 # ROMOPMappingTools 2.0.2
 
