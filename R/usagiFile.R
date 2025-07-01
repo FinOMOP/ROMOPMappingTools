@@ -164,5 +164,19 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
             dplyr::any_of(c(firstColNames, midColNames, lastColNames))
         )
 
+    # force "ADD_INFO:validationMessages" and "ADD_INFO:autoUpdatingInfo" to be NA if they are empty, if they exist
+    if ("ADD_INFO:validationMessages" %in% colNames) {
+        usagiTibble <- usagiTibble |>
+            dplyr::mutate(
+                `ADD_INFO:validationMessages` = ifelse(`ADD_INFO:validationMessages` == "", NA, `ADD_INFO:validationMessages`)
+            )
+    }
+    if ("ADD_INFO:autoUpdatingInfo" %in% colNames) {
+        usagiTibble <- usagiTibble |>
+            dplyr::mutate(
+                `ADD_INFO:autoUpdatingInfo` = ifelse(`ADD_INFO:autoUpdatingInfo` == "", NA, `ADD_INFO:autoUpdatingInfo`)
+            )
+    }
+
     readr::write_csv(usagiTibble, pathToUsagiFile, na = "")
 }
