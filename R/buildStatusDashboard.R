@@ -596,7 +596,7 @@ buildStatusDashboard <- function(
       statusSetBy = statusSetBy,
       fileIssue = paste0(
         "<a href='",
-        URLencode(paste0("https://github.com/", fileIssueRepo, "/issues/new?title=Issue with", sourceCode, " (", sourceVocabularyId, ")&body=Source code: ", sourceCode, "\nSource vocabulary: ", sourceVocabularyId, "\nSource concept name: ", sourceConceptName, "\nSource concept id: ", sourceConceptId, "\n\nStatus: ", status, "\n\nTarget concept ids: ", targetConceptIds_str, "\nTarget concept names: ", targetConceptNames_str, "\nTarget vocabulary: ", targetVocabularyIds_str, "\n\nPlease describe the issue hee: ")),
+        URLencode(paste0("https://github.com/", fileIssueRepo, "/issues/new?title=Issue with", sourceCode, " (", sourceVocabularyId, ")&body=Source code: ", sourceCode, "\nSource vocabulary: ", sourceVocabularyId, "\nSource concept name: ", sourceConceptName, "\nSource concept id: ", sourceConceptId, "\n\nStatus: ", status, "\n\nTarget concept ids: ", targetConceptIds_str, "\nTarget concept names: ", targetConceptNames_str, "\nTarget vocabulary: ", targetVocabularyIds_str, "\n\nPlease describe the issue here: ")),
         "' target='_blank'>File issue</a>"
       )
     ) |>
