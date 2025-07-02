@@ -1,3 +1,7 @@
+# ROMOPMappingTools 2.0.4
+
+- Added missing domainId combinations to the usagi file validation
+
 # ROMOPMappingTools 2.0.3
 
 - Added download button to vocabulary and database status tables
