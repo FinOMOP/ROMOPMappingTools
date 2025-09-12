@@ -1,3 +1,9 @@
+# ROMOPMappingTools 2.0.5
+
+- Fixed a bug in Usagi to STCM table conversion with respect to source parents
+- STCDM to CDM table conversion through SQL has flipped `Subsumes` and `Is a` relationships
+- Added the self-reference to the concepts in SQL that converts `concept_relationship` to `concept_ancestor`
+
 # ROMOPMappingTools 2.0.4
 
 - Added missing domainId combinations to the usagi file validation

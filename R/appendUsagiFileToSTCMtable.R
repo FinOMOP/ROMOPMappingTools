@@ -155,7 +155,7 @@ appendUsagiFileToSTCMtable <- function(
         if (all(c("ADD_INFO:sourceParents", "ADD_INFO:sourceParentVocabulary") %in% usagiTibbleColumns) &&
             any(!is.na(dplyr::pull(usagiTibble, `ADD_INFO:sourceParents`)))) {
             validVocabularyConceptCodes <- usagiTibble |>
-                dplyr::transmute(vocabulary_id = "", concept_code = sourceCode, concept_id = `ADD_INFO:sourceConceptId`) |>
+                dplyr::transmute(vocabulary_id = NA_character_, concept_code = sourceCode, concept_id = `ADD_INFO:sourceConceptId`) |>
                 dplyr::distinct()
 
             usedParentVocabularies <- usagiTibble |>
@@ -165,7 +165,7 @@ appendUsagiFileToSTCMtable <- function(
                 dplyr::pull(`ADD_INFO:sourceParentVocabulary`) |>
                 stringr::str_split("\\|") |>
                 purrr::flatten_chr() |>
-                unique()                                                                                
+                unique()
             if (length(usedParentVocabularies) > 0) {
                 parentVocabularyConceptCodes <- dplyr::tbl(connection, "CONCEPT") |>
                     dplyr::filter(vocabulary_id %in% usedParentVocabularies) |>
