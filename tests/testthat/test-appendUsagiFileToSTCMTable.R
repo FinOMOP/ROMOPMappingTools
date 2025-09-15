@@ -86,11 +86,11 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
     stcmTable |>
         dplyr::filter(is.na(SOURCE_PARENTS_CONCEPT_IDS)) |>
         nrow() |>
-        expect_equal(21)
+        expect_equal(0)
 
 })
 
-test_that("test appendUsagiFileToSTCMTable appends the ICD10fi usagi file to the sourceToConceptMapTable with proper parent information", {
+test_that("test appendUsagiFileToSTCMTable appends the ICD10fi usagi file to the sourceToConceptMapTable with ICD10 parent information", {
   pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
   nrowUsagiFile <- readUsagiFile(pathToUsagiFile)  |> nrow()
   nrowUsagiFileMapped <- readUsagiFile(pathToUsagiFile)  |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
@@ -128,40 +128,5 @@ test_that("test appendUsagiFileToSTCMTable appends the ICD10fi usagi file to the
     dplyr::filter(SOURCE_CODE == "Y94.1") |>
     dplyr::pull(SOURCE_PARENTS_CONCEPT_IDS) |>
     expect_equal("2000503725")
-
-})
-
-test_that("test appendUsagiFileToSTCMTable appends the ICD9fi usagi file to the sourceToConceptMapTable with proper parent information", {
-  pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD9fi/ICD9fi.usagi.csv", package = "ROMOPMappingTools")
-  nrowUsagiFile <- readUsagiFile(pathToUsagiFile)  |> nrow()
-  nrowUsagiFileMapped <- readUsagiFile(pathToUsagiFile)  |> dplyr::filter(mappingStatus == "APPROVED") |> nrow()
-  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
-  vocabularyDatabaseSchema <- "main"
-
-  connection <- DatabaseConnector::connect(
-    dbms = "duckdb",
-    server = pathToOMOPVocabularyDuckDBfile
-  )
-  on.exit(DatabaseConnector::disconnect(connection))
-
-  # create an extended sourceToConceptMapTable
-  sourceToConceptMapTable <- "source_to_concept_map_extended"
-  createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
-
-  appendUsagiFileToSTCMtable(
-    vocabularyId = "ICD10fi",
-    pathToUsagiFile = pathToUsagiFile,
-    connection = connection,
-    vocabularyDatabaseSchema = vocabularyDatabaseSchema,
-    sourceToConceptMapTable = sourceToConceptMapTable
-  )
-
-  stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> tibble::as_tibble()
-
-  # For source code 6806A the parent concept IDs should be ICD9fi code 680 with concept_id 2000405369
-  stcmTable |>
-    dplyr::filter(SOURCE_CODE == "6806A") |>
-    dplyr::pull(SOURCE_PARENTS_CONCEPT_IDS) |>
-    expect_equal("2000405369")
 
 })

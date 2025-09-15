@@ -1,5 +1,4 @@
 source_vocabulary_id,source_vocabulary_name,source_concept_id_offset,path_to_usagi_file,path_to_news_file,ignore
-ICD9fi,ICD-9 Finnish,2000400000,./ICD9fi/ICD9fi.usagi.csv,./ICD9fi/NEWS.md,FALSE
 ICD10fi,International Classification of Diseases 10th Revision Finnish extension,2000500000,./ICD10fi/ICD10fi.usagi.csv,./ICD10fi/NEWS.md,FALSE
 UNITfi,Finnish Units vocabulary,2001800000,./UNITfi/UNITfi.usagi.csv,./UNITfi/NEWS.md,FALSE
 

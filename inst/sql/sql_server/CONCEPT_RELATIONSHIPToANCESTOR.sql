@@ -56,7 +56,7 @@ WITH RECURSIVE ancestor_cte AS (
          max_levels_of_separation
   FROM ancestor_cte
   UNION ALL
-# Add self reference for each ancestor_concept_id
+-- Add self reference for each ancestor_concept_id
   SELECT r.concept_id_1 AS ancestor_concept_id,
 			   r.concept_id_1 AS descendant_concept_id,
 			   0 AS min_levels_of_separation,
@@ -66,7 +66,7 @@ WITH RECURSIVE ancestor_cte AS (
     FROM #relationships
   ) AS r
   UNION ALL
-# Add self reference for each descendant_concept_id
+-- Add self reference for each descendant_concept_id
   SELECT r.concept_id_2 AS ancestor_concept_id,
 			   r.concept_id_2 AS descendant_concept_id,
 			   0 AS min_levels_of_separation,
@@ -76,7 +76,7 @@ WITH RECURSIVE ancestor_cte AS (
     FROM #relationships
   ) AS r
 )
-SELECT *
+SELECT DISTINCT *
 FROM ancestor_cte_self_reference;
 
 
