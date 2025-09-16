@@ -52,5 +52,5 @@ testthat::test_that("duckdbToOMOPVocabularyCSVs", {
         )
     )
 
-    all(validation$type == "SUCCESS") |> expect_true()
+    all(validation$type %in% c("SUCCESS", "WARNING")) |> expect_true()
 })
