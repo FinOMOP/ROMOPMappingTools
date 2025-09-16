@@ -116,7 +116,7 @@ ORDER BY
 
 
 -- 4. CONCEPT_RELATIONSHIP table
--- Delete previous rows with the same concept_id_1 or concept_id_2 as in the source_to_concept_map.source_concept_id 
+-- Delete previous rows with the same concept_id_1 or concept_id_2 as in the source_to_concept_map.source_concept_id
 -- Insert one row for each relationship of type 'Maps to', 'Maps from', 'Subsumes', 'Is a'
 -- 'Maps to' as follows:
 --  - concept_id_1 = source_to_concept_map.source_concept_id
@@ -124,28 +124,28 @@ ORDER BY
 --  - relationship_id = 'Maps to'
 --  - valid_start_date = if source_to_concept_map.valid_start_date is not NULL, use it, otherwise use '1970-01-01'
 --  - valid_end_date = if source_to_concept_map.valid_end_date is not NULL, use it, otherwise use '2099-12-31'
---  - invalid_reason = NULL 
+--  - invalid_reason = NULL
 -- 'Maps from' as follows:
 --  - concept_id_1 = source_to_concept_map.target_concept_id
 --  - concept_id_2 = source_to_concept_map.source_concept_id
 --  - relationship_id = 'Maps from'
 --  - valid_start_date = if source_to_concept_map.valid_start_date is not NULL, use it, otherwise use '1970-01-01'
 --  - valid_end_date = if source_to_concept_map.valid_end_date is not NULL, use it, otherwise use '2099-12-31'
---  - invalid_reason = NULL 
+--  - invalid_reason = NULL
 -- 'Subsumes' as follows:
 --  - concept_id_1 = source_to_concept_map.source_concept_id
 --  - concept_id_2 = any concept_id in source_to_concept_map.source_parents_concept_ids
 --  - relationship_id = 'Subsumes'
 --  - valid_start_date = if source_to_concept_map.valid_start_date is not NULL, use it, otherwise use '1970-01-01'
 --  - valid_end_date = if source_to_concept_map.valid_end_date is not NULL, use it, otherwise use '2099-12-31'
---  - invalid_reason = NULL 
+--  - invalid_reason = NULL
 -- 'Is a' as follows:
 --  - concept_id_1 = any concept_id in source_to_concept_map.source_parents_concept_ids
 --  - concept_id_2 = source_to_concept_map.source_concept_id
 --  - relationship_id = 'Is a'
 --  - valid_start_date = if source_to_concept_map.valid_start_date is not NULL, use it, otherwise use '1970-01-01'
 --  - valid_end_date = if source_to_concept_map.valid_end_date is not NULL, use it, otherwise use '2099-12-31'
---  - invalid_reason = NULL 
+--  - invalid_reason = NULL
 DELETE FROM
     @vocabularyDatabaseSchema.CONCEPT_RELATIONSHIP
 WHERE
@@ -218,7 +218,7 @@ WHERE
     AND stcm.source_concept_id != 0;
 
 -- subsumes
-INSERT INTO 
+INSERT INTO
     @vocabularyDatabaseSchema.CONCEPT_RELATIONSHIP (
         concept_id_1,
         concept_id_2,
@@ -229,43 +229,43 @@ INSERT INTO
     )
 
 WITH RECURSIVE split_parents AS (
-    SELECT 
+    SELECT
         source_concept_id,
         valid_start_date,
         valid_end_date,
         -- Get the first value before the delimiter
-        SUBSTRING(source_parents_concept_ids, 1, 
-            CASE 
-                WHEN POSITION('|' IN source_parents_concept_ids) = 0 
+        SUBSTRING(source_parents_concept_ids, 1,
+            CASE
+                WHEN POSITION('|' IN source_parents_concept_ids) = 0
                 THEN LENGTH(source_parents_concept_ids)
                 ELSE POSITION('|' IN source_parents_concept_ids) - 1
             END) AS source_parents_concept_ids,
         -- Get the remaining string after the delimiter
-        CASE 
-            WHEN POSITION('|' IN source_parents_concept_ids) = 0 
+        CASE
+            WHEN POSITION('|' IN source_parents_concept_ids) = 0
             THEN NULL
-            ELSE SUBSTRING(source_parents_concept_ids, 
+            ELSE SUBSTRING(source_parents_concept_ids,
                          POSITION('|' IN source_parents_concept_ids) + 1)
         END AS remaining_string
     FROM @vocabularyDatabaseSchema.@sourceToConceptMapTable AS stcm
     WHERE stcm.source_parents_concept_ids IS NOT NULL
-    
+
     UNION ALL
-    
-    SELECT 
+
+    SELECT
         source_concept_id,
         valid_start_date,
         valid_end_date,
-        SUBSTRING(remaining_string, 1, 
-            CASE 
-                WHEN POSITION('|' IN remaining_string) = 0 
+        SUBSTRING(remaining_string, 1,
+            CASE
+                WHEN POSITION('|' IN remaining_string) = 0
                 THEN LENGTH(remaining_string)
                 ELSE POSITION('|' IN remaining_string) - 1
             END),
-        CASE 
-            WHEN POSITION('|' IN remaining_string) = 0 
+        CASE
+            WHEN POSITION('|' IN remaining_string) = 0
             THEN NULL
-            ELSE SUBSTRING(remaining_string, 
+            ELSE SUBSTRING(remaining_string,
                          POSITION('|' IN remaining_string) + 1)
         END
     FROM split_parents
@@ -275,7 +275,7 @@ WITH RECURSIVE split_parents AS (
 SELECT DISTINCT
     CAST(sp.source_concept_id AS INTEGER) AS concept_id_1,
     CAST(sp.source_parents_concept_ids AS INTEGER) AS concept_id_2,
-    'Subsumes' AS relationship_id,
+    'Is a' AS relationship_id,
     CAST(
         COALESCE(sp.valid_start_date, '1970-01-01') AS DATE
     ) AS valid_start_date,
@@ -287,11 +287,11 @@ FROM split_parents AS sp
 WHERE sp.source_parents_concept_ids IS NOT NULL
 UNION ALL
 
--- is a
+-- Subsumes
 SELECT DISTINCT
     CAST(sp.source_parents_concept_ids AS INTEGER) AS concept_id_1,
     CAST(sp.source_concept_id AS INTEGER) AS concept_id_2,
-    'Is a' AS relationship_id,
+    'Subsumes' AS relationship_id,
     CAST(
         COALESCE(sp.valid_start_date, '1970-01-01') AS DATE
     ) AS valid_start_date,

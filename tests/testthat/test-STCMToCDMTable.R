@@ -19,7 +19,7 @@ test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with corre
         "code5", 2000000005, "TestVocab", "Test Code 5 unmapped", 0, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class", "Condition", NA_character_,
         # no dates
         "code6", 2000000006, "TestVocab", "Test Code 6 no start date", 0, "SNOMED", as.Date(NA), as.Date("2099-12-31"), NA_character_, "Test concept class 2", "Condition", NA_character_,
-        "code7", 2000000007, "TestVocab", "Test Code 7 no end date", 0, "SNOMED", as.Date("2023-01-01"), as.Date(NA), NA_character_, "Test concept class 2", "Condition", NA_character_, 
+        "code7", 2000000007, "TestVocab", "Test Code 7 no end date", 0, "SNOMED", as.Date("2023-01-01"), as.Date(NA), NA_character_, "Test concept class 2", "Condition", NA_character_,
         # parent concept ids
         "code8", 2000000008, "TestVocab", "Test Code 8 parent concept ids", 0, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class 3", "Condition", "2000000001",
         "code9", 2000000009, "TestVocab", "Test Code 9 parent concept ids", 0, "SNOMED", as.Date("2023-01-01"), as.Date("2099-12-31"), NA_character_, "Test concept class 3", "Condition", "2000000001|2000000002",
@@ -56,9 +56,9 @@ test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with corre
     )
 
     # CONCEPT
-    res <- dplyr::tbl(connection, "CONCEPT") |> 
-        dplyr::filter(vocabulary_id == "TestVocab") |> 
-        dplyr::arrange(concept_id) |> 
+    res <- dplyr::tbl(connection, "CONCEPT") |>
+        dplyr::filter(vocabulary_id == "TestVocab") |>
+        dplyr::arrange(concept_id) |>
         dplyr::collect()
 
     # general
@@ -72,43 +72,44 @@ test_that("STCMToCDMTables creates CONCEPT entries from STCM Extended with corre
 
     # CONCEPT_RELATIONSHIP
     # maps to
-    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
-        dplyr::filter(relationship_id == "Maps to") |> 
-        dplyr::filter(concept_id_1 > 2000000000) |> 
-        dplyr::arrange(concept_id_1, concept_id_2) |> 
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |>
+        dplyr::filter(relationship_id == "Maps to") |>
+        dplyr::filter(concept_id_1 > 2000000000) |>
+        dplyr::arrange(concept_id_1, concept_id_2) |>
         dplyr::collect()
     res |> nrow() |> expect_equal(6)
     res  |> dplyr::pull(relationship_id) |> expect_equal(rep("Maps to", 6))
     res  |> dplyr::pull(concept_id_2) |> expect_equal(c( 141797, 141797, 36713461, 141797, 36713461, 36713461))
 
     # maps from
-    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
-        dplyr::filter(relationship_id == "Mapped from") |> 
-        dplyr::filter(concept_id_2 > 2000000000) |> 
-        dplyr::arrange(concept_id_2, concept_id_1) |> 
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |>
+        dplyr::filter(relationship_id == "Mapped from") |>
+        dplyr::filter(concept_id_2 > 2000000000) |>
+        dplyr::arrange(concept_id_2, concept_id_1) |>
         dplyr::collect()
     res |> nrow() |> expect_equal(6)
     res  |> dplyr::pull(relationship_id) |> expect_equal(rep("Mapped from", 6))
     res  |> dplyr::pull(concept_id_1) |> expect_equal(c( 141797, 141797, 36713461, 141797, 36713461, 36713461))
 
     # subsumes
-    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
-        dplyr::filter(relationship_id == "Subsumes") |> 
-        dplyr::filter(concept_id_1 > 2000000000) |> 
-        dplyr::arrange(concept_id_1, concept_id_2) |> 
-        dplyr::collect()
-    res |> nrow() |> expect_equal(6)
-    res  |> dplyr::pull(concept_id_1) |> expect_equal(c(2000000008, 2000000009, 2000000009, 2000000010, 2000000010, 2000000010))
-    res  |> dplyr::pull(concept_id_2) |> expect_equal(c(2000000001, 2000000001, 2000000002, 2000000001, 2000000002, 2000000003))
-
-    # is a
-    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |> 
-        dplyr::filter(relationship_id == "Is a") |> 
-        dplyr::filter(concept_id_1 > 2000000000) |> 
-        dplyr::arrange(concept_id_1, concept_id_2) |> 
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |>
+        dplyr::filter(relationship_id == "Subsumes") |>
+        dplyr::filter(concept_id_1 > 2000000000) |>
+        dplyr::arrange(concept_id_1, concept_id_2) |>
         dplyr::collect()
     res |> nrow() |> expect_equal(6)
     res  |> dplyr::pull(concept_id_1) |> expect_equal(c(2000000001, 2000000001, 2000000002, 2000000001, 2000000002, 2000000003))
     res  |> dplyr::pull(concept_id_2) |> expect_equal(c(2000000008, 2000000009, 2000000009, 2000000010, 2000000010, 2000000010))
+
+
+    # is a
+    res <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP")  |>
+        dplyr::filter(relationship_id == "Is a") |>
+        dplyr::filter(concept_id_1 > 2000000000) |>
+        dplyr::arrange(concept_id_1, concept_id_2) |>
+        dplyr::collect()
+    res |> nrow() |> expect_equal(6)
+    res  |> dplyr::pull(concept_id_1) |> expect_equal(c(2000000008, 2000000009, 2000000009, 2000000010, 2000000010, 2000000010))
+    res  |> dplyr::pull(concept_id_2) |> expect_equal(c(2000000001, 2000000001, 2000000002, 2000000001, 2000000002, 2000000003))
 
 })

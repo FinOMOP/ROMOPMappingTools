@@ -25,21 +25,21 @@ test_that("conceptRelationshipToAncestorTables creates CONCEPT_ANCESTOR table fr
     ancestor |> nrow() |> expect_gt(0)
 
     # check icd10 for asthma  45596282
-    asthmaChildren <- ancestor |> 
-        dplyr::filter(ancestor_concept_id == 45596282) |> 
+    asthmaChildren <- ancestor |>
+        dplyr::filter(ancestor_concept_id == 45596282) |>
         dplyr::collect()
 
-    asthmaChildren |> nrow() |> expect_equal(4)
-    asthmaChildren |> dplyr::pull(descendant_concept_id) |> expect_setequal(c(45548118, 45557624, 45557625, 45562456))
+    asthmaChildren |> nrow() |> expect_equal(5)
+    asthmaChildren |> dplyr::pull(descendant_concept_id) |> expect_setequal(c(45548118, 45557624, 45557625, 45562456, 45596282))
 
     # check descendant Chronic lower respiratory diseases 40475107
-    crdDescendant <- ancestor |> 
-        dplyr::filter(ancestor_concept_id == 40475107) |> 
+    crdDescendant <- ancestor |>
+        dplyr::filter(ancestor_concept_id == 40475107) |>
         dplyr::collect()
 
-    crdDescendant |> nrow() |> expect_equal(24)
-    crdDescendant |> dplyr::count(min_levels_of_separation, max_levels_of_separation)  |> 
-    dplyr::pull(n) |> 
-    expect_equal(c(8,16))
-    
+    crdDescendant |> nrow() |> expect_equal(25)
+    crdDescendant |> dplyr::count(min_levels_of_separation, max_levels_of_separation)  |>
+    dplyr::pull(n) |>
+    expect_equal(c(1,8,16))
+
 })
