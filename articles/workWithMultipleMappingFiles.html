@@ -512,7 +512,7 @@ source_to_concept_map_extended table, see the <a href="filesFormat.html">Files f
 <code class="sourceCode R"><span><span class="va">sourceToConceptMapTable</span> <span class="op">&lt;-</span> <span class="st">"source_to_concept_map_extended"</span></span>
 <span><span class="fu"><a href="../reference/createSourceToConceptMapExtended.html">createSourceToConceptMapExtended</a></span><span class="op">(</span><span class="va">connection</span>, <span class="va">vocabularyDatabaseSchema</span>, <span class="va">sourceToConceptMapTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0107 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.00999 secs</span></span></code></pre></div>
 <p><code>vocabularyFolderToSTCMVocabularyConcepClassTables</code> needs
 the path to the vocabulary folder, a connection to the database, the
 schema with the vocabulary tables and the name of the SourceToConceptMap
@@ -526,32 +526,32 @@ table.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Appending vocabularies.csv to VOCABULARY table</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00419 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0153 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.0041 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0125 secs</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00367 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.041 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00345 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0332 secs</span></span>
 <span><span class="co">#&gt; Appending info from Usagi files to Concept Class table</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Collecting concept classes from Usagi file ./ICD10fi/ICD10fi.usagi.csv</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Collecting concept classes from Usagi file ./UNITfi/UNITfi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00411 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0116 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00417 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0089 secs</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00398 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0127 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00365 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.00938 secs</span></span>
 <span><span class="co">#&gt; Appending Usagi files to STCM table</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Appending Usagi file ./ICD10fi/ICD10fi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00373 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.017 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00368 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.016 secs</span></span>
 <span><span class="co">#&gt; Appending Usagi file ./UNITfi/UNITfi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00348 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0132 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0033 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0107 secs</span></span></code></pre></div>
 <p>This function will populate the VOCABULARY table with the
 <code>vocabularies.csv</code> file and the
 source_to_concept_map_extended table with the Usagi-extended files.</p>
@@ -618,7 +618,7 @@ supported by DatabaseConnector, and be applied directly.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/STCMToCDMTables.html">STCMToCDMTables</a></span><span class="op">(</span><span class="va">connection</span>, <span class="va">vocabularyDatabaseSchema</span>, <span class="va">sourceToConceptMapTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0529 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0575 secs</span></span></code></pre></div>
 <p>This populates the CONCEPT table:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">connection</span>, <span class="st">"CONCEPT"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -655,16 +655,16 @@ supported by DatabaseConnector, and be applied directly.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4,089 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>102      4<span style="text-decoration: underline;">111</span>401 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>105       <span style="text-decoration: underline;">437</span>772 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>106       <span style="text-decoration: underline;">133</span>685 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>109       <span style="text-decoration: underline;">134</span>264 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>110      4<span style="text-decoration: underline;">329</span>572 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>114      4<span style="text-decoration: underline;">173</span>717 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>118      4<span style="text-decoration: underline;">130</span>374 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>119      4<span style="text-decoration: underline;">174</span>262 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>120       <span style="text-decoration: underline;">376</span>337 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>121       <span style="text-decoration: underline;">441</span>776 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>103      4<span style="text-decoration: underline;">166</span>072 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>107       <span style="text-decoration: underline;">258</span>333 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>110      4<span style="text-decoration: underline;">099</span>188 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>112       <span style="text-decoration: underline;">256</span>023 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>115       <span style="text-decoration: underline;">441</span>775 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>117      4<span style="text-decoration: underline;">150</span>516 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>126        <span style="text-decoration: underline;">72</span>817 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>128      4<span style="text-decoration: underline;">068</span>849 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>129      4<span style="text-decoration: underline;">224</span>748 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>135       <span style="text-decoration: underline;">196</span>019 Maps to         1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4,079 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 <ul>
@@ -678,16 +678,16 @@ supported by DatabaseConnector, and be applied directly.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4,089 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>      4<span style="text-decoration: underline;">111</span>401   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>102 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>      4<span style="text-decoration: underline;">166</span>072   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>103 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        <span style="text-decoration: underline;">80</span>316   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>108 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>      4<span style="text-decoration: underline;">329</span>572   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>110 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>       <span style="text-decoration: underline;">440</span>937   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>116 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>      4<span style="text-decoration: underline;">150</span>516   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>117 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>      4<span style="text-decoration: underline;">098</span>475   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>122 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        <span style="text-decoration: underline;">81</span>496   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>123 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     36<span style="text-decoration: underline;">713</span>392   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>133 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       <span style="text-decoration: underline;">194</span>268   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>134 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>       <span style="text-decoration: underline;">437</span>772   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>105 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>      4<span style="text-decoration: underline;">109</span>415   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>106 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>       <span style="text-decoration: underline;">258</span>333   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>107 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>       <span style="text-decoration: underline;">373</span>684   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>113 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>       <span style="text-decoration: underline;">434</span>557   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>120 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>      4<span style="text-decoration: underline;">224</span>748   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>129 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>      4<span style="text-decoration: underline;">056</span>331   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>132 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>       <span style="text-decoration: underline;">196</span>019   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>135 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>      4<span style="text-decoration: underline;">282</span>614   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>145 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>      4<span style="text-decoration: underline;">203</span>012   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>146 Mapped from     1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4,079 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 <p>And if the columns <code>sourceConceptCode</code> and
@@ -701,20 +701,20 @@ they will be used to populate the CONCEPT_RELATIONSHIP table with</p>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">relationship_id</span> <span class="op">==</span> <span class="st">"Is a"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">concept_id_1</span> <span class="op">&gt;</span> <span class="fl">2000500101</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 119 × 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5,353 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>209   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>210 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>246   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>254 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>246   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>256 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>246   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>257 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>313   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>314 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>329   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>330 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>470   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>468 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">501</span>535   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">501</span>537 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">501</span>572   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">501</span>573 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">501</span>632   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">501</span>631 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 109 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>104     45<span style="text-decoration: underline;">576</span>225 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>105     45<span style="text-decoration: underline;">532</span>807 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>110     45<span style="text-decoration: underline;">532</span>807 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>111     45<span style="text-decoration: underline;">532</span>809 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>112     45<span style="text-decoration: underline;">532</span>812 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>114     45<span style="text-decoration: underline;">532</span>812 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>115     45<span style="text-decoration: underline;">552</span>156 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>117     45<span style="text-decoration: underline;">552</span>156 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>121     45<span style="text-decoration: underline;">755</span>302 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>123     45<span style="text-decoration: underline;">755</span>302 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,343 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 <ul>
 <li>the <code>Subsumes</code> relationships:</li>
@@ -724,20 +724,20 @@ they will be used to populate the CONCEPT_RELATIONSHIP table with</p>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">relationship_id</span> <span class="op">==</span> <span class="st">"Subsumes"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">concept_id_1</span> <span class="op">&gt;</span> <span class="fl">2000500101</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/compute.html" class="external-link">collect</a></span><span class="op">(</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5,451 × 6</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>105     45<span style="text-decoration: underline;">532</span>807 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>112     45<span style="text-decoration: underline;">532</span>812 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>114     45<span style="text-decoration: underline;">532</span>812 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>117     45<span style="text-decoration: underline;">552</span>156 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>121     45<span style="text-decoration: underline;">755</span>302 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>123     45<span style="text-decoration: underline;">755</span>302 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>126     45<span style="text-decoration: underline;">755</span>302 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>135     45<span style="text-decoration: underline;">755</span>302 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>138     45<span style="text-decoration: underline;">755</span>302 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>142     45<span style="text-decoration: underline;">755</span>302 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,441 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>469   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>471 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>729 Subsumes        2010-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>737 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>748 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>728 Subsumes        1997-08-24       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>739 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>742 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>755 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>469   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>470 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>727 Subsumes        2010-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -756,7 +756,7 @@ included in the <code>vocabularies.csv</code> file.</p>
 <span>  vocabularyList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICD10"</span>, <span class="st">"ICD10fi"</span>, <span class="st">"UNITfi"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0383 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0452 secs</span></span></code></pre></div>
 <p>Close the connection to the database.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/disconnect.html" class="external-link">disconnect</a></span><span class="op">(</span><span class="va">connection</span><span class="op">)</span></span></code></pre></div>
@@ -805,6 +805,7 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; Processing check description: cdmTable</span></span>
 <span><span class="co">#&gt; Processing check description: measurePersonCompleteness</span></span>
 <span><span class="co">#&gt; Processing check description: measureConditionEraCompleteness</span></span>
+<span><span class="co">#&gt; Processing check description: measureObservationPeriodOverlap</span></span>
 <span><span class="co">#&gt; Processing check description: cdmField</span></span>
 <span><span class="co">#&gt; Processing check description: isRequired</span></span>
 <span><span class="co">#&gt; Processing check description: cdmDatatype</span></span>
@@ -828,30 +829,30 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; Processing check description: plausibleGender</span></span>
 <span><span class="co">#&gt; Processing check description: plausibleGenderUseDescendants</span></span>
 <span><span class="co">#&gt; Processing check description: plausibleUnitConceptIds</span></span>
-<span><span class="co">#&gt; Writing results to file: /tmp/RtmpboXxdk/tmp_vocab_table-20250702123957.json</span></span>
+<span><span class="co">#&gt; Writing results to file: /tmp/RtmpRXOLqz/tmp_vocab_table-20250916110108.json</span></span>
 <span><span class="co">#&gt; Execution Complete</span></span>
 <span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; Writing results to table main.dqdashboard_results</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00578 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.0172 secs</span></span>
 <span><span class="co">#&gt; Warning: Column 'warning' is of type 'logical', but this is not supported by</span></span>
 <span><span class="co">#&gt; many DBMSs. Converting to numeric (1 = TRUE, 0 = FALSE)</span></span>
 <span><span class="co">#&gt; Warning: Column 'error' is of type 'logical', but this is not supported by many</span></span>
 <span><span class="co">#&gt; DBMSs. Converting to numeric (1 = TRUE, 0 = FALSE)</span></span>
-<span><span class="co">#&gt; Warning: Column 'not_applicable_reason' is of type 'logical', but this is not</span></span>
-<span><span class="co">#&gt; supported by many DBMSs. Converting to numeric (1 = TRUE, 0 = FALSE)</span></span>
 <span><span class="co">#&gt; Warning: Column 'notes_value' is of type 'logical', but this is not supported</span></span>
 <span><span class="co">#&gt; by many DBMSs. Converting to numeric (1 = TRUE, 0 = FALSE)</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0184 secs</span></span>
-<span><span class="co">#&gt; Finished writing table</span></span></code></pre></div>
+<span><span class="co">#&gt; Warning in value[[3L]](cond): Writing table failed: Invalid Error: Conversion Error: Could not convert string 'Table CONCEPT_SYNONYM is empty.' to INT32 when casting from source column not_applicable_reason</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Context: rapi_execute</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Error type: INVALID</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Raw message: Conversion Error: Could not convert string 'Table CONCEPT_SYNONYM is empty.' to INT32 when casting from source column not_applicable_reason</span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">validationLogR6</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
 <col width="2%">
 <col width="2%">
-<col width="84%">
-<col width="9%">
+<col width="83%">
+<col width="10%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">context</th>
@@ -1507,7 +1508,7 @@ CONCEPT_RELATIONSHIP that is considered not nullable.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of
 records with a NULL value in the CONCEPT_ID of the CONCEPT_SYNONYM that
 is considered not nullable.</td>
@@ -1515,7 +1516,7 @@ is considered not nullable.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: The number and
 percent of records with a NULL value in the CONCEPT_SYNONYM_NAME of the
 CONCEPT_SYNONYM that is considered not nullable.</td>
@@ -1523,7 +1524,7 @@ CONCEPT_SYNONYM that is considered not nullable.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and
 percent of records with a NULL value in the LANGUAGE_CONCEPT_ID of the
 CONCEPT_SYNONYM that is considered not nullable.</td>
@@ -1555,7 +1556,7 @@ not nullable.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent
 of records with a NULL value in the DRUG_CONCEPT_ID of the DRUG_STRENGTH
 that is considered not nullable.</td>
@@ -1563,7 +1564,7 @@ that is considered not nullable.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and
 percent of records with a NULL value in the INGREDIENT_CONCEPT_ID of the
 DRUG_STRENGTH that is considered not nullable.</td>
@@ -1571,7 +1572,7 @@ DRUG_STRENGTH that is considered not nullable.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.VALID_END_DATE: The number and percent of
 records with a NULL value in the VALID_END_DATE of the DRUG_STRENGTH
 that is considered not nullable.</td>
@@ -1579,7 +1580,7 @@ that is considered not nullable.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.VALID_START_DATE: The number and percent
 of records with a NULL value in the VALID_START_DATE of the
 DRUG_STRENGTH that is considered not nullable.</td>
@@ -1730,7 +1731,7 @@ fields.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">CONCEPT_SYNONYM.CONCEPT_ID: A yes or no value
 indicating if the CONCEPT_ID in the CONCEPT_SYNONYM is the expected data
 type based on the specification. Only checks integer fields.</td>
@@ -1738,7 +1739,7 @@ type based on the specification. Only checks integer fields.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: A yes or no value
 indicating if the LANGUAGE_CONCEPT_ID in the CONCEPT_SYNONYM is the
 expected data type based on the specification. Only checks integer
@@ -1755,7 +1756,7 @@ on the specification. Only checks integer fields.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: A yes or no value
 indicating if the AMOUNT_UNIT_CONCEPT_ID in the DRUG_STRENGTH is the
 expected data type based on the specification. Only checks integer
@@ -1764,7 +1765,7 @@ fields.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.BOX_SIZE: A yes or no value indicating if
 the BOX_SIZE in the DRUG_STRENGTH is the expected data type based on the
 specification. Only checks integer fields.</td>
@@ -1772,7 +1773,7 @@ specification. Only checks integer fields.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: A yes or no
 value indicating if the DENOMINATOR_UNIT_CONCEPT_ID in the DRUG_STRENGTH
 is the expected data type based on the specification. Only checks
@@ -1781,7 +1782,7 @@ integer fields.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.DRUG_CONCEPT_ID: A yes or no value
 indicating if the DRUG_CONCEPT_ID in the DRUG_STRENGTH is the expected
 data type based on the specification. Only checks integer fields.</td>
@@ -1789,7 +1790,7 @@ data type based on the specification. Only checks integer fields.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: A yes or no value
 indicating if the INGREDIENT_CONCEPT_ID in the DRUG_STRENGTH is the
 expected data type based on the specification. Only checks integer
@@ -1798,7 +1799,7 @@ fields.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: A yes or no
 value indicating if the NUMERATOR_UNIT_CONCEPT_ID in the DRUG_STRENGTH
 is the expected data type based on the specification. Only checks
@@ -1941,7 +1942,7 @@ table.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of
 records that have a value in the CONCEPT_ID field in the CONCEPT_SYNONYM
 table that does not exist in the CONCEPT table.</td>
@@ -1949,7 +1950,7 @@ table that does not exist in the CONCEPT table.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and
 percent of records that have a value in the LANGUAGE_CONCEPT_ID field in
 the CONCEPT_SYNONYM table that does not exist in the CONCEPT table.</td>
@@ -1965,7 +1966,7 @@ table that does not exist in the CONCEPT table.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: The number and
 percent of records that have a value in the AMOUNT_UNIT_CONCEPT_ID field
 in the DRUG_STRENGTH table that does not exist in the CONCEPT
@@ -1974,7 +1975,7 @@ table.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: The number
 and percent of records that have a value in the
 DENOMINATOR_UNIT_CONCEPT_ID field in the DRUG_STRENGTH table that does
@@ -1983,7 +1984,7 @@ not exist in the CONCEPT table.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent
 of records that have a value in the DRUG_CONCEPT_ID field in the
 DRUG_STRENGTH table that does not exist in the CONCEPT table.</td>
@@ -1991,7 +1992,7 @@ DRUG_STRENGTH table that does not exist in the CONCEPT table.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and
 percent of records that have a value in the INGREDIENT_CONCEPT_ID field
 in the DRUG_STRENGTH table that does not exist in the CONCEPT
@@ -2000,7 +2001,7 @@ table.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: The number and
 percent of records that have a value in the NUMERATOR_UNIT_CONCEPT_ID
 field in the DRUG_STRENGTH table that does not exist in the CONCEPT
@@ -2026,7 +2027,7 @@ in the VOCABULARY table that does not exist in the CONCEPT table.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent
 of records that have a value in the DRUG_CONCEPT_ID field in the
 DRUG_STRENGTH table that do not conform to the DRUG domain.</td>
@@ -2034,12 +2035,410 @@ DRUG_STRENGTH table that do not conform to the DRUG domain.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and
 percent of records that have a value in the INGREDIENT_CONCEPT_ID field
 in the DRUG_STRENGTH table that do not conform to the INGREDIENT
 class.</td>
 <td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.CONCEPT_CLASS_ID: The number and percent of
+records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.CONCEPT_CODE: The number and percent of records
+with a NULL value in the CONCEPT_CODE of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.CONCEPT_ID: The number and percent of records
+with a NULL value in the CONCEPT_ID of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.CONCEPT_NAME: The number and percent of records
+with a NULL value in the CONCEPT_NAME of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.DOMAIN_ID: The number and percent of records
+with a NULL value in the DOMAIN_ID of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.INVALID_REASON: The number and percent of
+records with a NULL value in the INVALID_REASON of the CONCEPT.</td>
+<td align="left">Number of violated rows: 30785</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.STANDARD_CONCEPT: The number and percent of
+records with a NULL value in the STANDARD_CONCEPT of the CONCEPT.</td>
+<td align="left">Number of violated rows: 20551</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.VALID_END_DATE: The number and percent of
+records with a NULL value in the VALID_END_DATE of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.VALID_START_DATE: The number and percent of
+records with a NULL value in the VALID_START_DATE of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT.VOCABULARY_ID: The number and percent of
+records with a NULL value in the VOCABULARY_ID of the CONCEPT.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: The number and
+percent of records with a NULL value in the ANCESTOR_CONCEPT_ID of the
+CONCEPT_ANCESTOR.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: The number and
+percent of records with a NULL value in the DESCENDANT_CONCEPT_ID of the
+CONCEPT_ANCESTOR.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: The number
+and percent of records with a NULL value in the MAX_LEVELS_OF_SEPARATION
+of the CONCEPT_ANCESTOR.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: The number
+and percent of records with a NULL value in the MIN_LEVELS_OF_SEPARATION
+of the CONCEPT_ANCESTOR.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: The number and
+percent of records with a NULL value in the CONCEPT_CLASS_CONCEPT_ID of
+the CONCEPT_CLASS.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_CLASS.CONCEPT_CLASS_ID: The number and percent
+of records with a NULL value in the CONCEPT_CLASS_ID of the
+CONCEPT_CLASS.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_CLASS.CONCEPT_CLASS_NAME: The number and
+percent of records with a NULL value in the CONCEPT_CLASS_NAME of the
+CONCEPT_CLASS.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_RELATIONSHIP.CONCEPT_ID_1: The number and
+percent of records with a NULL value in the CONCEPT_ID_1 of the
+CONCEPT_RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_RELATIONSHIP.CONCEPT_ID_2: The number and
+percent of records with a NULL value in the CONCEPT_ID_2 of the
+CONCEPT_RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_RELATIONSHIP.INVALID_REASON: The number and
+percent of records with a NULL value in the INVALID_REASON of the
+CONCEPT_RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 57725</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: The number and
+percent of records with a NULL value in the RELATIONSHIP_ID of the
+CONCEPT_RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_RELATIONSHIP.VALID_END_DATE: The number and
+percent of records with a NULL value in the VALID_END_DATE of the
+CONCEPT_RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">CONCEPT_RELATIONSHIP.VALID_START_DATE: The number and
+percent of records with a NULL value in the VALID_START_DATE of the
+CONCEPT_RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of
+records with a NULL value in the CONCEPT_ID of the CONCEPT_SYNONYM.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: The number and
+percent of records with a NULL value in the CONCEPT_SYNONYM_NAME of the
+CONCEPT_SYNONYM.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and
+percent of records with a NULL value in the LANGUAGE_CONCEPT_ID of the
+CONCEPT_SYNONYM.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">DOMAIN.DOMAIN_CONCEPT_ID: The number and percent of
+records with a NULL value in the DOMAIN_CONCEPT_ID of the DOMAIN.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">DOMAIN.DOMAIN_ID: The number and percent of records
+with a NULL value in the DOMAIN_ID of the DOMAIN.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">DOMAIN.DOMAIN_NAME: The number and percent of records
+with a NULL value in the DOMAIN_NAME of the DOMAIN.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: The number and
+percent of records with a NULL value in the AMOUNT_UNIT_CONCEPT_ID of
+the DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.AMOUNT_VALUE: The number and percent of
+records with a NULL value in the AMOUNT_VALUE of the DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.BOX_SIZE: The number and percent of
+records with a NULL value in the BOX_SIZE of the DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: The number
+and percent of records with a NULL value in the
+DENOMINATOR_UNIT_CONCEPT_ID of the DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.DENOMINATOR_VALUE: The number and percent
+of records with a NULL value in the DENOMINATOR_VALUE of the
+DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent
+of records with a NULL value in the DRUG_CONCEPT_ID of the
+DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and
+percent of records with a NULL value in the INGREDIENT_CONCEPT_ID of the
+DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.INVALID_REASON: The number and percent of
+records with a NULL value in the INVALID_REASON of the
+DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: The number and
+percent of records with a NULL value in the NUMERATOR_UNIT_CONCEPT_ID of
+the DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.NUMERATOR_VALUE: The number and percent
+of records with a NULL value in the NUMERATOR_VALUE of the
+DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.VALID_END_DATE: The number and percent of
+records with a NULL value in the VALID_END_DATE of the
+DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">WARNING</td>
+<td align="left">DRUG_STRENGTH.VALID_START_DATE: The number and percent
+of records with a NULL value in the VALID_START_DATE of the
+DRUG_STRENGTH.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">RELATIONSHIP.DEFINES_ANCESTRY: The number and percent
+of records with a NULL value in the DEFINES_ANCESTRY of the
+RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">RELATIONSHIP.IS_HIERARCHICAL: The number and percent of
+records with a NULL value in the IS_HIERARCHICAL of the
+RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: The number and
+percent of records with a NULL value in the RELATIONSHIP_CONCEPT_ID of
+the RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">RELATIONSHIP.RELATIONSHIP_ID: The number and percent of
+records with a NULL value in the RELATIONSHIP_ID of the
+RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">RELATIONSHIP.RELATIONSHIP_NAME: The number and percent
+of records with a NULL value in the RELATIONSHIP_NAME of the
+RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">RELATIONSHIP.REVERSE_RELATIONSHIP_ID: The number and
+percent of records with a NULL value in the REVERSE_RELATIONSHIP_ID of
+the RELATIONSHIP.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">VOCABULARY.VOCABULARY_CONCEPT_ID: The number and
+percent of records with a NULL value in the VOCABULARY_CONCEPT_ID of the
+VOCABULARY.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">VOCABULARY.VOCABULARY_ID: The number and percent of
+records with a NULL value in the VOCABULARY_ID of the VOCABULARY.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">VOCABULARY.VOCABULARY_NAME: The number and percent of
+records with a NULL value in the VOCABULARY_NAME of the VOCABULARY.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="even">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">VOCABULARY.VOCABULARY_REFERENCE: The number and percent
+of records with a NULL value in the VOCABULARY_REFERENCE of the
+VOCABULARY.</td>
+<td align="left">Number of violated rows: 0</td>
+</tr>
+<tr class="odd">
+<td align="left">DQD</td>
+<td align="left">SUCCESS</td>
+<td align="left">VOCABULARY.VOCABULARY_VERSION: The number and percent
+of records with a NULL value in the VOCABULARY_VERSION of the
+VOCABULARY.</td>
+<td align="left">Number of violated rows: 4</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
@@ -2061,7 +2460,7 @@ VALID_START_DATE field of the CONCEPT_RELATIONSHIP table.</td>
 </tr>
 <tr class="even">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.VALID_END_DATE: The number and percent of
 records with a value in the VALID_END_DATE field of the DRUG_STRENGTH
 that occurs prior to the date in the VALID_START_DATE field of the
@@ -2087,7 +2486,7 @@ VALID_END_DATE.</td>
 </tr>
 <tr class="odd">
 <td align="left">DQD</td>
-<td align="left">SUCCESS</td>
+<td align="left">WARNING</td>
 <td align="left">DRUG_STRENGTH.VALID_START_DATE: The number and percent
 of records with a value in the VALID_START_DATE field of the
 DRUG_STRENGTH that occurs after the date in the VALID_END_DATE.</td>
