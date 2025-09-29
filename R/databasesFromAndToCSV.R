@@ -113,7 +113,7 @@ duckdbToOMOPVocabularyCSVs <- function(
     OMOPVocabularyTableNames |>
         stringr::str_to_lower() |>
         checkmate::assertSubset(
-            DatabaseConnector::dbListTables(connection)
+            DatabaseConnector::getTableNames(connection)
         )
 
     pathToOMOPVocabularyCSVsFolder |> checkmate::assertDirectoryExists()

@@ -28,7 +28,7 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
         expect_equal(nrowUsagiFile)
 
     stcmTable |>
-        dplyr::filter(TARGET_CONCEPT_ID != 0L) |>
+        dplyr::filter(target_concept_id != 0L) |>
         dplyr::count() |> dplyr::pull(n) |>
         expect_equal(nrowUsagiFileMapped)
 
@@ -71,7 +71,7 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
         expect_equal(nrowUsagiFile)
 
     stcmTable |>
-        dplyr::filter(TARGET_CONCEPT_ID != 0L) |>
+        dplyr::filter(target_concept_id != 0L) |>
         dplyr::count() |> dplyr::pull(n) |>
         expect_equal(nrowUsagiFileMapped)
 
@@ -84,7 +84,7 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
              "source_domain", "source_parents_concept_ids"))
 
     stcmTable |>
-        dplyr::filter(is.na(SOURCE_PARENTS_CONCEPT_IDS)) |>
+        dplyr::filter(is.na(source_parents_concept_ids)) |>
         nrow() |>
         expect_equal(0)
 
@@ -119,14 +119,14 @@ test_that("test appendUsagiFileToSTCMTable appends the ICD10fi usagi file to the
 
   # For source code C18.62 the parent concept IDs should be ICD10 code C18.6 with concept_id 45552246
   stcmTable |>
-    dplyr::filter(SOURCE_CODE == "C18.62") |>
-    dplyr::pull(SOURCE_PARENTS_CONCEPT_IDS) |>
+    dplyr::filter(source_code == "C18.62") |>
+    dplyr::pull(source_parents_concept_ids) |>
     expect_equal("45552246")
 
   # For source code Y94.1 the parent concept IDs should be ICD10fi code Y94 with concept_id 2000503727
   stcmTable |>
-    dplyr::filter(SOURCE_CODE == "Y94.1") |>
-    dplyr::pull(SOURCE_PARENTS_CONCEPT_IDS) |>
+    dplyr::filter(source_code == "Y94.1") |>
+    dplyr::pull(source_parents_concept_ids) |>
     expect_equal("2000503725")
 
 })
