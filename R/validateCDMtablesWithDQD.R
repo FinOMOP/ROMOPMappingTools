@@ -20,7 +20,7 @@ validateCDMtablesWithDQD <- function(connectionDetails, vocabularyDatabaseSchema
   validationResultsFolder |> checkmate::assertDirectory()
 
   connection <- DatabaseConnector::connect(connectionDetails)
-  tableNames <- DatabaseConnector::dbListTables(connection, vocabularyDatabaseSchema)
+  tableNames <- DatabaseConnector::getTableNames(connection, vocabularyDatabaseSchema)
   DatabaseConnector::disconnect(connection)
 
   OMOPVocabularyTableNames <- c(

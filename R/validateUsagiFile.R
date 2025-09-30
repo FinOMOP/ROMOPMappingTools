@@ -41,7 +41,7 @@ validateUsagiFile <- function(
     # Check if required tables exist
     # tables <- DatabaseConnector::getTableNames(condlnection, vocabularyDatabaseSchema)
     # TEMP untill solved https://github.com/OHDSI/DatabaseConnector/issues/299
-    tableNames <- DatabaseConnector::dbListTables(connection, vocabularyDatabaseSchema)
+    tableNames <- DatabaseConnector::getTableNames(connection, vocabularyDatabaseSchema)
     c("concept", "concept_relationship", "domain") |>
         checkmate::assertSubset(tableNames)
 
