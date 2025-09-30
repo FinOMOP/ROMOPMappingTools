@@ -55,6 +55,11 @@ omopVocabularyCSVsToDuckDB <- function(
         sql = sql,
         targetDialect = "duckdb"
     )
+    
+    # Fix DuckDB data type issues: replace NUMERIC with DOUBLE for float columns
+    # This prevents precision errors when importing large numeric values
+    sql <- gsub("NUMERIC NULL", "DOUBLE NULL", sql)
+    sql <- gsub("NUMERIC NOT NULL", "DOUBLE NOT NULL", sql)
 
     DatabaseConnector::dbExecute(connection, sql)
 
