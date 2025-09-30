@@ -1,3 +1,7 @@
+# ROMOPMappingTools 2.1.1
+
+- Fixed bug in the conversion of the OMOP vocabulary CSVs to DuckDB
+
 # ROMOPMappingTools 2.1.0
 
 - Fixed concept_ancestor table generation. ICD10fi hierarchy was not correct, and duplicated rows were present in the table.
