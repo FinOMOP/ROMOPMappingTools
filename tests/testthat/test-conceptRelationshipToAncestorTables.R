@@ -42,4 +42,12 @@ test_that("conceptRelationshipToAncestorTables creates CONCEPT_ANCESTOR table fr
     dplyr::pull(n) |>
     expect_equal(c(1,8,16))
 
+
+    # check ancestor_concept_id and descendant_concept_id are unique
+    ancestor |>
+        dplyr::distinct(ancestor_concept_id, descendant_concept_id) |>
+        nrow() |>
+        expect_equal(ancestor |> nrow())
+
+
 })
