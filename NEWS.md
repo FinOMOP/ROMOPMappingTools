@@ -1,3 +1,9 @@
+# ROMOPMappingTools 2.1.0
+
+- Fixed concept_ancestor table generation. ICD10fi hierarchy was not correct, and duplicated rows were present in the table.
+- Added DRUG_STRENGTH table generation. This was missing, and created warnings in the DQD validation.
+- Fixed errors due to DatabaseConnector v7.0.0.
+
 # ROMOPMappingTools 2.0.5
 
 - Fixed a bug in Usagi to STCM table conversion with respect to source parents

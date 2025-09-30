@@ -76,8 +76,13 @@ WITH RECURSIVE ancestor_cte AS (
     FROM #relationships
   ) AS r
 )
-SELECT DISTINCT *
-FROM ancestor_cte_self_reference;
+SELECT 
+    ancestor_concept_id,
+    descendant_concept_id,
+    MIN(min_levels_of_separation) as min_levels_of_separation,
+    MAX(max_levels_of_separation) as max_levels_of_separation
+FROM ancestor_cte_self_reference
+GROUP BY ancestor_concept_id, descendant_concept_id;
 
 
 -- 4- Remove the temporary table

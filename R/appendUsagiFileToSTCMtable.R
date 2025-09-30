@@ -67,7 +67,7 @@ appendUsagiFileToSTCMtable <- function(
     #
 
     # check if the sourceToConceptMapTable exists
-    listTables <- DBI::dbListTables(connection, vocabularyDatabaseSchema)
+    listTables <- DatabaseConnector::getTableNames(connection, vocabularyDatabaseSchema)
     if (!sourceToConceptMapTable %in% listTables) {
         stop(paste0("The sourceToConceptMapTable ", sourceToConceptMapTable, " does not exist in the vocabularyDatabaseSchema ", vocabularyDatabaseSchema))
     }

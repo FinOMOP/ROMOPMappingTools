@@ -24,7 +24,7 @@ omopVocabularyCSVsToDuckDB <- function(
         "CONCEPT_RELATIONSHIP",
         "CONCEPT_SYNONYM",
         "DOMAIN",
-        # "DRUG_STRENGTH", TEMP: loading makes error, leave out at the moment
+        "DRUG_STRENGTH", 
         "RELATIONSHIP",
         "VOCABULARY"
     )
@@ -113,7 +113,7 @@ duckdbToOMOPVocabularyCSVs <- function(
     OMOPVocabularyTableNames |>
         stringr::str_to_lower() |>
         checkmate::assertSubset(
-            DatabaseConnector::dbListTables(connection)
+            DatabaseConnector::getTableNames(connection)
         )
 
     pathToOMOPVocabularyCSVsFolder |> checkmate::assertDirectoryExists()
