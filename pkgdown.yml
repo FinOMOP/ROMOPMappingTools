@@ -1,12 +1,12 @@
 pandoc: 3.1.11
-pkgdown: 2.1.3
+pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   filesFormat: filesFormat.html
   workAsGithubRepo: workAsGithubRepo.html
   workWithMultipleMappingFiles: workWithMultipleMappingFiles.html
   workWithOneMappingFile: workWithOneMappingFile.html
-last_built: 2025-09-30T18:29Z
+last_built: 2025-12-01T08:48Z
 urls:
   reference: https://finomop.github.io/ROMOPMappingTools/reference
   article: https://finomop.github.io/ROMOPMappingTools/articles

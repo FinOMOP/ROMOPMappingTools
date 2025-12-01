@@ -199,107 +199,112 @@ vocabulary with all the keys in other tables (see
 </tr>
 <tr class="even">
 <td align="left">SUCCESS</td>
-<td align="left">SourceName is empty</td>
+<td align="left">SourceCode is more than 50 characters</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
+<td align="left">SUCCESS</td>
+<td align="left">SourceName is empty</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceName is more than 255 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceFrequency is not empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is not valid</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus conceptId is 0</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">Missing C&amp;CR columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is not a number on the range</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is more than 20 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is not a valid domain</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing date columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceValidStartDate is after SourceValidEndDate</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing parent columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">Invalid parent concept code</td>
 <td align="left"></td>
@@ -354,111 +359,116 @@ included in the package for unit testing purposes.</p>
 </tr>
 <tr class="even">
 <td align="left">ERROR</td>
-<td align="left">SourceName is empty</td>
+<td align="left">SourceCode is more than 50 characters</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
 <tr class="odd">
+<td align="left">ERROR</td>
+<td align="left">SourceName is empty</td>
+<td align="left">Number of failed rules: 1</td>
+</tr>
+<tr class="even">
 <td align="left">ERROR</td>
 <td align="left">SourceName is more than 255 characters</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceFrequency is not empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is not valid</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ERROR</td>
 <td align="left">APPROVED mappingStatus conceptId is 0</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">APPROVED mappingStatus with concepts outdated</td>
 <td align="left">3 conceptIds do not exist on the target vocabularies, 3
 conceptNames are outdated, 3 domainIds are outdated, 8 standardConcepts
 have changed to non-standard</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">WARNING</td>
 <td align="left">Not APPROVED mappingStatus with concepts outdated</td>
 <td align="left">3 conceptIds do not exist on the target vocabularies, 1
 conceptNames are outdated, 3 domainIds are outdated, 5 standardConcepts
 have changed to non-standard</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">Missing C&amp;CR columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ERROR</td>
 <td align="left">SourceConceptId is empty</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">SourceConceptId is not a number on the range</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ERROR</td>
 <td align="left">SourceConceptClass is empty</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">SourceConceptClass is more than 20 characters</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ERROR</td>
 <td align="left">SourceDomain is empty</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">SourceDomain is not a valid domain</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">WARNING</td>
 <td align="left">Not APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left">Found 1 codes with invalid domain combinations</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left">Found 1 codes with invalid domain combinations</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing date columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">SourceValidStartDate is after SourceValidEndDate</td>
 <td align="left">Number of failed rules: 1</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing parent columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">Invalid parent concept code</td>
 <td align="left">Found 3 codes with invalid parent concept codes</td>
@@ -523,108 +533,113 @@ ids, which is included in the package for unit testing purposes.</p>
 </tr>
 <tr class="even">
 <td align="left">SUCCESS</td>
-<td align="left">SourceName is empty</td>
+<td align="left">SourceCode is more than 50 characters</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
+<td align="left">SUCCESS</td>
+<td align="left">SourceName is empty</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceName is more than 255 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceFrequency is not empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is not valid</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus conceptId is 0</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">APPROVED mappingStatus with concepts outdated</td>
 <td align="left">122 conceptNames are outdated, 92 domainIds are
 outdated, 24 standardConcepts have changed to non-standard</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">Missing C&amp;CR columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is not a number on the range</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is more than 20 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is not a valid domain</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing date columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceValidStartDate is after SourceValidEndDate</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing parent columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">Invalid parent concept code</td>
 <td align="left"></td>
@@ -738,107 +753,112 @@ errors.</p>
 </tr>
 <tr class="even">
 <td align="left">SUCCESS</td>
-<td align="left">SourceName is empty</td>
+<td align="left">SourceCode is more than 50 characters</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
+<td align="left">SUCCESS</td>
+<td align="left">SourceName is empty</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceName is more than 255 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceFrequency is not empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is not valid</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus conceptId is 0</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">Missing C&amp;CR columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is not a number on the range</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is more than 20 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is not a valid domain</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ERROR</td>
 <td align="left">APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left">Found 6 codes with invalid domain combinations</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing date columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">SourceValidStartDate is after SourceValidEndDate</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">SUCCESS</td>
 <td align="left">Missing parent columns</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">SUCCESS</td>
 <td align="left">Invalid parent concept code</td>
 <td align="left"></td>
@@ -863,7 +883,7 @@ user by reviewing the Usagi file.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.3.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
