@@ -5,6 +5,7 @@
 #' - Check if all default Usagi columns are present:
 #' - Check if sourceCode and conceptId are unique
 #' - Check if sourceCode is not empty
+#' - Check if sourceCode is less than 50 characters
 #' - Check if sourceName is not empty
 #' - Check if sourceName is less than 255 characters
 #' If usagi file has C&CR columns:
@@ -96,6 +97,7 @@ validateUsagiFile <- function(
     validationRules <- validate::validator(
         SourceCode.is.empty = is_complete(sourceCode),
         SourceCode.and.conceptId.are.not.unique = is_unique(sourceCode, conceptId),
+        SourceCode.is.more.than.50.characters = field_length(sourceCode, min = 0, max = 50),
         SourceName.is.empty = is_complete(sourceName),
         SourceName.is.more.than.255.characters = field_length(sourceName, min = 0, max = 255),
         SourceFrequency.is.not.empty = is_complete(sourceFrequency),
