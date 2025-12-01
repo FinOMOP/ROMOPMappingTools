@@ -24,7 +24,7 @@ omopVocabularyCSVsToDuckDB <- function(
         "CONCEPT_RELATIONSHIP",
         "CONCEPT_SYNONYM",
         "DOMAIN",
-        "DRUG_STRENGTH", 
+        "DRUG_STRENGTH",
         "RELATIONSHIP",
         "VOCABULARY"
     )
@@ -55,7 +55,7 @@ omopVocabularyCSVsToDuckDB <- function(
         sql = sql,
         targetDialect = "duckdb"
     )
-    
+
     # Fix DuckDB data type issues: replace NUMERIC with DOUBLE for float columns
     # This prevents precision errors when importing large numeric values
     sql <- gsub("NUMERIC NULL", "DOUBLE NULL", sql)
@@ -130,14 +130,14 @@ duckdbToOMOPVocabularyCSVs <- function(
     for (table_name in OMOPVocabularyTableNames) {
         message("Exporting table: ", table_name)
         out_path <- file.path(pathToOMOPVocabularyCSVsFolder, paste0(table_name, ".csv"))
-        
+
         col_info <- DBI::dbGetQuery(
             connection,
             paste0("PRAGMA table_info(", table_name, ");")
         )
         cols <- col_info$name
         date_cols <- col_info$name[grepl("^date$", tolower(col_info$type))]
-        
+
         select_cols <- sapply(cols, function(col) {
             if (col %in% date_cols) {
                 paste0("STRFTIME('%Y%m%d', ", col, ") AS ", col)
@@ -147,7 +147,7 @@ duckdbToOMOPVocabularyCSVs <- function(
         })
 
         select_sql <- paste(select_cols, collapse = ", ")
-        sql <- paste0("COPY (SELECT ", select_sql, " FROM ", table_name, ") TO '", out_path, "' (HEADER, DELIM '\t');")
+        sql <- paste0("COPY (SELECT ", select_sql, " FROM ", table_name, ") TO '", out_path, "' (HEADER, DELIM '\t', QUOTE '');")
         DatabaseConnector::dbExecute(connection, sql)
     }
 
