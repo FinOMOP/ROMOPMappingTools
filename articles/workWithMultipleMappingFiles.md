@@ -70,7 +70,7 @@ connection <- DatabaseConnector::connect(connectionDetails)
 #> Warning in connectDuckdb(connectionDetails): The ICU extension of DuckDB is not
 #> installed. Attempting to install it.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.25 secs
+#> Executing SQL took 0.426 secs
 vocabularyDatabaseSchema <- "main"
 ```
 
@@ -184,7 +184,7 @@ vignette for more details.
 sourceToConceptMapTable <- "source_to_concept_map_extended"
 createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00942 secs
+#> Executing SQL took 0.0101 secs
 ```
 
 `vocabularyFolderToSTCMVocabularyConcepClassTables` needs the path to
@@ -200,32 +200,32 @@ vocabularyFolderToSTCMVocabularyConcepClassTables(
 )
 #> Appending vocabularies.csv to VOCABULARY table
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00486 secs
-#> Inserting data took 0.013 secs
+#> Executing SQL took 0.0071 secs
+#> Inserting data took 0.0137 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00584 secs
-#> Inserting data took 0.0446 secs
+#> Executing SQL took 0.00647 secs
+#> Inserting data took 0.0393 secs
 #> Appending info from Usagi files to Concept Class table
 #> 
 #> Collecting concept classes from Usagi file ./ICD10fi/ICD10fi.usagi.csv
 #> 
 #> Collecting concept classes from Usagi file ./UNITfi/UNITfi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00654 secs
-#> Inserting data took 0.0136 secs
+#> Executing SQL took 0.00424 secs
+#> Inserting data took 0.00961 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00571 secs
+#> Executing SQL took 0.00417 secs
 #> Inserting data took 0.0101 secs
 #> Appending Usagi files to STCM table
 #> 
 #> Appending Usagi file ./ICD10fi/ICD10fi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0037 secs
-#> Inserting data took 0.0161 secs
+#> Executing SQL took 0.00417 secs
+#> Inserting data took 0.016 secs
 #> Appending Usagi file ./UNITfi/UNITfi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00378 secs
-#> Inserting data took 0.0109 secs
+#> Executing SQL took 0.00386 secs
+#> Inserting data took 0.0116 secs
 ```
 
 This function will populate the VOCABULARY table with the
@@ -300,7 +300,7 @@ by DatabaseConnector, and be applied directly.
 ``` r
 STCMToCDMTables(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0648 secs
+#> Executing SQL took 0.0529 secs
 ```
 
 This populates the CONCEPT table:
@@ -342,16 +342,16 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 4,089 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1   2000500103      4166072 Maps to         1900-01-01       2099-12-31    
-#>  2   2000500107       258333 Maps to         1900-01-01       2099-12-31    
-#>  3   2000500110      4099188 Maps to         1900-01-01       2099-12-31    
-#>  4   2000500112       256023 Maps to         1900-01-01       2099-12-31    
-#>  5   2000500115       441775 Maps to         1900-01-01       2099-12-31    
-#>  6   2000500117      4150516 Maps to         1900-01-01       2099-12-31    
-#>  7   2000500126        72817 Maps to         1900-01-01       2099-12-31    
-#>  8   2000500128      4068849 Maps to         1900-01-01       2099-12-31    
-#>  9   2000500129      4224748 Maps to         1900-01-01       2099-12-31    
-#> 10   2000500135       196019 Maps to         1900-01-01       2099-12-31    
+#>  1   2000500104        80316 Maps to         1900-01-01       2099-12-31    
+#>  2   2000500111     44811663 Maps to         1900-01-01       2099-12-31    
+#>  3   2000500116       440937 Maps to         1900-01-01       2099-12-31    
+#>  4   2000500119       434557 Maps to         1900-01-01       2099-12-31    
+#>  5   2000500120       434557 Maps to         1900-01-01       2099-12-31    
+#>  6   2000500123        81496 Maps to         1900-01-01       2099-12-31    
+#>  7   2000500125        80626 Maps to         1900-01-01       2099-12-31    
+#>  8   2000500132      4056331 Maps to         1900-01-01       2099-12-31    
+#>  9   2000500142       201779 Maps to         1900-01-01       2099-12-31    
+#> 10   2000500144       141777 Maps to         1900-01-01       2099-12-31    
 #> # ℹ 4,079 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -394,16 +394,16 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 5,353 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1   2000500102     45576225 Is a            1900-01-01       2099-12-31    
-#>  2   2000500113     45532812 Is a            1900-01-01       2099-12-31    
-#>  3   2000500118     45552156 Is a            1900-01-01       2099-12-31    
-#>  4   2000500120     45552156 Is a            1900-01-01       2099-12-31    
-#>  5   2000500128     45755302 Is a            1900-01-01       2099-12-31    
-#>  6   2000500131     45755302 Is a            1900-01-01       2099-12-31    
-#>  7   2000500140     45755302 Is a            1900-01-01       2099-12-31    
-#>  8   2000500141     45755302 Is a            1900-01-01       2099-12-31    
-#>  9   2000500145     45755302 Is a            1900-01-01       2099-12-31    
-#> 10   2000500146     45755302 Is a            1900-01-01       2099-12-31    
+#>  1   2000500263     45600423 Is a            1900-01-01       2099-12-31    
+#>  2   2000500264     45552189 Is a            1900-01-01       2099-12-31    
+#>  3   2000500265     45552189 Is a            1900-01-01       2099-12-31    
+#>  4   2000500277     45547422 Is a            1900-01-01       2099-12-31    
+#>  5   2000500279     45547422 Is a            1900-01-01       2099-12-31    
+#>  6   2000500281     45581128 Is a            1900-01-01       2099-12-31    
+#>  7   2000500283     45581128 Is a            1900-01-01       2099-12-31    
+#>  8   2000500288     45595594 Is a            1900-01-01       2099-12-31    
+#>  9   2000500294     45595594 Is a            1900-01-01       2099-12-31    
+#> 10   2000500296     45595594 Is a            1900-01-01       2099-12-31    
 #> # ℹ 5,343 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -418,14 +418,14 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 21 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1   2000500469   2000500471 Subsumes        1900-01-01       2099-12-31    
-#>  2   2000503725   2000503729 Subsumes        2010-01-01       2099-12-31    
-#>  3   2000503769   2000503737 Subsumes        1900-01-01       2099-12-31    
-#>  4   2000503769   2000503748 Subsumes        1900-01-01       2099-12-31    
-#>  5   2000503725   2000503728 Subsumes        1997-08-24       2099-12-31    
-#>  6   2000503769   2000503739 Subsumes        1900-01-01       2099-12-31    
-#>  7   2000503769   2000503742 Subsumes        1900-01-01       2099-12-31    
-#>  8   2000503769   2000503755 Subsumes        1900-01-01       2099-12-31    
+#>  1   2000503725   2000503728 Subsumes        1997-08-24       2099-12-31    
+#>  2   2000503769   2000503739 Subsumes        1900-01-01       2099-12-31    
+#>  3   2000503769   2000503742 Subsumes        1900-01-01       2099-12-31    
+#>  4   2000503769   2000503755 Subsumes        1900-01-01       2099-12-31    
+#>  5   2000500469   2000500471 Subsumes        1900-01-01       2099-12-31    
+#>  6   2000503725   2000503729 Subsumes        2010-01-01       2099-12-31    
+#>  7   2000503769   2000503737 Subsumes        1900-01-01       2099-12-31    
+#>  8   2000503769   2000503748 Subsumes        1900-01-01       2099-12-31    
 #>  9   2000500469   2000500470 Subsumes        1900-01-01       2099-12-31    
 #> 10   2000503725   2000503727 Subsumes        2010-01-01       2099-12-31    
 #> # ℹ 11 more rows
@@ -449,7 +449,7 @@ conceptRelationshipToAncestorTables(
   vocabularyList = c("ICD10", "ICD10fi", "UNITfi")
 )
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0553 secs
+#> Executing SQL took 0.0559 secs
 ```
 
 Close the connection to the database.
@@ -526,12 +526,12 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> Processing check description: plausibleGender
 #> Processing check description: plausibleGenderUseDescendants
 #> Processing check description: plausibleUnitConceptIds
-#> Writing results to file: /tmp/Rtmp1tpVgw/tmp_vocab_table-20251201084930.json
+#> Writing results to file: /tmp/RtmphaWyHx/tmp_vocab_table-20251201090445.json
 #> Execution Complete
 #> Connecting using DuckDB driver
 #> Writing results to table main.dqdashboard_results
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0093 secs
+#> Executing SQL took 0.00658 secs
 #> Warning in value[[3L]](cond): Writing table failed: Invalid Error: Conversion Error: Could not convert string 'Table CONCEPT_SYNONYM is empty.' to INT32 when casting from source column not_applicable_reason
 #> ℹ Context: rapi_execute
 #> ℹ Error type: INVALID
