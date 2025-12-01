@@ -1,5 +1,8 @@
 # ROMOPMappingTools 2.1.2
 
+- Added rule to validate usagi file: sourceConceptCode must be less than 50 characters
+- Fix bug in the DuckDB export: remove QUOTE '' from the export, this was adding extra characters to the export
+
 # ROMOPMappingTools 2.1.1
 
 - Fixed bug in the conversion of the OMOP vocabulary CSVs to DuckDB
