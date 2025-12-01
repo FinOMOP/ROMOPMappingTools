@@ -1,3 +1,5 @@
+# ROMOPMappingTools 2.1.2
+
 # ROMOPMappingTools 2.1.1
 
 - Fixed bug in the conversion of the OMOP vocabulary CSVs to DuckDB
