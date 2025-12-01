@@ -88,6 +88,14 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(is.na(sourceName)) |> dplyr::pull(mappingStatus) |> 
   expect_equal("FLAGGED")
   
+  # SourceCode is more than 50 characters
+  validationsSummary |> dplyr::filter(step == "SourceCode is more than 50 characters") |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceCode is more than 50 characters"))  |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceCode is more than 50 characters")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
+  expect_equal("ERROR: SourceCode is more than 50 characters")
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceCode is more than 50 characters")) |> dplyr::pull(mappingStatus) |> 
+  expect_equal("FLAGGED")
+  
   # SourceName is more than 255 characters
   validationsSummary |> dplyr::filter(step == "SourceName is more than 255 characters") |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceName is more than 255 characters"))  |> nrow() |> expect_equal(1)
