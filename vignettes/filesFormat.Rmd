@@ -97,3 +97,35 @@ The SOURCE_TO_CONCEPT_MAP_EXTENDED table has the following columns:
 | source_domain           | character | Domain in source vocabulary                               | not empty, must exist in DOMAIN table |
 | source_parents_concept_ids | character | Parent concept IDs in source vocabulary                   | optional, comma-separated list |
 
+
+# Lab values files format
+
+## quantity_source_unit_conversion.tsv file format
+
+The `quantity_source_unit_conversion.tsv` file is used to describe the quantity source unit conversion.
+It is a TSV file with the following columns:
+
+| Name                     | Type      | Description                                                | Rules    |
+| ------------------------ | --------- | ---------------------------------------------------------- | -------- |
+| omop_quantity            | character | The OMOP quantity concept name                             | not empty, must be in the Vocabulary |
+| source_unit_valid        | character | The source unit to convert from                            | not empty, must be in the validUnitsList |
+| to_source_unit_valid     | character | The target unit to convert to                              | not empty, must be in the validUnitsList |
+| conversion               | character | The conversion formula or factor                           | not empty, must be a valid conversion formula |
+| only_to_omop_concepts    | integer   | Applicable to this OMOP concepts only                      | optional, must exist in the CONCEPT table|
+
+
+
+## Extra Usagi rules for lab values
+
+The following rules are applied to the Usagi file when the pathToValidUnitsFile and pathToUnitConversionFile are provided:
+
+ERROR:
+- The sourceCode must be of the format {testName}[{testUnit}]
+- The testUnit must be in the quantity_source_unit_conversion.tsv
+- Domain of the mapped concept must be 'Measurement'
+- The testUnit quantity must agree with the quantity in the vocabularies for the mapped concept
+
+
+WARNING:
+- Same testName with same quantity maps to different concept ids
+  

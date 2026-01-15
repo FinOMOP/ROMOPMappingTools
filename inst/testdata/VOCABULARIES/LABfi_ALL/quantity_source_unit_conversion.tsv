@@ -1,5 +1,5 @@
 omop_quantity	source_unit_valid	to_source_unit_valid	conversion	only_to_omop_concepts
--		1	
+-			1	
 Arbitrary Concentration	au/ml	au/ml	1	
 Arbitrary Concentration	eliau/ml	eliau/ml	1	
 Arbitrary Concentration	eliau/ml	u/ml	1	
@@ -63,7 +63,7 @@ Mass Rate	ug/min	ug/min	1
 Mass Ratio	%	%	1	
 Mass Ratio	ratio	ratio	1	
 Mass fraction	%	%	1	
-Mass fraction	%	mmol/mol	10.93*X-23.50	3004410
+Mass fraction	%	mmol/mol	10,93*X-23,50	3004410
 Mass fraction	mmol/mol	mmol/mol	1	
 Mass or Substance Rate	mmol/24h	mmol/24h	1	
 Number Areic (per area)	u/field	u/field	1	

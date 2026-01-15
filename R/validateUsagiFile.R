@@ -33,7 +33,8 @@ validateUsagiFile <- function(
     pathToValidatedUsagiFile,
     sourceConceptIdOffset,
     pathToValidUnitsFile = NULL,
-    pathToUnitConversionFile = NULL) {
+    pathToUnitConversionFile = NULL, 
+    pathToValidatedUnitConversionFile = NULL) {
     #
     # Parameter validation
     #
@@ -432,6 +433,8 @@ validateUsagiFile <- function(
 
     # Checks for Lab Value Usagi file
     if (!is.null(pathToValidUnitsFile) && !is.null(pathToUnitConversionFile)) {
+        # Prepare files for lab values checks
+        # - validUnitsList:
         validUnitsTibble <- readUsagiFile(pathToValidUnitsFile) |>
             dplyr::filter(mappingStatus == "APPROVED")
 
@@ -444,8 +447,117 @@ validateUsagiFile <- function(
             dplyr::distinct(sourceCode) |>
             dplyr::pull(sourceCode)
 
-        unitConversionTibble <- readUsagiFile(pathToUnitConversionFile) |>
-            dplyr::filter(mappingStatus == "APPROVED")
+        # - usagiTibble:
+        usagiTibble <- usagiTibble |>
+            dplyr::mutate(
+                testName = stringr::str_extract(sourceCode, "[a-zA-Z]+"),
+                testUnit = stringr::str_extract(sourceCode, "(?<=\\s|^)[^\\d\\W\\.]+")
+            )
+
+        conceptIdToQuantity <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
+            dplyr::filter(concept_id_1 %in% usagiTibble |> dplyr::pull(conceptId) |> unique()) |>
+            dplyr::filter(relationship_id == "Has property") |>
+            dplyr::select(concept_id, concept_id_2) |>
+            left_join(
+                dplyr::tbl(connection, "CONCEPT") |>
+                    dplyr::select(concept_id, concept_name),
+                by = c("concept_id_2" = "concept_id")
+            ) |>
+            dplyr::transmute(
+                conceptId = concept_id,
+                quantity = dplyr::if_else(!is.na(concept_name), concept_name, "-")
+            )
+        
+        usagiTibble <- usagiTibble |>
+            dplyr::left_join(conceptIdToQuantity, by = "conceptId")
+
+        # - unitConversionTibble:
+        unitConversionTibble <- readUnitConversionFile(pathToUnitConversionFile)
+        result <- validateUnitConversionTibble(unitConversionTibble, validUnitsList, validQuantitiesList)
+        unitConversionTibble <- result$unitConversionTibble
+        unitConversionValidationLogR6 <- result$validationLogR6
+        if (unitConversionValidationLogR6$logTibble |> dplyr::filter(type == "ERROR") |> nrow() > 0) {
+            unitConversionTibble |> readr::write_tsv(pathToValidatedUnitConversionFile, na = "")
+            return(unitConversionValidationLogR6$logTibble)
+        }
+
+        # Check that all the sourceCodes in usagiTibble are of the format {testName}[{testUnit}]
+        invalidLabSourceCodes <- usagiTibble |>
+            dplyr::filter(!stringr::str_detect(sourceCode, "^[a-zA-Z]+\\[[^\\d\\W\\.]+\\]$")) |>
+            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab source code, it must be of the format testName[testUnit]"))
+        if (nrow(invalidLabSourceCodes) > 0) {
+            validationLogR6$ERROR("Invalid lab source code", paste0("Found ", nrow(invalidLabSourceCodes), " codes with invalid lab source codes"))
+
+            usagiTibble <- usagiTibble |>
+                dplyr::left_join(invalidLabSourceCodes, by = "sourceCode") |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
+                dplyr::select(-errorMessage)
+        } else {
+            validationLogR6$SUCCESS("Invalid lab source code", "")
+        }
+
+        # check if usagiTibble testUnit is in validUnitsList or na
+        invalidLabUnits <- usagiTibble |>
+            dplyr::filter(!is.na(testUnit) & !testUnit %in% validUnitsList) |>
+            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid unit: ", testUnit))
+        if (nrow(invalidLabUnits) > 0) {
+            validationLogR6$ERROR("Invalid lab unit", paste0("Found ", nrow(invalidLabUnits), " codes with invalid lab units"))
+
+            usagiTibble <- usagiTibble |>
+                dplyr::left_join(invalidLabUnits, by = "sourceCode") |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
+                dplyr::select(-errorMessage)
+        } else {
+            validationLogR6$SUCCESS("Invalid lab unit", "")
+        }
+
+        # check if domain of the mapped concept is 'Measurement'
+        invalidLabDomains <- usagiTibble |>
+            dplyr::filter(domainId != "Measurement") |>
+            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab domain: ", domainId))
+        if (nrow(invalidLabDomains) > 0) {
+            validationLogR6$ERROR("Invalid lab domain", paste0("Found ", nrow(invalidLabDomains), " codes with invalid lab domains"))
+
+            usagiTibble <- usagiTibble |>
+                dplyr::left_join(invalidLabDomains, by = "sourceCode") |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
+                dplyr::select(-errorMessage)
+        } else {
+            validationLogR6$SUCCESS("Invalid lab domain", "")
+        }
+
+        # check if the quantity of the mapped concept is in the unitConversionTibble
+        invalidLabQuantities <- usagiTibble |>
+        dplyr::filter(!is.na(quantity) & !is.na(testUnit)) |>
+        dplyr::left_join(unitConversionTibble, by = c("quantity", "testUnit")) |>
+        dplyr::filter(is.na(conversion)) |>
+        dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab quantity: ", quantity))
+        if (nrow(invalidLabQuantities) > 0) {
+            validationLogR6$ERROR("Invalid lab quantity", paste0("Found ", nrow(invalidLabQuantities), " codes with invalid lab quantities"))
+
+            usagiTibble <- usagiTibble |>
+                dplyr::left_join(invalidLabQuantities, by = "sourceCode") |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
+                dplyr::select(-errorMessage)
+        } else {
+            validationLogR6$SUCCESS("Invalid lab quantity", "")
+        }
+
+        # check if the same testName with same quantity maps to different concept ids
+        warningTestNameQuantityCombinations <- usagiTibble |>
+            dplyr::filter(!is.na(quantity) & !is.na(testUnit)) |>
+            dplyr::group_by(testName, quantity) |>
+            dplyr::summarise(conceptId = paste(conceptId, collapse = " | ")) |>
+            dplyr::ungroup()
+        if (nrow(warningTestNameQuantityCombinations) > 0) {
+            validationLogR6$WARNING("TestName with same quantity maps to different concept ids", paste0("Found ", nrow(warningTestNameQuantityCombinations), " codes with testName with same quantity maps to different concept ids"))
+        } else {
+            validationLogR6$SUCCESS("TestName with same quantity maps to different concept ids", "")
+        }
+
+        # Clean up
+        usagiTibble <- usagiTibble |>
+            dplyr::select(-testName, -testUnit, -quantity)
     }
 
     #

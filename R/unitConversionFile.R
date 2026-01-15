@@ -17,8 +17,8 @@
 #' @importFrom checkmate assertFileExists
 #'
 #' @export
-readConversionFile <- function(pathToConversionFile) {
-    checkmate::assertFileExists(pathToConversionFile)
+readUnitConversionFile <- function(pathToUnitConversionFile) {
+    checkmate::assertFileExists(pathToUnitConversionFile)
 
     cols <- readr::cols(
         omop_quantity = readr::col_character(),
@@ -29,10 +29,10 @@ readConversionFile <- function(pathToConversionFile) {
         .default = readr::col_character()
     )
 
-    readr::read_tsv(pathToConversionFile, col_types = cols, na = c(""))
+    readr::read_tsv(pathToUnitConversionFile, col_types = cols, na = c(""))
 }
 
-#' Validate Conversion Tibble
+#' Validate Unit Conversion Tibble
 #'
 #' Validates a conversion tibble against a set of rules:
 #' - omop_quantity column is not empty and is string
@@ -40,7 +40,7 @@ readConversionFile <- function(pathToConversionFile) {
 #' - conversion column is not empty and is string
 #' - only_to_omop_concepts can be empty and is integer
 #'
-#' @param conversionTibble A tibble containing conversion data
+#' @param unitConversionTibble A tibble containing conversion data
 #' @param validUnitsList A character vector of valid unit codes
 #'
 #' @return A tibble containing validation results with columns: type, step, message
@@ -50,11 +50,16 @@ readConversionFile <- function(pathToConversionFile) {
 #' @importFrom validate validator confront
 #'
 #' @export
-validateConversionTibble <- function(conversionTibble, validUnitsList) {
-    checkmate::assertTibble(conversionTibble)
+validateUnitConversionTibble <- function(unitConversionTibble, validUnitsList, validQuantitiesList) {
+    checkmate::assertTibble(unitConversionTibble)
     checkmate::assertCharacter(validUnitsList, any.missing = FALSE)
+    checkmate::assertCharacter(validQuantitiesList, any.missing = FALSE)
 
     validationLogR6 <- LogTibble$new()
+
+    # Add tmpvalidationMessages message column
+    unitConversionTibble <- unitConversionTibble |>
+        dplyr::mutate(tmpvalidationMessages = "")
 
     # Check required columns exist
     requiredColumns <- c(
@@ -66,87 +71,47 @@ validateConversionTibble <- function(conversionTibble, validUnitsList) {
     )
 
     missingColumns <- requiredColumns |>
-        setdiff(names(conversionTibble))
+        setdiff(names(unitConversionTibble))
 
     if (length(missingColumns) > 0) {
         validationLogR6$ERROR(
             "Missing required columns",
             paste0("Missing columns: ", paste(missingColumns, collapse = ", "))
         )
-        return(validationLogR6$logTibble)
+        return(list(unitConversionTibble = unitConversionTibble, validationLogR6 = validationLogR6))
     } else {
         validationLogR6$SUCCESS("Missing required columns", "")
     }
 
+    # remove first row and af it after the validation
+    firstRow <- unitConversionTibble |> dplyr::slice(1)
+    unitConversionTibble <- unitConversionTibble |>
+        dplyr::slice(-1)
+
     # Validate omop_quantity: not empty and is string
     validationRules <- validate::validator(
         omop_quantity.is.empty = is_complete(omop_quantity),
-        omop_quantity.is.not.string = is.character(omop_quantity)
-    )
-    validations <- validate::confront(conversionTibble, validationRules)
-    result <- .applyValidationRules(fileTibble = NULL, validations, validationLogR6)
-    validationLogR6 <- result$validationLogR6
-
-    # Validate source_unit_valid: not empty, is string, and exists in validUnitsList
-    validationRules <- validate::validator(
+        omop_quantity.not.in.validQuantitiesList = omop_quantity %in% validQuantitiesList,
         source_unit_valid.is.empty = is_complete(source_unit_valid),
-        source_unit_valid.is.not.string = is.character(source_unit_valid),
-        source_unit_valid.not.in.validUnitsList = source_unit_valid %in% validUnitsList
-    )
-    validations <- validate::confront(
-        conversionTibble,
-        validationRules,
-        ref = list(validUnitsList = validUnitsList)
-    )
-    result <- .applyValidationRules(fileTibble = NULL, validations, validationLogR6)
-    validationLogR6 <- result$validationLogR6
-
-    # Validate to_source_unit_valid: not empty, is string, and exists in validUnitsList
-    validationRules <- validate::validator(
+        source_unit_valid.not.in.validUnitsList = source_unit_valid %in% validUnitsList,
         to_source_unit_valid.is.empty = is_complete(to_source_unit_valid),
-        to_source_unit_valid.is.not.string = is.character(to_source_unit_valid),
-        to_source_unit_valid.not.in.validUnitsList = to_source_unit_valid %in% validUnitsList
+        to_source_unit_valid.not.in.validUnitsList = to_source_unit_valid %in% validUnitsList,
+        conversion.is.not.valid =
+            # Acceptable: floats like "1", "10.2", or formulas like "10.93*X-23.50"
+            grepl(
+                "^[+-]?(\\d*\\.?\\d+|\\d+)([eE][+-]?\\d+)?$|^([+-]?\\d*\\.?\\d+[eE]?[+-]?\\d*)?\\*X([+-]\\d*\\.?\\d+)?$",
+                conversion
+            ) | is_complete(conversion)
     )
-    validations <- validate::confront(
-        conversionTibble,
-        validationRules,
-        ref = list(validUnitsList = validUnitsList)
-    )
-    result <- .applyValidationRules(fileTibble = NULL, validations, validationLogR6)
+
+    validations <- validate::confront(unitConversionTibble, validationRules, ref = list(validQuantitiesList = validQuantitiesList, validUnitsList = validUnitsList))
+    result <- .applyValidationRules(unitConversionTibble, validations, validationLogR6) 
+    unitConversionTibble <- result$fileTibble
     validationLogR6 <- result$validationLogR6
 
-    # Validate conversion: not empty and is string
-    validationRules <- validate::validator(
-        conversion.is.empty = is_complete(conversion),
-        conversion.is.not.string = is.character(conversion)
-    )
-    validations <- validate::confront(conversionTibble, validationRules)
-    result <- .applyValidationRules(fileTibble = NULL, validations, validationLogR6)
-    validationLogR6 <- result$validationLogR6
+    # add first row back
+    unitConversionTibble <- firstRow |>
+        dplyr::bind_rows(unitConversionTibble)
 
-    # Validate only_to_omop_concepts: can be empty and is integer
-    # Check if column exists and has correct type
-    # Since readr::col_integer() reads as integer, we just need to verify it's integer type
-    if ("only_to_omop_concepts" %in% names(conversionTibble)) {
-        # Check if all non-NA values are integers or can be converted to integers
-        nonNaValues <- conversionTibble |>
-            dplyr::filter(!is.na(only_to_omop_concepts)) |>
-            dplyr::pull(only_to_omop_concepts)
-
-        if (length(nonNaValues) > 0) {
-            # Check if it's integer type or numeric that can be converted to integer
-            if (!is.integer(nonNaValues) && !(is.numeric(nonNaValues) && all(nonNaValues == as.integer(nonNaValues), na.rm = TRUE))) {
-                validationLogR6$ERROR(
-                    "only_to_omop_concepts.is.not.integer",
-                    "only_to_omop_concepts must be integer type"
-                )
-            } else {
-                validationLogR6$SUCCESS("only_to_omop_concepts.is.not.integer", "")
-            }
-        } else {
-            validationLogR6$SUCCESS("only_to_omop_concepts.is.not.integer", "")
-        }
-    }
-
-    return(validationLogR6$logTibble)
+    return(list(unitConversionTibble = unitConversionTibble, validationLogR6 = validationLogR6))
 }

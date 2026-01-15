@@ -1,0 +1,11 @@
+omop_quantity	source_unit_valid	to_source_unit_valid	conversion	only_to_omop_concepts
+-			1	
+Arbitrary Concentration	g	au/ml	1	
+invalid	au/ml	au/ml	1	
+Arbitrary Concentration	invalid	au/ml	1	
+Arbitrary Concentration	au/ml	invalid	1	
+Arbitrary Concentration	au/ml		1	
+Arbitrary Concentration	au/ml		1	
+Arbitrary Concentration	g	au/ml		
+Arbitrary Concentration	g	au/ml	10.93*X-23.50	
+Arbitrary Concentration	g	au/ml	invalid	
