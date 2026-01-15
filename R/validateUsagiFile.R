@@ -31,7 +31,9 @@ validateUsagiFile <- function(
     connection,
     vocabularyDatabaseSchema,
     pathToValidatedUsagiFile,
-    sourceConceptIdOffset) {
+    sourceConceptIdOffset,
+    pathToValidUnitsFile = NULL,
+    pathToUnitConversionFile = NULL) {
     #
     # Parameter validation
     #
@@ -142,12 +144,12 @@ validateUsagiFile <- function(
         ) |>
         dplyr::filter(errorMessage != "") |>
         dplyr::distinct(conceptId, errorMessage)
- 
+
     if (nrow(outdatedConcepts) > 0) {
         usagiTibble <- usagiTibble |>
             dplyr::left_join(outdatedConcepts, by = c("conceptId")) |>
             dplyr::mutate(errorMessage = dplyr::case_when(
-                !is.na(errorMessage) & mappingStatus%in% c("FLAGGED", "APPROVED") ~ paste0("ERROR ", errorMessage),
+                !is.na(errorMessage) & mappingStatus %in% c("FLAGGED", "APPROVED") ~ paste0("ERROR ", errorMessage),
                 !is.na(errorMessage) & mappingStatus %in% c("UNCHECKED") ~ paste0("WARNING ", errorMessage),
                 TRUE ~ errorMessage
             )) |>
@@ -159,23 +161,23 @@ validateUsagiFile <- function(
     }
 
     # conceptIds not in vocabularies
-    totalOutdatedErrors <- usagiTibble  |> 
-    dplyr::mutate(
-        error = stringr::str_extract(tmpvalidationMessages, "\\w+\\s+OUTDATED\\s+\\w+:"),
-        errorLevel = stringr::str_extract(error, "\\w+"),
-        errorType = stringr::str_extract(error, "\\w+(?=:)")
-    ) |>
-    dplyr::filter(!is.na(error)) |>
-    dplyr::count(errorLevel, errorType)  |> 
-    dplyr::mutate(errorMessage = dplyr::case_when(
-        errorType == "conceptId" ~ paste0(n, " conceptIds do not exist on the target vocabularies"),
-        errorType == "domainId" ~ paste0(n, " domainIds are outdated"),
-        errorType == "conceptName" ~ paste0(n, " conceptNames are outdated"),
-        errorType == "standardConcept" ~ paste0(n, " standardConcepts have changed to non-standard"),
-        TRUE ~ ""
-    )) |>
-    dplyr::group_by(errorLevel) |>
-    dplyr::summarise(message = paste(errorMessage, collapse = ", "))
+    totalOutdatedErrors <- usagiTibble |>
+        dplyr::mutate(
+            error = stringr::str_extract(tmpvalidationMessages, "\\w+\\s+OUTDATED\\s+\\w+:"),
+            errorLevel = stringr::str_extract(error, "\\w+"),
+            errorType = stringr::str_extract(error, "\\w+(?=:)")
+        ) |>
+        dplyr::filter(!is.na(error)) |>
+        dplyr::count(errorLevel, errorType) |>
+        dplyr::mutate(errorMessage = dplyr::case_when(
+            errorType == "conceptId" ~ paste0(n, " conceptIds do not exist on the target vocabularies"),
+            errorType == "domainId" ~ paste0(n, " domainIds are outdated"),
+            errorType == "conceptName" ~ paste0(n, " conceptNames are outdated"),
+            errorType == "standardConcept" ~ paste0(n, " standardConcepts have changed to non-standard"),
+            TRUE ~ ""
+        )) |>
+        dplyr::group_by(errorLevel) |>
+        dplyr::summarise(message = paste(errorMessage, collapse = ", "))
 
     if (totalOutdatedErrors |> dplyr::filter(errorLevel == "ERROR") |> nrow() > 0) {
         validationLogR6$ERROR(
@@ -254,7 +256,7 @@ validateUsagiFile <- function(
                 recalcualted_domainId == "Condition Device" ~ "Condition/Device",
                 recalcualted_domainId == "Condition Drug" ~ "Condition/Drug",
                 recalcualted_domainId == "Condition Measurement" ~ "Condition/Meas",
-                recalcualted_domainId == "Condition Observation" ~ "Condition/Obs", 
+                recalcualted_domainId == "Condition Observation" ~ "Condition/Obs",
                 recalcualted_domainId == "Condition Procedure" ~ "Condition/Procedure",
                 recalcualted_domainId == "Device Drug" ~ "Device/Drug",
                 recalcualted_domainId == "Device Observation" ~ "Device/Obs",
@@ -269,9 +271,9 @@ validateUsagiFile <- function(
             )) |>
             dplyr::filter(!(recalcualted_domainId %in% validDomains)) |>
             dplyr::mutate(
-                errorMessage = paste0("this code is mapped to more than one domains that are not compatible: ", recalcualted_domainId), 
+                errorMessage = paste0("this code is mapped to more than one domains that are not compatible: ", recalcualted_domainId),
                 errorMessage = dplyr::if_else(mappingStatus == "UNCHECKED", paste0("WARNING: ", errorMessage), paste0("ERROR: ", errorMessage))
-                ) |>
+            ) |>
             dplyr::select(sourceCode, errorMessage)
 
 
@@ -282,7 +284,9 @@ validateUsagiFile <- function(
                 dplyr::select(-errorMessage)
         }
 
-        n <- invalidDomainCombinations |> dplyr::filter(stringr::str_detect(errorMessage, "WARNING")) |> nrow()
+        n <- invalidDomainCombinations |>
+            dplyr::filter(stringr::str_detect(errorMessage, "WARNING")) |>
+            nrow()
         if (n > 0) {
             validationLogR6$WARNING(
                 "Not APPROVED mappingStatus with valid domain combination",
@@ -291,7 +295,9 @@ validateUsagiFile <- function(
         } else {
             validationLogR6$SUCCESS("Not APPROVED mappingStatus with valid domain combination", "")
         }
-        n <- invalidDomainCombinations |> dplyr::filter(stringr::str_detect(errorMessage, "ERROR")) |> nrow()
+        n <- invalidDomainCombinations |>
+            dplyr::filter(stringr::str_detect(errorMessage, "ERROR")) |>
+            nrow()
         if (n > 0) {
             validationLogR6$ERROR(
                 "APPROVED mappingStatus with valid domain combination",
@@ -423,6 +429,25 @@ validateUsagiFile <- function(
         }
     }
 
+
+    # Checks for Lab Value Usagi file
+    if (!is.null(pathToValidUnitsFile) && !is.null(pathToUnitConversionFile)) {
+        validUnitsTibble <- readUsagiFile(pathToValidUnitsFile) |>
+            dplyr::filter(mappingStatus == "APPROVED")
+
+        if ("ADD_INFO:UniqueForLab" %in% validUnitsTibble |> names()) {
+            validUnitsTibble <- validUnitsTibble |>
+                dplyr::filter(ADD_INFO:UniqueForLab == TRUE)
+        }
+
+        validUnitsList <- validUnitsTibble |>
+            dplyr::distinct(sourceCode) |>
+            dplyr::pull(sourceCode)
+
+        unitConversionTibble <- readUsagiFile(pathToUnitConversionFile) |>
+            dplyr::filter(mappingStatus == "APPROVED")
+    }
+
     #
     # end
     #
@@ -432,8 +457,9 @@ validateUsagiFile <- function(
             # Change to FLAGGED if there is an error not due to outdated concepts, this means there is string with 'ERROR:'
             mappingStatus = dplyr::if_else(
                 stringr::str_detect(tmpvalidationMessages, "ERROR:"),
-                "FLAGGED", 
-                mappingStatus)
+                "FLAGGED",
+                mappingStatus
+            )
         ) |>
         dplyr::select(-tmpvalidationMessages)
 
