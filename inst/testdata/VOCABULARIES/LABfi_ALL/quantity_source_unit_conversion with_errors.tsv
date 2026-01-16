@@ -5,7 +5,6 @@ invalid	au/ml	au/ml	1
 Arbitrary Concentration	invalid	au/ml	1	
 Arbitrary Concentration	au/ml	invalid	1	
 Arbitrary Concentration	au/ml		1	
-Arbitrary Concentration	au/ml		1	
-Arbitrary Concentration	g	au/ml		
-Arbitrary Concentration	g	au/ml	10.93*X-23.50	
-Arbitrary Concentration	g	au/ml	invalid	
+Arbitrary Concentration	mg	au/ml		
+Arbitrary Concentration	kg	au/ml	10.93*X-23.50	
+Arbitrary Concentration	ng	au/ml	invalid	

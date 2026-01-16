@@ -33,7 +33,7 @@ validateUsagiFile <- function(
     pathToValidatedUsagiFile,
     sourceConceptIdOffset,
     pathToValidUnitsFile = NULL,
-    pathToUnitConversionFile = NULL, 
+    pathToUnitConversionFile = NULL,
     pathToValidatedUnitConversionFile = NULL) {
     #
     # Parameter validation
@@ -435,12 +435,11 @@ validateUsagiFile <- function(
     if (!is.null(pathToValidUnitsFile) && !is.null(pathToUnitConversionFile)) {
         # Prepare files for lab values checks
         # - validUnitsList:
-        validUnitsTibble <- readUsagiFile(pathToValidUnitsFile) |>
-            dplyr::filter(mappingStatus == "APPROVED")
+        validUnitsTibble <- readUsagiFile(pathToValidUnitsFile) 
 
-        if ("ADD_INFO:UniqueForLab" %in% validUnitsTibble |> names()) {
+        if ("ADD_INFO:UniqueForLab" %in% names(validUnitsTibble)) {
             validUnitsTibble <- validUnitsTibble |>
-                dplyr::filter(ADD_INFO:UniqueForLab == TRUE)
+                dplyr::filter(`ADD_INFO:UniqueForLab` == TRUE)
         }
 
         validUnitsList <- validUnitsTibble |>
@@ -450,27 +449,30 @@ validateUsagiFile <- function(
         # - usagiTibble:
         usagiTibble <- usagiTibble |>
             dplyr::mutate(
-                testName = stringr::str_extract(sourceCode, "[a-zA-Z]+"),
-                testUnit = stringr::str_extract(sourceCode, "(?<=\\s|^)[^\\d\\W\\.]+")
+                testName = stringr::str_extract(sourceCode, "^.*(?=\\[)"),
+                testUnit = stringr::str_extract(sourceCode, "(?<=\\[)[^\\]]+(?=\\])")
             )
-
+        conceptIds <- usagiTibble |>
+            dplyr::pull(conceptId) |>
+            unique()
         conceptIdToQuantity <- dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
-            dplyr::filter(concept_id_1 %in% usagiTibble |> dplyr::pull(conceptId) |> unique()) |>
+            dplyr::filter(concept_id_1 %in% conceptIds) |>
             dplyr::filter(relationship_id == "Has property") |>
-            dplyr::select(concept_id, concept_id_2) |>
+            dplyr::select(concept_id_1, concept_id_2) |>
             left_join(
                 dplyr::tbl(connection, "CONCEPT") |>
                     dplyr::select(concept_id, concept_name),
                 by = c("concept_id_2" = "concept_id")
             ) |>
             dplyr::transmute(
-                conceptId = concept_id,
-                quantity = dplyr::if_else(!is.na(concept_name), concept_name, "-")
-            )
-        
+                conceptId = concept_id_1,
+                omop_quantity = dplyr::if_else(!is.na(concept_name), concept_name, "-")
+            ) |>
+            dplyr::collect()
+
         usagiTibble <- usagiTibble |>
             dplyr::left_join(conceptIdToQuantity, by = "conceptId")
-
+        
         # - unitConversionTibble:
         unitConversionTibble <- readUnitConversionFile(pathToUnitConversionFile)
         result <- validateUnitConversionTibble(unitConversionTibble, validUnitsList, validQuantitiesList)
@@ -483,81 +485,125 @@ validateUsagiFile <- function(
 
         # Check that all the sourceCodes in usagiTibble are of the format {testName}[{testUnit}]
         invalidLabSourceCodes <- usagiTibble |>
-            dplyr::filter(!stringr::str_detect(sourceCode, "^[a-zA-Z]+\\[[^\\d\\W\\.]+\\]$")) |>
-            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab source code, it must be of the format testName[testUnit]"))
+            dplyr::distinct(sourceCode) |>
+            dplyr::filter(!stringr::str_detect(sourceCode, "^.+\\[.*\\]$")) |>
+            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab source code, it must be of the format testName[testUnit]"))|>
+            dplyr::select(sourceCode, errorMessage)
         if (nrow(invalidLabSourceCodes) > 0) {
-            validationLogR6$ERROR("Invalid lab source code", paste0("Found ", nrow(invalidLabSourceCodes), " codes with invalid lab source codes"))
+            validationLogR6$ERROR("LAB: Invalid lab source code format", paste0("Found ", nrow(invalidLabSourceCodes), " codes where source code is not of the format testName[testUnit]"))
 
             usagiTibble <- usagiTibble |>
                 dplyr::left_join(invalidLabSourceCodes, by = "sourceCode") |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
                 dplyr::select(-errorMessage)
         } else {
-            validationLogR6$SUCCESS("Invalid lab source code", "")
+            validationLogR6$SUCCESS("LAB: Invalid lab source code format", "")
         }
-
+browser()
         # check if usagiTibble testUnit is in validUnitsList or na
         invalidLabUnits <- usagiTibble |>
-            dplyr::filter(!is.na(testUnit) & !testUnit %in% validUnitsList) |>
-            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid unit: ", testUnit))
-        if (nrow(invalidLabUnits) > 0) {
-            validationLogR6$ERROR("Invalid lab unit", paste0("Found ", nrow(invalidLabUnits), " codes with invalid lab units"))
-
+            dplyr::distinct(sourceCode, testUnit, mappingStatus) |>
+            dplyr::filter(!(is.na(testUnit) | (testUnit %in% validUnitsList))) |>
+            dplyr::mutate(
+                errorType = dplyr::if_else(mappingStatus == "UNCHECKED", "WARNING: not APPROVED", "ERROR: APPROVED"),
+                errorMessage = paste0(errorType, ": ", sourceCode, " is not a valid unit: ", testUnit)
+            )|>
+            dplyr::select(sourceCode, errorType, errorMessage)
+        if (nrow(invalidLabUnits ) > 0) {
             usagiTibble <- usagiTibble |>
                 dplyr::left_join(invalidLabUnits, by = "sourceCode") |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
-                dplyr::select(-errorMessage)
+                dplyr::select(-errorMessage, -errorType)
+        } 
+
+        nErrors <- invalidLabUnits |> dplyr::filter(errorType == "ERROR: APPROVED") |> nrow()
+        if (nErrors > 0) {
+            validationLogR6$ERROR("LAB: APPROVED Invalid lab unit", paste0("Found ", nErrors, " APPROVED lab source codes where unit is not in validUnitsList or is NA"))
         } else {
-            validationLogR6$SUCCESS("Invalid lab unit", "")
+            validationLogR6$SUCCESS("LAB: APPROVED Invalid lab unit", "")
+        }
+
+        nWarnings <- invalidLabUnits |> dplyr::filter(errorType == "WARNING: not APPROVED") |> nrow()
+        if (nWarnings > 0) {
+            validationLogR6$WARNING("LAB: not APPROVED Invalid lab unit", paste0("Found ", nWarnings, " not APPROVED lab source codes where unit is not in validUnitsList or is NA"))
+        } else {
+            validationLogR6$SUCCESS("LAB: not APPROVED Invalid lab unit", "")
         }
 
         # check if domain of the mapped concept is 'Measurement'
         invalidLabDomains <- usagiTibble |>
+            dplyr::distinct(sourceCode, conceptId, domainId, conceptName) |>
             dplyr::filter(domainId != "Measurement") |>
-            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab domain: ", domainId))
+            dplyr::mutate(errorMessage = paste0("WARNING: ", sourceCode, " is mapped to incorrect domain: ",domainId, " for concept ", conceptId, " (", conceptName, ")"))|>
+            dplyr::select(sourceCode, conceptId, errorMessage)
         if (nrow(invalidLabDomains) > 0) {
-            validationLogR6$ERROR("Invalid lab domain", paste0("Found ", nrow(invalidLabDomains), " codes with invalid lab domains"))
+            validationLogR6$WARNING("LAB: Invalid lab mapped domain", paste0("Found ", nrow(invalidLabDomains), " mapped lab source codes where domain is not 'Measurement'"))
 
             usagiTibble <- usagiTibble |>
-                dplyr::left_join(invalidLabDomains, by = "sourceCode") |>
+                dplyr::left_join(invalidLabDomains, by = c("sourceCode", "conceptId")) |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
                 dplyr::select(-errorMessage)
         } else {
-            validationLogR6$SUCCESS("Invalid lab domain", "")
+            validationLogR6$SUCCESS("LAB: Invalid lab mapped domain", "")
         }
 
         # check if the quantity of the mapped concept is in the unitConversionTibble
         invalidLabQuantities <- usagiTibble |>
-        dplyr::filter(!is.na(quantity) & !is.na(testUnit)) |>
-        dplyr::left_join(unitConversionTibble, by = c("quantity", "testUnit")) |>
-        dplyr::filter(is.na(conversion)) |>
-        dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab quantity: ", quantity))
+            dplyr::distinct(sourceCode, conceptId, conceptName, omop_quantity, testUnit, mappingStatus) |>
+            dplyr::filter(!is.na(omop_quantity) & !is.na(testUnit)) |>
+            dplyr::left_join(unitConversionTibble, by = c("omop_quantity", "testUnit"="source_unit_valid")) |>
+            dplyr::filter(is.na(conversion)) |>
+            dplyr::mutate(
+                errorType = dplyr::if_else(mappingStatus == "UNCHECKED", "WARNING: not APPROVED", "ERROR: APPROVED"),
+                errorMessage = paste0(errorType, ": test unit [", testUnit, "] does not agree with omop_quantity '", omop_quantity, "' for mapped concept ", conceptId, " (", conceptName, ")")
+            )|>
+            dplyr::select(sourceCode, conceptId, errorType, errorMessage)
         if (nrow(invalidLabQuantities) > 0) {
-            validationLogR6$ERROR("Invalid lab quantity", paste0("Found ", nrow(invalidLabQuantities), " codes with invalid lab quantities"))
-
-            usagiTibble <- usagiTibble |>
-                dplyr::left_join(invalidLabQuantities, by = "sourceCode") |>
+             usagiTibble <- usagiTibble |>
+                dplyr::left_join(invalidLabQuantities, by = c("sourceCode", "conceptId")) |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
-                dplyr::select(-errorMessage)
+                dplyr::select(-errorMessage, -errorType)
+        } 
+
+        nErrors <- invalidLabQuantities |> dplyr::filter(errorType == "ERROR: APPROVED") |> nrow()
+        if (nErrors > 0) {
+            validationLogR6$ERROR("LAB: APPROVED Invalid lab quantity", paste0("Found ", nErrors, " APPROVED lab source codes where test unit does not agree with omop_quantity"))
         } else {
-            validationLogR6$SUCCESS("Invalid lab quantity", "")
+            validationLogR6$SUCCESS("LAB: APPROVED Invalid lab quantity", "")
+        }
+
+        nWarnings <- invalidLabQuantities |> dplyr::filter(errorType == "WARNING: not APPROVED") |> nrow()
+        if (nWarnings > 0) {
+            validationLogR6$WARNING("LAB: not APPROVED Invalid lab quantity", paste0("Found ", nWarnings, " not APPROVED lab source codes where test unit does not agree with omop_quantity"))
+        } else {
+            validationLogR6$SUCCESS("LAB: not APPROVED Invalid lab quantity", "")
         }
 
         # check if the same testName with same quantity maps to different concept ids
         warningTestNameQuantityCombinations <- usagiTibble |>
-            dplyr::filter(!is.na(quantity) & !is.na(testUnit)) |>
-            dplyr::group_by(testName, quantity) |>
-            dplyr::summarise(conceptId = paste(conceptId, collapse = " | ")) |>
-            dplyr::ungroup()
+            dplyr::filter(mappingStatus == "APPROVED") |>
+            dplyr::distinct(testName, omop_quantity, conceptId, conceptName) |>
+            dplyr::group_by(testName, omop_quantity) |>
+            dplyr::summarise(
+                conceptIds_list = list(conceptId), message = paste(paste0(conceptId, " (", conceptName, ")"), collapse = " | "), n = dplyr::n()) |>
+            dplyr::ungroup() |> 
+            dplyr::filter(n > 1) |> 
+            dplyr::mutate(errorMessage = paste0("WARNING: testName '", testName, "' with omop_quantity '", omop_quantity, "' maps to different concept ids: ", message)) |>
+            tidyr::unnest(conceptIds_list) |> dplyr::rename(conceptId = conceptIds_list) |>
+            dplyr::select(testName, omop_quantity, conceptId, errorMessage)
         if (nrow(warningTestNameQuantityCombinations) > 0) {
-            validationLogR6$WARNING("TestName with same quantity maps to different concept ids", paste0("Found ", nrow(warningTestNameQuantityCombinations), " codes with testName with same quantity maps to different concept ids"))
+            validationLogR6$WARNING("LAB: TestName with same quantity maps to different concept ids", paste0("Found ", nrow(warningTestNameQuantityCombinations), " codes with testName with same quantity maps to different concept ids"))
+            usagiTibble <- usagiTibble |>
+                dplyr::left_join(warningTestNameQuantityCombinations, by = c("testName", "omop_quantity", "conceptId")) |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
+                dplyr::select(-errorMessage)
         } else {
-            validationLogR6$SUCCESS("TestName with same quantity maps to different concept ids", "")
+            validationLogR6$SUCCESS("LAB: TestName with same quantity maps to different concept ids", "")
         }
 
         # Clean up
         usagiTibble <- usagiTibble |>
-            dplyr::select(-testName, -testUnit, -quantity)
+            dplyr::select(-testName, -testUnit, -omop_quantity)
     }
 
     #
@@ -640,7 +686,8 @@ validateUsagiFile <- function(
                 dplyr::mutate(row = dplyr::row_number()) |>
                 dplyr::left_join(failedRulesRows, by = "row") |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
-                dplyr::select(-row, -errorMessage)
+                dplyr::select(-row, -errorMessage) |> 
+                dplyr::distinct()
         }
     }
 

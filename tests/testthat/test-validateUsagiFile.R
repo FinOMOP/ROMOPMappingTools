@@ -283,11 +283,92 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 })
 
 
+test_that("test validateUsagiFile returns errors with a invalid quantity_source_unit_conversion.tsv file", {
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/LABfi_ALL.usagi.csv", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  
+  # TEMP
+  pathToOMOPVocabularyDuckDBfile <- pathToFullOMOPVocabularyDuckDBfile
+  #
+
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+
+  pathToQuantitySourceUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion with_errors.tsv", package = "ROMOPMappingTools")
+  pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
+  
+  pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
+  pathToValidatedUnitConversionFile <- tempfile(fileext = ".tsv")
+  vocabularyDatabaseSchema = "main"
+  sourceConceptIdOffset = 2000500000
 
 
+  # Create connection to test database
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
 
 
+  validationsSummary <- validateUsagiFile(
+    pathToUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToValidatedUsagiFile,
+    sourceConceptIdOffset,
+    pathToValidUnitsFile,
+    pathToQuantitySourceUnitConversionFile,
+    pathToValidatedUnitConversionFile
+  )
 
+  validationsSummary |> dplyr::filter(type == "ERROR") |> nrow() |> expect_gt(0)
+  validatedUnitConversionFile <- readUnitConversionFile(pathToValidatedUnitConversionFile)
+  validatedUnitConversionFile |> dplyr::filter(is.na(validation_messages)) |> nrow() |> expect_gt(0)
+})
+
+
+test_that("test validateUsagiFile ", {
+  pathToUsagiFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/LABfi_ALL.usagi.csv", package = "ROMOPMappingTools")
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  
+  # TEMP
+  pathToOMOPVocabularyDuckDBfile <- pathToFullOMOPVocabularyDuckDBfile
+  #
+
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+
+  pathToQuantitySourceUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion.tsv", package = "ROMOPMappingTools")
+  pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
+  
+  pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
+  pathToValidatedUnitConversionFile <- tempfile(fileext = ".tsv")
+  vocabularyDatabaseSchema = "main"
+  sourceConceptIdOffset = 2002400000
+
+
+  # Create connection to test database
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
+
+
+  validationsSummary <- validateUsagiFile(
+    pathToUsagiFile, 
+    connection,
+    vocabularyDatabaseSchema,
+    pathToValidatedUsagiFile,
+    sourceConceptIdOffset,
+    pathToValidUnitsFile,
+    pathToQuantitySourceUnitConversionFile,
+    pathToValidatedUnitConversionFile
+  )
+
+  validationsSummary |> dplyr::filter(type == "ERROR") |> nrow() |> expect_equal(0)
+  validatedUnitConversionFile <- readUnitConversionFile(pathToValidatedUnitConversionFile)
+  validatedUnitConversionFile |> dplyr::filter(is.na(validation_messages)) |> nrow() |> expect_gt(0)
+})
 
 
 

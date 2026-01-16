@@ -113,7 +113,7 @@ It is a TSV file with the following columns:
 | conversion               | character | The conversion formula or factor                           | not empty, must be a valid conversion formula |
 | only_to_omop_concepts    | integer   | Applicable to this OMOP concepts only                      | optional, must exist in the CONCEPT table|
 
-
+omop_quantity, source_unit_valid and to_source_unit_valid must be unique combinations.
 
 ## Extra Usagi rules for lab values
 

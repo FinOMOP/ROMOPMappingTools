@@ -29,7 +29,12 @@ readUnitConversionFile <- function(pathToUnitConversionFile) {
         .default = readr::col_character()
     )
 
-    readr::read_tsv(pathToUnitConversionFile, col_types = cols, na = c(""))
+    unitConversionTibble <- readr::read_tsv(pathToUnitConversionFile, col_types = cols, na = c(""))
+    if(!('validation_messages' %in% names(unitConversionTibble))) {
+        unitConversionTibble <- unitConversionTibble |>
+            dplyr::mutate(validation_messages = "")
+    }
+    return(unitConversionTibble)
 }
 
 #' Validate Unit Conversion Tibble
@@ -57,7 +62,6 @@ validateUnitConversionTibble <- function(unitConversionTibble, validUnitsList, v
 
     validationLogR6 <- LogTibble$new()
 
-    # Add tmpvalidationMessages message column
     unitConversionTibble <- unitConversionTibble |>
         dplyr::mutate(tmpvalidationMessages = "")
 
@@ -90,18 +94,19 @@ validateUnitConversionTibble <- function(unitConversionTibble, validUnitsList, v
 
     # Validate omop_quantity: not empty and is string
     validationRules <- validate::validator(
+        omop_quantity.source_unit_valid.to_source_unit_valid.is.unique = is_unique(omop_quantity, source_unit_valid, to_source_unit_valid),
         omop_quantity.is.empty = is_complete(omop_quantity),
         omop_quantity.not.in.validQuantitiesList = omop_quantity %in% validQuantitiesList,
-        source_unit_valid.is.empty = is_complete(source_unit_valid),
-        source_unit_valid.not.in.validUnitsList = source_unit_valid %in% validUnitsList,
-        to_source_unit_valid.is.empty = is_complete(to_source_unit_valid),
-        to_source_unit_valid.not.in.validUnitsList = to_source_unit_valid %in% validUnitsList,
+        #source_unit_valid.is.empty = is_complete(source_unit_valid),
+        source_unit_valid.not.in.validUnitsList = (source_unit_valid %in% validUnitsList)|(is.na(source_unit_valid)),
+        #to_source_unit_valid.is.empty = is_complete(to_source_unit_valid),
+        to_source_unit_valid.not.in.validUnitsList = (to_source_unit_valid %in% validUnitsList)|(is.na(to_source_unit_valid)),
         conversion.is.not.valid =
             # Acceptable: floats like "1", "10.2", or formulas like "10.93*X-23.50"
             grepl(
                 "^[+-]?(\\d*\\.?\\d+|\\d+)([eE][+-]?\\d+)?$|^([+-]?\\d*\\.?\\d+[eE]?[+-]?\\d*)?\\*X([+-]\\d*\\.?\\d+)?$",
                 conversion
-            ) | is_complete(conversion)
+            ) 
     )
 
     validations <- validate::confront(unitConversionTibble, validationRules, ref = list(validQuantitiesList = validQuantitiesList, validUnitsList = validUnitsList))
@@ -112,6 +117,10 @@ validateUnitConversionTibble <- function(unitConversionTibble, validUnitsList, v
     # add first row back
     unitConversionTibble <- firstRow |>
         dplyr::bind_rows(unitConversionTibble)
+   
+    unitConversionTibble <- unitConversionTibble |>
+        dplyr::mutate(validation_messages = tmpvalidationMessages) |> 
+        dplyr::select(-tmpvalidationMessages)
 
     return(list(unitConversionTibble = unitConversionTibble, validationLogR6 = validationLogR6))
 }

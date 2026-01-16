@@ -35,7 +35,7 @@ Decimal number fraction	%	%	1
 Entitic mass	pg	pg	1	
 Entitic mass	pg/cell	pg	1	
 Entitic volume	fl	fl	1	
-Finding	NA	NA	1	
+Finding			1	
 Length fraction	%	%	1	
 Length	mm	mm	1	
 Log molar concentration	ph	ph	1	
@@ -63,7 +63,7 @@ Mass Rate	ug/min	ug/min	1
 Mass Ratio	%	%	1	
 Mass Ratio	ratio	ratio	1	
 Mass fraction	%	%	1	
-Mass fraction	%	mmol/mol	10,93*X-23,50	3004410
+Mass fraction	%	mmol/mol	10.93*X-23.50	3004410
 Mass fraction	mmol/mol	mmol/mol	1	
 Mass or Substance Rate	mmol/24h	mmol/24h	1	
 Number Areic (per area)	u/field	u/field	1	
@@ -82,10 +82,10 @@ Osmolality	mosm/kgh2o	mosm/kgh2o	1
 Partial pressure	%	%	1	
 Partial pressure	kpa	kpa	1	
 Presence or Threshold	estimate	estimate	1	
-Presence or Threshold	estimate	NA	1	
-Presence or Threshold	NA	estimate	1	
-Presence or Threshold	NA	NA	1	
-Presence or Identity	NA	NA	1	
+Presence or Threshold	estimate		1	
+Presence or Threshold		estimate	1	
+Presence or Threshold			1	
+Presence or Identity			1	
 Ratio	%	%	1	
 Ratio	ratio	ratio	1	
 Ratio	ratio	%	100	
