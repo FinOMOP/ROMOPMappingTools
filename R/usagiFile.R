@@ -163,8 +163,12 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
 
     colNames <- usagiTibble |> names()
     midColNames <- colNames |> setdiff(c(firstColNames, lastColNames))
-    
-    colNamesInOrder <- c(firstColNames, midColNames, lastColNames)
+
+    if (all(labValuesColNames %in% colNames)) {
+        colNamesInOrder <- c(firstColNames, labValuesColNames, midColNames, lastColNames)
+    } else {
+        colNamesInOrder <- c(firstColNames, midColNames, lastColNames)
+    }
 
     # order the columns
     usagiTibble <- usagiTibble |>

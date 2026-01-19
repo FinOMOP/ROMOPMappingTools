@@ -433,6 +433,10 @@ validateUsagiFile <- function(
 
     # Checks for Lab Value Usagi file
     if (!is.null(pathToValidUnitsFile) && !is.null(pathToUnitConversionFile)) {
+        # remove lab values columns that will be re-added later
+        usagiTibble <- usagiTibble |>
+            dplyr::select(-`ADD_INFO:testNameAbbreviation`, -`ADD_INFO:measurementUnit`, -`ADD_INFO:omopQuantity`)
+
         # Prepare files for lab values checks
         # - validUnitsList:
         validUnitsTibble <- readUsagiFile(pathToValidUnitsFile) 
@@ -609,7 +613,7 @@ validateUsagiFile <- function(
 
         # Clean up
         usagiTibble <- usagiTibble |>
-            dplyr::select(-testName, -testUnit, -omop_quantity)
+            dplyr::rename(`ADD_INFO:testNameAbbreviation` = testName, `ADD_INFO:measurementUnit` = testUnit, `ADD_INFO:omopQuantity` = omop_quantity)
     }
 
     #
@@ -627,10 +631,10 @@ validateUsagiFile <- function(
         ) |>
         dplyr::select(-tmpvalidationMessages)
 
-    # Kill switch, if other than `mappingStatus` and `ADD_INFO:validationMessages` are different then error
+    # Kill switch, if other than `mappingStatus` and `ADD_INFO:validationMessages` are different then error (or lab columns)
     byNames <- usagiTibble |>
         names() |>
-        setdiff(c("mappingStatus", "ADD_INFO:validationMessages"))
+        setdiff(c("mappingStatus", "ADD_INFO:validationMessages", "ADD_INFO:testNameAbbreviation", "ADD_INFO:measurementUnit", "ADD_INFO:omopQuantity"))
     differences <- usagiTibbleOriginal |>
         dplyr::select(dplyr::all_of(byNames)) |>
         dplyr::anti_join(usagiTibble |> dplyr::select(dplyr::all_of(byNames)), by = byNames)
