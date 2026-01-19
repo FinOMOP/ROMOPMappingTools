@@ -449,8 +449,9 @@ validateUsagiFile <- function(
         # - usagiTibble:
         usagiTibble <- usagiTibble |>
             dplyr::mutate(
-                testName = stringr::str_extract(sourceCode, "^.*(?=\\[)"),
-                testUnit = stringr::str_extract(sourceCode, "(?<=\\[)[^\\]]+(?=\\])")
+                # TEMP we use sourceName instead of sourceCode bcs sourceCode has been trimmed to 50 characters
+                testName = stringr::str_extract(sourceName, "^.*(?=\\[)"),
+                testUnit = stringr::str_extract(sourceName, "(?<=\\[)[^\\]]+(?=\\])")
             )
         conceptIds <- usagiTibble |>
             dplyr::pull(conceptId) |>
@@ -472,40 +473,45 @@ validateUsagiFile <- function(
 
         usagiTibble <- usagiTibble |>
             dplyr::left_join(conceptIdToQuantity, by = "conceptId")
-        
+
+        validQuantitiesList <- conceptIdToQuantity |>
+                dplyr::pull(omop_quantity) |>
+                unique() |>
+                na.omit()
+
         # - unitConversionTibble:
         unitConversionTibble <- readUnitConversionFile(pathToUnitConversionFile)
         result <- validateUnitConversionTibble(unitConversionTibble, validUnitsList, validQuantitiesList)
         unitConversionTibble <- result$unitConversionTibble
         unitConversionValidationLogR6 <- result$validationLogR6
+        unitConversionTibble |> readr::write_tsv(pathToValidatedUnitConversionFile, na = "")
         if (unitConversionValidationLogR6$logTibble |> dplyr::filter(type == "ERROR") |> nrow() > 0) {
-            unitConversionTibble |> readr::write_tsv(pathToValidatedUnitConversionFile, na = "")
             return(unitConversionValidationLogR6$logTibble)
         }
 
-        # Check that all the sourceCodes in usagiTibble are of the format {testName}[{testUnit}]
-        invalidLabSourceCodes <- usagiTibble |>
-            dplyr::distinct(sourceCode) |>
-            dplyr::filter(!stringr::str_detect(sourceCode, "^.+\\[.*\\]$")) |>
-            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceCode, " is not a valid lab source code, it must be of the format testName[testUnit]"))|>
-            dplyr::select(sourceCode, errorMessage)
-        if (nrow(invalidLabSourceCodes) > 0) {
-            validationLogR6$ERROR("LAB: Invalid lab source code format", paste0("Found ", nrow(invalidLabSourceCodes), " codes where source code is not of the format testName[testUnit]"))
+        # Check that all the sourceName in usagiTibble are of the format {testName}[{testUnit}]
+        invalidLabSourceNames <- usagiTibble |>
+            dplyr::distinct(sourceName) |>
+            dplyr::filter(!stringr::str_detect(sourceName, "^.+\\[.*\\]$")) |>
+            dplyr::mutate(errorMessage = paste0("ERROR: ", sourceName, " is not a valid lab source name, it must be of the format testName[testUnit]"))|>
+            dplyr::select(sourceName, errorMessage)
+        if (nrow(invalidLabSourceNames) > 0) {
+            validationLogR6$ERROR("LAB: Invalid lab source name format", paste0("Found ", nrow(invalidLabSourceNames), " codes where source name is not of the format testName[testUnit]"))
 
             usagiTibble <- usagiTibble |>
-                dplyr::left_join(invalidLabSourceCodes, by = "sourceCode") |>
+                dplyr::left_join(invalidLabSourceNames, by = "sourceName") |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(!is.na(errorMessage), paste0(tmpvalidationMessages, " | ", errorMessage), tmpvalidationMessages)) |>
                 dplyr::select(-errorMessage)
         } else {
-            validationLogR6$SUCCESS("LAB: Invalid lab source code format", "")
+            validationLogR6$SUCCESS("LAB: Invalid lab source name format", "")
         }
-browser()
+
         # check if usagiTibble testUnit is in validUnitsList or na
         invalidLabUnits <- usagiTibble |>
             dplyr::distinct(sourceCode, testUnit, mappingStatus) |>
             dplyr::filter(!(is.na(testUnit) | (testUnit %in% validUnitsList))) |>
             dplyr::mutate(
-                errorType = dplyr::if_else(mappingStatus == "UNCHECKED", "WARNING: not APPROVED", "ERROR: APPROVED"),
+                errorType = dplyr::if_else(mappingStatus == "APPROVED", "ERROR: APPROVED", "WARNING: not APPROVED"),
                 errorMessage = paste0(errorType, ": ", sourceCode, " is not a valid unit: ", testUnit)
             )|>
             dplyr::select(sourceCode, errorType, errorMessage)
@@ -554,7 +560,7 @@ browser()
             dplyr::left_join(unitConversionTibble, by = c("omop_quantity", "testUnit"="source_unit_valid")) |>
             dplyr::filter(is.na(conversion)) |>
             dplyr::mutate(
-                errorType = dplyr::if_else(mappingStatus == "UNCHECKED", "WARNING: not APPROVED", "ERROR: APPROVED"),
+                errorType = dplyr::if_else(mappingStatus == "APPROVED", "ERROR: APPROVED", "WARNING: not APPROVED"),
                 errorMessage = paste0(errorType, ": test unit [", testUnit, "] does not agree with omop_quantity '", omop_quantity, "' for mapped concept ", conceptId, " (", conceptName, ")")
             )|>
             dplyr::select(sourceCode, conceptId, errorType, errorMessage)

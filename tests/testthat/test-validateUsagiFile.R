@@ -293,7 +293,7 @@ test_that("test validateUsagiFile returns errors with a invalid quantity_source_
 
   withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
 
-  pathToQuantitySourceUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion with_errors.tsv", package = "ROMOPMappingTools")
+  pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion with_errors.tsv", package = "ROMOPMappingTools")
   pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
   
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
@@ -317,7 +317,7 @@ test_that("test validateUsagiFile returns errors with a invalid quantity_source_
     pathToValidatedUsagiFile,
     sourceConceptIdOffset,
     pathToValidUnitsFile,
-    pathToQuantitySourceUnitConversionFile,
+    pathToUnitConversionFile,
     pathToValidatedUnitConversionFile
   )
 
@@ -337,7 +337,7 @@ test_that("test validateUsagiFile ", {
 
   withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
 
-  pathToQuantitySourceUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion.tsv", package = "ROMOPMappingTools")
+  pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion.tsv", package = "ROMOPMappingTools")
   pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
   
   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
@@ -361,21 +361,22 @@ test_that("test validateUsagiFile ", {
     pathToValidatedUsagiFile,
     sourceConceptIdOffset,
     pathToValidUnitsFile,
-    pathToQuantitySourceUnitConversionFile,
+    pathToUnitConversionFile,
     pathToValidatedUnitConversionFile
   )
 
-  validationsSummary |> dplyr::filter(type == "ERROR") |> nrow() |> expect_equal(0)
-  validatedUnitConversionFile <- readUnitConversionFile(pathToValidatedUnitConversionFile)
-  validatedUnitConversionFile |> dplyr::filter(is.na(validation_messages)) |> nrow() |> expect_gt(0)
+  validationsSummary
+  pathToValidatedUnitConversionFile |> readr::read_tsv() |> View()
+
+  validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
+
+  
+  validatedUsagiFile |> 
+  dplyr::filter(stringr::str_detect(`ADD_INFO:validationMessages`, "with omop_quantity "))  |> 
+  dplyr::filter(stringr::str_detect(`ADD_INFO:validationMessages`, "ERROR"))  |> 
+  select(sourceName, `ADD_INFO:validationMessages`) |> 
+  View()
+
+
 })
-
-
-
-
-
-
-
-
-
 

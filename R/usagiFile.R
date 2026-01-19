@@ -150,6 +150,12 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
         "ADD_INFO:sourceParentVocabulary"
     )
 
+    labValuesColNames <- c(
+        "ADD_INFO:testNameAbbreviation",
+        "ADD_INFO:measurementUnit",
+        "ADD_INFO:omopQuantity"
+    )
+
     lastColNames <- c(
         "ADD_INFO:validationMessages",
         "ADD_INFO:autoUpdatingInfo"
@@ -157,11 +163,13 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
 
     colNames <- usagiTibble |> names()
     midColNames <- colNames |> setdiff(c(firstColNames, lastColNames))
+    
+    colNamesInOrder <- c(firstColNames, midColNames, lastColNames)
 
     # order the columns
     usagiTibble <- usagiTibble |>
         dplyr::select(
-            dplyr::any_of(c(firstColNames, midColNames, lastColNames))
+            dplyr::any_of(colNamesInOrder)
         )
 
     # force "ADD_INFO:validationMessages" and "ADD_INFO:autoUpdatingInfo" to be NA if they are empty, if they exist

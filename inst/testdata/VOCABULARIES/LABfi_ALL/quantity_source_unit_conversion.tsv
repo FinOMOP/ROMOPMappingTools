@@ -32,15 +32,20 @@ Catalytic Concentration	u/l	u/l	1
 Catalytic Fraction	%	%	1	
 Catalytic Ratio	%	%	1	
 Decimal number fraction	%	%	1	
+Decimal mass fraction	%	%	1	
+DistWidth	%	%	1	
+DistWidth	ratio	ratio	1	
 Entitic mass	pg	pg	1	
 Entitic mass	pg/cell	pg	1	
-Entitic volume	fl	fl	1	
+Entitic mean volume	fl	fl	1	
+Entitic Mass/volume	g/l	g/l	0.001	
 Finding			1	
 Length fraction	%	%	1	
 Length	mm	mm	1	
 Log molar concentration	ph	ph	1	
 Mass	g	g	1	
 Mass	mg	mg	1	
+Mass	kg	kg	1	
 Mass Concentration	g/l	g/l	1	
 Mass Concentration	g/l	mg/l	1000	
 Mass Concentration	mg/l	g/l	0.001	
@@ -66,6 +71,7 @@ Mass fraction	%	%	1
 Mass fraction	%	mmol/mol	10.93*X-23.50	3004410
 Mass fraction	mmol/mol	mmol/mol	1	
 Mass or Substance Rate	mmol/24h	mmol/24h	1	
+Multiple of the median	mom	mom	1	
 Number Areic (per area)	u/field	u/field	1	
 Number Concentration	%	%	1	
 Number Concentration	e12/l	e12/l	1	
@@ -95,7 +101,7 @@ Ratio	g/mol	mg/mmol	1
 Ratio	mg/mmol	g/mol	1	
 Ratio	mg/mmol	mg/mmol	1	
 Relative Arbitrary Concentration	%	%	1	
-Relative Density	kg/l	kg/l	1	
+Specific gravity	kg/l	kg/l	1	
 Relative Mass Concentration	%	%	1	
 Relative Ratio	%	%	1	
 Relative Ratio	mg/g	mg/g	1	
@@ -123,6 +129,7 @@ Substance Rate	mmol/24h	mmol/24h	1
 Substance Rate	nmol/24h	nmol/24h	1	
 Substance Rate	umol/24h	umol/24h	1	
 Substance Ratio	%	%	1	
+Substance Ratio	ratio	ratio	1	
 Temperature	°c	°c	1	
 Time (e.g. seconds)	min	min	1	
 Time (e.g. seconds)	s	min	0.01666667	
