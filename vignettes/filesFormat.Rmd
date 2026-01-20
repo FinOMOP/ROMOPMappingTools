@@ -120,12 +120,11 @@ omop_quantity, source_unit_valid and to_source_unit_valid must be unique combina
 The following rules are applied to the Usagi file when the pathToValidUnitsFile and pathToUnitConversionFile are provided:
 
 ERROR:
-- The sourceCode must be of the format {testName}[{testUnit}]
-- The testUnit must be in the quantity_source_unit_conversion.tsv
-- Domain of the mapped concept must be 'Measurement'
-- The testUnit quantity must agree with the quantity in the vocabularies for the mapped concept
-
+- "LAB: Invalid lab source name format": The sourceName must be of the format {testName}[{testUnit}]
+- "LAB: APPROVED Invalid lab unit": All approved mappings must have a testUnit that is in the provided units usagi file
+- "LAB: APPROVED Invalid lab quantity": All approved mappings must have a testUnit quantity that agrees with the quantity in the vocabularies for the mapped concept
 
 WARNING:
-- Same testName with same quantity maps to different concept ids
-  
+- "LAB: Invalid lab mapped domain": If the domain of the mapped concept is not 'Measurement'
+- "LAB: not APPROVED Invalid lab unit": An not approved mappings has a testUnit that is in the provided units usagi file
+- "LAB: not APPROVED Invalid lab quantity": An not approved mappings has a testUnit quantity that does not agree with the quantity in the vocabularies for the mapped concept

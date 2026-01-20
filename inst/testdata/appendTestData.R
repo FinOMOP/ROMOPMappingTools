@@ -1,6 +1,4 @@
-# Do not edit any more. This freeze for the current ICD10 and UNIT fi data.
-# Append data instead
-if (FALSE) {
+
     pathToFullOMOPVocabularyCSVsFolder <- "../OMOP_vocabularies/data/input_omop_vocabulary"
 
     # convert to duckdb
@@ -29,19 +27,13 @@ if (FALSE) {
     relationship <- dplyr::tbl(connection, "RELATIONSHIP")
     vocabulary <- dplyr::tbl(connection, "VOCABULARY")
 
-    # Vocabularies to include
-    vocabulariesToInclude <- c("ICD10")
 
     # Vocabularies to map
     # we need also all the concepts that will be mapped by the usagi files
-    pathToICD10fiUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
-    ICD10fiUsagiFile <- readUsagiFile(pathToICD10fiUsagiFile)
-    pathToUNITfiUsagiFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
-    UNITfiUsagiFile <- readUsagiFile(pathToUNITfiUsagiFile)
-    pathToICD10fiUsagiFileWithErrors <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
-    ICD10fiUsagiFileWithErrors <- readUsagiFile(pathToICD10fiUsagiFileWithErrors)
+    pathToLABfiUsagiFileWithErrors <- system.file("testdata/VOCABULARIES/LABfi_ALL/LABfi_with_errors.usagi.csv", package = "ROMOPMappingTools")
+    LABfiUsagiFileWithErrors <- readUsagiFile(pathToLABfiUsagiFileWithErrors)
 
-    allUsagiFiles <- dplyr::bind_rows(ICD10fiUsagiFile, UNITfiUsagiFile, ICD10fiUsagiFileWithErrors)
+    allUsagiFiles <- dplyr::bind_rows(LABfiUsagiFileWithErrors)
 
     conceptIdsToMap <- allUsagiFiles |>
         dplyr::pull(conceptId) |>
