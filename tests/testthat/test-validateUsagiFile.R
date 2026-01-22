@@ -327,7 +327,7 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 # })
 
 
-# test_that("test validateUsagiFile ", {
+# # test_that("test validateUsagiFile ", {
 #   pathToUsagiFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/LABfi_ALL.usagi.csv", package = "ROMOPMappingTools")
 #   pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
   
@@ -378,5 +378,5 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 #   View()
 
 
-# })
+# # })
 
