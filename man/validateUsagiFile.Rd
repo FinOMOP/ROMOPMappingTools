@@ -9,7 +9,10 @@ validateUsagiFile(
   connection,
   vocabularyDatabaseSchema,
   pathToValidatedUsagiFile,
-  sourceConceptIdOffset
+  sourceConceptIdOffset,
+  pathToValidUnitsFile = NULL,
+  pathToUnitConversionFile = NULL,
+  pathToValidatedUnitConversionFile = NULL
 )
 }
 \arguments{
@@ -30,6 +33,7 @@ Default Usagi columns:
 \item Check if all default Usagi columns are present:
 \item Check if sourceCode and conceptId are unique
 \item Check if sourceCode is not empty
+\item Check if sourceCode is less than 50 characters
 \item Check if sourceName is not empty
 \item Check if sourceName is less than 255 characters
 If usagi file has C&CR columns:

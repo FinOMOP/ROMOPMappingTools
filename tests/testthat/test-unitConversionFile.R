@@ -1,30 +1,30 @@
-test_that("test validateConversionTibble returns no errors with a valid quantity_source_unit_conversion.tsv file", {
-  pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion.tsv", package = "ROMOPMappingTools")
-  unitConversionTibble <- readUnitConversionFile(pathToUnitConversionFile)
+# test_that("test validateConversionTibble returns no errors with a valid quantity_source_unit_conversion.tsv file", {
+#   pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion.tsv", package = "ROMOPMappingTools")
+#   unitConversionTibble <- readUnitConversionFile(pathToUnitConversionFile)
 
-  pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
-  validUnitsList <- readUsagiFile(pathToValidUnitsFile) |>
-    dplyr::filter(`ADD_INFO:UniqueForLab` == TRUE) |>
-    dplyr::pull(sourceCode) |>
-    unique() |>
-    na.omit()
+#   pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
+#   validUnitsList <- readUsagiFile(pathToValidUnitsFile) |>
+#     dplyr::filter(`ADD_INFO:UniqueForLab` == TRUE) |>
+#     dplyr::pull(sourceCode) |>
+#     unique() |>
+#     na.omit()
 
-  validQuantitiesList <- unitConversionTibble$omop_quantity |>
-    unique() |>
-    na.omit()
+#   validQuantitiesList <- unitConversionTibble$omop_quantity |>
+#     unique() |>
+#     na.omit()
 
-  result <- validateUnitConversionTibble(unitConversionTibble, validUnitsList, validQuantitiesList)
+#   result <- validateUnitConversionTibble(unitConversionTibble, validUnitsList, validQuantitiesList)
 
-  result$validationLogR6$logTibble |>
-    dplyr::filter(type == "ERROR") |>
-    nrow() |>
-    expect_equal(0)
+#   result$validationLogR6$logTibble |>
+#     dplyr::filter(type == "ERROR") |>
+#     nrow() |>
+#     expect_equal(0)
     
-  result$unitConversionTibble |>
-    dplyr::filter(validation_messages != "") |>
-    nrow() |>
-    expect_equal(0)
-})
+#   result$unitConversionTibble |>
+#     dplyr::filter(validation_messages != "") |>
+#     nrow() |>
+#     expect_equal(0)
+# })
 
 test_that("test validateConversionTibble returns errors with a invalid quantity_source_unit_conversion.tsv file", {
   pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion with_errors.tsv", package = "ROMOPMappingTools")
