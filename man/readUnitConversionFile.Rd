@@ -7,7 +7,7 @@
 readUnitConversionFile(pathToUnitConversionFile)
 }
 \arguments{
-\item{pathToConversionFile}{Path to the conversion file to read}
+\item{pathToUnitConversionFile}{Path to the conversion file to read}
 }
 \value{
 A tibble containing the conversion data with appropriate column types

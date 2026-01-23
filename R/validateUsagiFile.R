@@ -19,6 +19,9 @@
 #' @param vocabularyDatabaseSchema Schema name where the vocabulary tables are stored
 #' @param pathToValidatedUsagiFile Path where to save the validated Usagi file
 #' @param sourceConceptIdOffset Integer offset to add to source concept IDs. Default is 0
+#' @param pathToValidUnitsFile Optional path to a Usagi file containing valid units for lab data validation
+#' @param pathToUnitConversionFile Optional path to a unit conversion file for lab data validation
+#' @param pathToValidatedUnitConversionFile Optional path where to save the validated unit conversion file
 #'
 #' @importFrom checkmate assertFileExists assertSubset
 #' @importFrom DBI dbConnect dbListTables

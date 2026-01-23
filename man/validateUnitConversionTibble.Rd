@@ -14,6 +14,8 @@ validateUnitConversionTibble(
 \item{unitConversionTibble}{A tibble containing conversion data}
 
 \item{validUnitsList}{A character vector of valid unit codes}
+
+\item{validQuantitiesList}{A character vector of valid quantity codes}
 }
 \value{
 A tibble containing validation results with columns: type, step, message

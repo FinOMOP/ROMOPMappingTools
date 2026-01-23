@@ -9,7 +9,7 @@
 #' - conversion (character): Conversion formula or factor
 #' - only_to_omop_concepts (integer): Optional concept ID restriction
 #'
-#' @param pathToConversionFile Path to the conversion file to read
+#' @param pathToUnitConversionFile Path to the conversion file to read
 #'
 #' @return A tibble containing the conversion data with appropriate column types
 #'
@@ -47,6 +47,7 @@ readUnitConversionFile <- function(pathToUnitConversionFile) {
 #'
 #' @param unitConversionTibble A tibble containing conversion data
 #' @param validUnitsList A character vector of valid unit codes
+#' @param validQuantitiesList A character vector of valid quantity codes
 #'
 #' @return A tibble containing validation results with columns: type, step, message
 #'

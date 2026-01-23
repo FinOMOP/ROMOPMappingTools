@@ -25,6 +25,12 @@ validateUsagiFile(
 \item{pathToValidatedUsagiFile}{Path where to save the validated Usagi file}
 
 \item{sourceConceptIdOffset}{Integer offset to add to source concept IDs. Default is 0}
+
+\item{pathToValidUnitsFile}{Optional path to a Usagi file containing valid units for lab data validation}
+
+\item{pathToUnitConversionFile}{Optional path to a unit conversion file for lab data validation}
+
+\item{pathToValidatedUnitConversionFile}{Optional path where to save the validated unit conversion file}
 }
 \description{
 Reads a usagi file given in 'pathToUsagiFile' and performs the following checks:

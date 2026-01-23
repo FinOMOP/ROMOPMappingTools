@@ -27,7 +27,7 @@
 # })
 
 test_that("test validateConversionTibble returns errors with a invalid quantity_source_unit_conversion.tsv file", {
-  pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion with_errors.tsv", package = "ROMOPMappingTools")
+  pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion_with_errors.tsv", package = "ROMOPMappingTools")
   unitConversionTibble <- readUnitConversionFile(pathToUnitConversionFile)
   pathToValidatedUnitConversionFile <- tempfile(fileext = ".tsv")
 

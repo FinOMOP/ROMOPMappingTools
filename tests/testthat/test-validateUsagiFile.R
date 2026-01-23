@@ -293,7 +293,7 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 
 #   withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
 
-#   pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion with_errors.tsv", package = "ROMOPMappingTools")
+#   pathToUnitConversionFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/quantity_source_unit_conversion_with_errors.tsv", package = "ROMOPMappingTools")
 #   pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
   
 #   pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
