@@ -1,4 +1,3 @@
-#renv::install("tidyprompt")
 library(dplyr)
 library(ellmer)
 
