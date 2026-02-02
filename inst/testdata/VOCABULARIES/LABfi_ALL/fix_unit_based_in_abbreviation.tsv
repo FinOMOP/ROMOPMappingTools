@@ -1,0 +1,64 @@
+TEST_NAME_ABBREVIATION	source_unit_clean	source_unit_clean_fix
+p-tt-inr		inr
+p-tt-inr	form	inr
+u-ph	form	ph
+u-ph		ph
+s-ph		ph
+fs-ph		ph
+ph		ph
+u-ph-o		ph
+vb-ph		ph
+cb-ph		ph
+du-prot	g	g/24h
+du-na	mmol	mmol/24h
+du-kors-v	nmol	nmol/24h
+b-hkr	osuus	ratio
+b-hkr		ratio
+b-erytrosyytit,tilavuusosuus	osuus	ratio
+b-pvk+tkd,hkr	osuus	ratio
+b-retind	osuus	%
+b-erytrosyyttientilavuusosuus	osuus	%
+erytrosyytit,tilavuusosuus	osuus	ratio
+erytrosyytit,tilavuusosuus		ratio
+p-krea		umol/l
+ab-ph		ph
+pt-gfreepi	form	ml/min/173m2
+pt-gfreepi		ml/min/173m2
+u-osmoest	mosm/l	mosm/kgh2o
+u-suhti	g/ml	kg/l
+p-tsh	mlu/l	miu/l
+b-xkoe	form	
+p-inr		inr
+u-suhtih		kg/l
+s-k/l-s-v		ratio
+u-osmole		mosm/kgh2o
+p-crp		mg/l
+fp-krea		umol/l
+p-tromboplastiiniaika,inr-tulostus		inr
+b-crp		mg/l
+du-ca	mmol	mmol/24h
+u-keto-o	l	estimate
+eryt	e6/l	e12/l
+p-uraat	mmol/l	umol/l
+s-uraat	mmol/l	umol/l
+kreatiniini	mmol/l	umol/l
+p-krea	mmol/l	umol/l
+s-krea	mmol/l	umol/l
+u-alb		ug/l
+albumiini	g/l	mg/l
+album	g/l	mg/l
+kol/hdlsuhde		ratio
+kol/hdl-su		ratio
+kol/hdl		ratio
+kolesterolinjahdl-kolest.suhde		ratio
+u-suhti		mg/l
+u-suhteellinentiheys		ratio
+u-suhtih		ratio
+u-ominp-h		ratio
+non-hdl		mmol/l
+p-hb	g/l	mg/l
+p-hb		mg/l
+fp-gluk	nmol/l	mmol/l
+fp-glukoosi	nmol/l	mmol/l
+s-b12-vit		pmol/l
+p-b12-vit		pmol/l
