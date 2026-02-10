@@ -1,7 +1,4 @@
 
-library(tibble)
-library(tidyr)
-
 test_that("test validateFixUnitTibble returns errors with an invalid fix_unit_based_in_abbreviation.tsv file", {
   pathToFixUnitFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/fix_unit_based_in_abbreviation_with_errors.tsv", package = "ROMOPMappingTools")
   fixUnitTibble <- readFixUnitFile(pathToFixUnitFile)

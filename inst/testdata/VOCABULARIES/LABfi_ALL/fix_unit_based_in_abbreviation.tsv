@@ -27,9 +27,7 @@ pt-gfreepi		ml/min/173m2
 u-osmoest	mosm/l	mosm/kgh2o
 u-suhti	g/ml	kg/l
 p-tsh	mlu/l	miu/l
-b-xkoe	form	
 p-inr		inr
-u-suhtih		kg/l
 s-k/l-s-v		ratio
 u-osmole		mosm/kgh2o
 p-crp		mg/l
@@ -51,7 +49,6 @@ kol/hdlsuhde		ratio
 kol/hdl-su		ratio
 kol/hdl		ratio
 kolesterolinjahdl-kolest.suhde		ratio
-u-suhti		mg/l
 u-suhteellinentiheys		ratio
 u-suhtih		ratio
 u-ominp-h		ratio
