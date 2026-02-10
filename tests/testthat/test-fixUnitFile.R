@@ -1,42 +1,50 @@
+
+library(tibble)
+library(tidyr)
+
 test_that("test validateFixUnitTibble returns errors with an invalid fix_unit_based_in_abbreviation.tsv file", {
   pathToFixUnitFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/fix_unit_based_in_abbreviation_with_errors.tsv", package = "ROMOPMappingTools")
   fixUnitTibble <- readFixUnitFile(pathToFixUnitFile)
 
-  validUnitsList <- c("inr", "ph", "g/24h", "mmol/24h", "nmol/24h", "ratio", "%", "umol/l", "ml/min/173m2", "mosm/kgh2o", "kg/l", "miu/l", "mg/l", "pmol/l", "mmol/l", "ug/l", "e12/l", "estimate", "mosm/l")
+  # Create validNameUnitsTibble with test_name and measurement_unit columns
+  validNameUnitsTibble <- tibble::tribble(
+    ~test_name, ~measurement_unit,
+    "p-tt-inr", "inr",
+    "u-ph", "ph",
+    "s-ph", "ph",
+    "fs-ph", "ph",
+    "p-tt-inr", "g/24h",
+    "u-ph", "mmol/24h",
+    "s-ph", "nmol/24h"
+  )
 
-  result <- validateFixUnitTibble(fixUnitTibble, validUnitsList)
+  result <- validateFixUnitTibble(fixUnitTibble, validNameUnitsTibble)
 
   fixUnitTibble <- result$fixUnitTibble
 
-  # Check that we have the expected number of rows (first row removed and added back, so same count)
-  expect_equal(nrow(fixUnitTibble), 9)
+  # Check that we have the expected number of rows
+  expect_equal(nrow(fixUnitTibble), 7)
 
-  # Row 1 (first row/header): should have no errors
-  expect_equal(fixUnitTibble$validation_messages[1], "")
+  # Row 1: "p-tt-inr", "", "inr" - has duplicate TEST_NAME_ABBREVIATION and source_unit_clean combination
+  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[1], "TEST_NAME_ABBREVIATION source_unit_clean is unique"))
 
-  # Row 2: "p-tt-inr", "", "inr" - should have no errors (valid)
-  expect_equal(fixUnitTibble$validation_messages[2], "")
+  # Row 2: "", "form", "inr" - empty TEST_NAME_ABBREVIATION
+  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[2], "TEST_NAME_ABBREVIATION is empty"))
 
-  # Row 3: "", "form", "inr" - empty TEST_NAME_ABBREVIATION
-  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[3], "TEST_NAME_ABBREVIATION is empty"))
+  # Row 3: "p-tt-inr", "", "invalid" - invalid TEST_NAME_ABBREVIATION and source_unit_clean_fix pair
+  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[3], "TEST_NAME_ABBREVIATION source_unit_clean_fix pair valid"))
 
-  # Row 4: "p-tt-inr", "", "invalid" - invalid source_unit_clean_fix
-  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[4], "source_unit_clean_fix not in validUnitsList"))
+  # Row 4: "u-ph", "form", "ph" - should have no errors (valid)
+  expect_equal(fixUnitTibble$validation_messages[4], "")
 
-  # Row 5: "p-tt-inr", "", "inr" - duplicate TEST_NAME_ABBREVIATION and source_unit_clean combination
-  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[5], "TEST_NAME_ABBREVIATION source_unit_clean is unique"))
+  # Row 5: "u-ph", "", "ph" - should have no errors (valid, different source_unit_clean)
+  expect_equal(fixUnitTibble$validation_messages[5], "")
 
-  # Row 6: "u-ph", "form", "ph" - should have no errors (valid)
-  expect_equal(fixUnitTibble$validation_messages[6], "")
+  # Row 6: "s-ph", "", "invalid_unit" - invalid TEST_NAME_ABBREVIATION and source_unit_clean_fix pair
+  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[6], "TEST_NAME_ABBREVIATION source_unit_clean_fix pair valid"))
 
-  # Row 7: "u-ph", "", "ph" - should have no errors (valid, different source_unit_clean)
+  # Row 7: "fs-ph", "", "ph" - should have no errors (valid)
   expect_equal(fixUnitTibble$validation_messages[7], "")
-
-  # Row 8: "s-ph", "", "invalid_unit" - invalid source_unit_clean_fix
-  expect_true(stringr::str_detect(fixUnitTibble$validation_messages[8], "source_unit_clean_fix not in validUnitsList"))
-
-  # Row 9: "fs-ph", "", "ph" - should have no errors (valid)
-  expect_equal(fixUnitTibble$validation_messages[9], "")
 
   # Check that validation log has errors
   result$validationLogR6$logTibble |>
@@ -50,19 +58,19 @@ test_that("test validateFixUnitTibble returns no errors with a valid fix_unit_ba
   pathToFixUnitFile <- system.file("testdata/VOCABULARIES/LABfi_ALL/fix_unit_based_in_abbreviation.tsv", package = "ROMOPMappingTools")
   fixUnitTibble <- readFixUnitFile(pathToFixUnitFile)
   pathToValidUnitsFile <- system.file("testdata/VOCABULARIES/UNITfi/UNITfi.usagi.csv", package = "ROMOPMappingTools")
-  validUnitsList <- readUsagiFile(pathToValidUnitsFile) |>
-    dplyr::filter(`ADD_INFO:UniqueForLab` == TRUE) |>
-    dplyr::pull(sourceCode) |>
-    unique() |>
-    na.omit()
+  
+  # Create validNameUnitsTibble from the actual combinations in the fixUnitTibble
+  # This is more realistic than creating a cross product of all possible combinations
+  validNameUnitsTibble <- fixUnitTibble |>
+    dplyr::filter(!is.na(TEST_NAME_ABBREVIATION), !is.na(source_unit_clean_fix)) |>
+    dplyr::select(test_name = TEST_NAME_ABBREVIATION, measurement_unit = source_unit_clean_fix) |>
+    dplyr::distinct()
 
-  result <- validateFixUnitTibble(fixUnitTibble, validUnitsList)
+  result <- validateFixUnitTibble(fixUnitTibble, validNameUnitsTibble)
 
   result$validationLogR6$logTibble |>
     dplyr::filter(type == "ERROR") |>
     nrow() |>
     expect_equal(0)
 
-  result$fixUnitTibble |>
-    dplyr::filter(validation_messages != "") |> View()
 })

@@ -2,7 +2,6 @@ TEST_NAME_ABBREVIATION	source_unit_clean	source_unit_clean_fix
 p-tt-inr		inr
 	form	inr
 p-tt-inr		invalid
-p-tt-inr		inr
 u-ph	form	ph
 u-ph		ph
 s-ph		invalid_unit

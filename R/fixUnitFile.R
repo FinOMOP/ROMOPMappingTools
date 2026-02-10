@@ -39,23 +39,32 @@ readFixUnitFile <- function(pathToFixUnitFile) {
 #' Validates a fix unit tibble against a set of rules:
 #' - TEST_NAME_ABBREVIATION is not empty
 #' - TEST_NAME_ABBREVIATION and source_unit_clean combination is unique
-#' - source_unit_clean_fix must be in the validUnitsList
+#' - TEST_NAME_ABBREVIATION and source_unit_clean_fix pair must exist in validNameUnitsTibble
 #'
 #' @param fixUnitTibble A tibble containing fix unit data
-#' @param validUnitsList A character vector of valid unit codes
+#' @param validNameUnitsTibble A tibble with columns test_name and measurement_unit containing valid combinations
 #'
 #' @return A list containing:
 #'   - fixUnitTibble: The validated tibble with validation messages
 #'   - validationLogR6: A LogTibble object containing validation results
 #'
-#' @importFrom checkmate assertTibble assertCharacter
+#' @importFrom checkmate assertTibble
 #' @importFrom dplyr mutate slice bind_rows select
 #' @importFrom validate validator confront
 #'
 #' @export
-validateFixUnitTibble <- function(fixUnitTibble, validUnitsList) {
+validateFixUnitTibble <- function(fixUnitTibble, validNameUnitsTibble) {
     checkmate::assertTibble(fixUnitTibble)
-    checkmate::assertCharacter(validUnitsList, any.missing = FALSE)
+    checkmate::assertTibble(validNameUnitsTibble)
+    
+    # Validate that validNameUnitsTibble has required columns
+    requiredValidColumns <- c("test_name", "measurement_unit")
+    missingValidColumns <- requiredValidColumns |>
+        setdiff(names(validNameUnitsTibble))
+    
+    if (length(missingValidColumns) > 0) {
+        stop(paste0("validNameUnitsTibble missing required columns: ", paste(missingValidColumns, collapse = ", ")))
+    }
 
     validationLogR6 <- LogTibble$new()
 
@@ -82,14 +91,17 @@ validateFixUnitTibble <- function(fixUnitTibble, validUnitsList) {
         validationLogR6$SUCCESS("Missing required columns", "")
     }
 
+    # Create a lookup for valid combinations
+    validCombinations <- paste(validNameUnitsTibble$test_name, validNameUnitsTibble$measurement_unit, sep = "___")
+    
     # Validate rules
     validationRules <- validate::validator(
         TEST_NAME_ABBREVIATION.source_unit_clean.is.unique = is_unique(TEST_NAME_ABBREVIATION, source_unit_clean),
         TEST_NAME_ABBREVIATION.is.empty = is_complete(TEST_NAME_ABBREVIATION),
-        source_unit_clean_fix.not.in.validUnitsList = source_unit_clean_fix %in% validUnitsList
+        TEST_NAME_ABBREVIATION.source_unit_clean_fix.pair.valid = paste(TEST_NAME_ABBREVIATION, source_unit_clean_fix, sep = "___") %in% validCombinations
     )
 
-    validations <- validate::confront(fixUnitTibble, validationRules, ref = list(validUnitsList = validUnitsList))
+    validations <- validate::confront(fixUnitTibble, validationRules, ref = list(validCombinations = validCombinations))
     result <- .applyValidationRules(fixUnitTibble, validations, validationLogR6) 
     fixUnitTibble <- result$fileTibble
     validationLogR6 <- result$validationLogR6
