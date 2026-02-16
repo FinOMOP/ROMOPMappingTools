@@ -95,7 +95,7 @@ validateUnitConversionTibble <- function(unitConversionTibble, validUnitsList, v
 
     # Validate omop_quantity: not empty and is string
     validationRules <- validate::validator(
-        omop_quantity.source_unit_valid.to_source_unit_valid.is.unique = is_unique(omop_quantity, source_unit_valid, to_source_unit_valid),
+        omop_quantity.source_unit_valid.to_source_unit_valid.is.unique = is_unique(omop_quantity, source_unit_valid, to_source_unit_valid, only_to_omop_concepts),
         omop_quantity.is.empty = is_complete(omop_quantity),
         omop_quantity.not.in.validQuantitiesList = omop_quantity %in% validQuantitiesList,
         #source_unit_valid.is.empty = is_complete(source_unit_valid),
