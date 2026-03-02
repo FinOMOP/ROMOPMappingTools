@@ -67,7 +67,7 @@ buildValidationStatusMd <- function(
                 if ("ADD_INFO:ignoreReason" %in% names(usagiTibble)) {
                     usagiTibble <- usagiTibble |>
                         dplyr::mutate(
-                            mappingStatus = dplyr::if_else(!is.na(`ADD_INFO:ignoreReason`) & `ADD_INFO:ignoreReason`, "IGNORE", mappingStatus)
+                            mappingStatus = dplyr::if_else(!is.na(`ADD_INFO:ignoreReason`), "IGNORE", mappingStatus)
                         )
                 }
                     mappingSummary <- usagiTibble |>
