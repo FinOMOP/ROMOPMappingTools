@@ -7,7 +7,8 @@
 buildValidationStatusMd(
   validationLogTibble,
   pathToValidationStatusMdFile = file.path(tempdir(),
-    "VOCABULARIES_VALIDATION_STATUS.md")
+    "VOCABULARIES_VALIDATION_STATUS.md"),
+  pathToVocabularyFolder = NULL
 )
 }
 \arguments{
@@ -16,6 +17,10 @@ context, type, step, and message}
 
 \item{pathToValidationStatusMdFile}{Path where the markdown file will be saved
 (default: tempdir()/VOCABULARIES_VALIDATION_STATUS.md)}
+
+\item{pathToVocabularyFolder}{Optional path to the vocabulary folder. If provided,
+a mapping summary section will be included showing the count of distinct
+sourceCodes per mappingStatus. If NULL, the mapping summary section is omitted.}
 }
 \value{
 Path to the generated markdown file
