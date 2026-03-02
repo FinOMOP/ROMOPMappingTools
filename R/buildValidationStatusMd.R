@@ -64,10 +64,10 @@ buildValidationStatusMd <- function(
                 pathToUsagiFile <- file.path(pathToVocabularyFolder, vocabulariesTibble$path_to_usagi_file[i])
                 if (file.exists(pathToUsagiFile)) {
                     usagiTibble <- readr::read_csv(pathToUsagiFile, show_col_types = FALSE)
-                if ("ignoreReason" %in% names(usagiTibble)) {
+                if ("ADD_INFO:ignoreReason" %in% names(usagiTibble)) {
                     usagiTibble <- usagiTibble |>
                         dplyr::mutate(
-                            mappingStatus = dplyr::if_else(!is.na(ignoreReason) & ignoreReason, "IGNORE", mappingStatus)
+                            mappingStatus = dplyr::if_else(!is.na(`ADD_INFO:ignoreReason`) & `ADD_INFO:ignoreReason`, "IGNORE", mappingStatus)
                         )
                 }
                     mappingSummary <- usagiTibble |>
