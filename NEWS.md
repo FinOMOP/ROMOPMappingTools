@@ -1,3 +1,7 @@
+# ROMOPMappingTools 2.1.3
+
+- Added rule to validate usagi file: sourceConceptId must be unique
+
 # ROMOPMappingTools 2.1.2
 
 - Added rule to validate usagi file: sourceConceptCode must be less than 50 characters
