@@ -239,26 +239,36 @@ validateUsagiFile <- function(
         usagiTibble <- result$fileTibble
         validationLogR6 <- result$validationLogR6
 
-        # Check SourceConceptId is unique (each sourceConceptId should belong to only one sourceCode)
-        duplicatedSourceConceptIds <- usagiTibble |>
-            dplyr::select(sourceCode, `ADD_INFO:sourceConceptId`) |>
+        # Check SourceConceptId is unique (each sourceConceptId should belong to only one sourceCode).
+        # Deduplication by (sourceCode, sourceConceptId) is needed first so that valid multi-mapped
+        # codes (one sourceCode → many conceptIds, all sharing the same sourceConceptId) are not
+        # incorrectly flagged.
+        usagiDistinct <- usagiTibble |>
             dplyr::filter(!is.na(`ADD_INFO:sourceConceptId`)) |>
-            dplyr::distinct() |>
-            dplyr::group_by(`ADD_INFO:sourceConceptId`) |>
-            dplyr::filter(dplyr::n() > 1) |>
-            dplyr::ungroup() |>
-            dplyr::pull(`ADD_INFO:sourceConceptId`) |>
-            unique()
+            dplyr::distinct(sourceCode, `ADD_INFO:sourceConceptId`)
 
-        if (length(duplicatedSourceConceptIds) > 0) {
+        distinctValidationRules <- validate::validator(
+            SourceConceptId.is.not.unique = is_unique(`ADD_INFO:sourceConceptId`)
+        )
+        distinctValidations <- validate::confront(usagiDistinct, distinctValidationRules)
+        distinctValidationSummary <- validate::summary(distinctValidations) |> tibble::as_tibble()
+
+        if (distinctValidationSummary$fails[1] > 0) {
             validationLogR6$ERROR(
                 "SourceConceptId is not unique",
-                paste0("Found ", length(duplicatedSourceConceptIds), " sourceConceptIds assigned to more than one sourceCode")
+                paste0("Found ", distinctValidationSummary$fails[1], " sourceConceptIds assigned to more than one sourceCode")
             )
+
+            notUniqueSourceConceptIds <- usagiDistinct[
+                !validate::values(distinctValidations)[, "SourceConceptId.is.not.unique"],
+            ] |>
+                dplyr::pull(`ADD_INFO:sourceConceptId`) |>
+                unique()
+
             usagiTibble <- usagiTibble |>
                 dplyr::mutate(
                     errorMessage = dplyr::if_else(
-                        `ADD_INFO:sourceConceptId` %in% duplicatedSourceConceptIds,
+                        `ADD_INFO:sourceConceptId` %in% notUniqueSourceConceptIds,
                         "ERROR: SourceConceptId is not unique",
                         NA_character_
                     )
