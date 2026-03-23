@@ -137,6 +137,7 @@ knitr::kable(validationsSummary)
 | SUCCESS | SourceConceptClass is more than 20 characters            |         |
 | SUCCESS | SourceDomain is empty                                    |         |
 | SUCCESS | SourceDomain is not a valid domain                       |         |
+| SUCCESS | SourceConceptId is not unique                            |         |
 | SUCCESS | Not APPROVED mappingStatus with valid domain combination |         |
 | SUCCESS | APPROVED mappingStatus with valid domain combination     |         |
 | SUCCESS | Missing date columns                                     |         |
@@ -192,6 +193,7 @@ knitr::kable(validationsSummaryWithErrors)
 | ERROR   | SourceConceptClass is more than 20 characters            | Number of failed rules: 1                                                                                                                                    |
 | ERROR   | SourceDomain is empty                                    | Number of failed rules: 1                                                                                                                                    |
 | ERROR   | SourceDomain is not a valid domain                       | Number of failed rules: 1                                                                                                                                    |
+| ERROR   | SourceConceptId is not unique                            | Found 2 sourceConceptIds assigned to more than one sourceCode                                                                                                |
 | WARNING | Not APPROVED mappingStatus with valid domain combination | Found 1 codes with invalid domain combinations                                                                                                               |
 | ERROR   | APPROVED mappingStatus with valid domain combination     | Found 1 codes with invalid domain combinations                                                                                                               |
 | SUCCESS | Missing date columns                                     |                                                                                                                                                              |
@@ -252,6 +254,7 @@ knitr::kable(validationsSummaryWithErrors)
 | SUCCESS | SourceConceptClass is more than 20 characters            |                                                                                                            |
 | SUCCESS | SourceDomain is empty                                    |                                                                                                            |
 | SUCCESS | SourceDomain is not a valid domain                       |                                                                                                            |
+| SUCCESS | SourceConceptId is not unique                            |                                                                                                            |
 | SUCCESS | Not APPROVED mappingStatus with valid domain combination |                                                                                                            |
 | SUCCESS | APPROVED mappingStatus with valid domain combination     |                                                                                                            |
 | SUCCESS | Missing date columns                                     |                                                                                                            |
@@ -336,6 +339,7 @@ knitr::kable(validationsSummaryWithErrors)
 | SUCCESS | SourceConceptClass is more than 20 characters            |                                                |
 | SUCCESS | SourceDomain is empty                                    |                                                |
 | SUCCESS | SourceDomain is not a valid domain                       |                                                |
+| SUCCESS | SourceConceptId is not unique                            |                                                |
 | SUCCESS | Not APPROVED mappingStatus with valid domain combination |                                                |
 | ERROR   | APPROVED mappingStatus with valid domain combination     | Found 6 codes with invalid domain combinations |
 | SUCCESS | Missing date columns                                     |                                                |

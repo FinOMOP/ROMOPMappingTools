@@ -7,14 +7,14 @@
 
 ## Citation
 
-Gracia-Tabuenca J (2025). *ROMOPMappingTools: Tools for Working with
-OMOP CDM Mappings*. R package version 2.1.2,
+Gracia-Tabuenca J (2026). *ROMOPMappingTools: Tools for Working with
+OMOP CDM Mappings*. R package version 2.1.3,
 <https://finomop.github.io/ROMOPMappingTools/>.
 
     @Manual{,
       title = {ROMOPMappingTools: Tools for Working with OMOP CDM Mappings},
       author = {Javier Gracia-Tabuenca},
-      year = {2025},
-      note = {R package version 2.1.2},
+      year = {2026},
+      note = {R package version 2.1.3},
       url = {https://finomop.github.io/ROMOPMappingTools/},
     }

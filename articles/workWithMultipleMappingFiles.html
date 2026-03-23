@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">ROMOPMappingTools</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">2.1.3</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -127,7 +127,7 @@ included in the package. Create a new database by making a copy of the
 <span><span class="co">#&gt; Warning in connectDuckdb(connectionDetails): The ICU extension of DuckDB is not</span></span>
 <span><span class="co">#&gt; installed. Attempting to install it.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.426 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.435 secs</span></span>
 <span><span class="va">vocabularyDatabaseSchema</span> <span class="op">&lt;-</span> <span class="st">"main"</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -324,153 +324,165 @@ billion</td>
 <tr class="even">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
+<td align="left">SourceConceptId is not unique</td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">ICD10fi</td>
+<td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Missing date columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceValidStartDate is after SourceValidEndDate</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Missing parent columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Invalid parent concept code</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Missing default columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceCode is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceCode and conceptId are not unique</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceCode is more than 50 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceName is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceName is more than 255 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceFrequency is not empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is not valid</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus conceptId is 0</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Missing C&amp;CR columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is not a number on the range</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is more than 20 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is not a valid domain</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">UNITfi</td>
+<td align="left">SUCCESS</td>
+<td align="left">SourceConceptId is not unique</td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
@@ -528,7 +540,7 @@ source_to_concept_map_extended table, see the <a href="filesFormat.html">Files f
 <code class="sourceCode R"><span><span class="va">sourceToConceptMapTable</span> <span class="op">&lt;-</span> <span class="st">"source_to_concept_map_extended"</span></span>
 <span><span class="fu"><a href="../reference/createSourceToConceptMapExtended.html">createSourceToConceptMapExtended</a></span><span class="op">(</span><span class="va">connection</span>, <span class="va">vocabularyDatabaseSchema</span>, <span class="va">sourceToConceptMapTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0101 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.00933 secs</span></span></code></pre></div>
 <p><code>vocabularyFolderToSTCMVocabularyConcepClassTables</code> needs
 the path to the vocabulary folder, a connection to the database, the
 schema with the vocabulary tables and the name of the SourceToConceptMap
@@ -542,32 +554,32 @@ table.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Appending vocabularies.csv to VOCABULARY table</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0071 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0137 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00635 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0122 secs</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00647 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0393 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00488 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0322 secs</span></span>
 <span><span class="co">#&gt; Appending info from Usagi files to Concept Class table</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Collecting concept classes from Usagi file ./ICD10fi/ICD10fi.usagi.csv</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Collecting concept classes from Usagi file ./UNITfi/UNITfi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00424 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.00961 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00432 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.00953 secs</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00417 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0101 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.0049 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0156 secs</span></span>
 <span><span class="co">#&gt; Appending Usagi files to STCM table</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Appending Usagi file ./ICD10fi/ICD10fi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00417 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.016 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00406 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.014 secs</span></span>
 <span><span class="co">#&gt; Appending Usagi file ./UNITfi/UNITfi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00386 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0116 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.00379 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0107 secs</span></span></code></pre></div>
 <p>This function will populate the VOCABULARY table with the
 <code>vocabularies.csv</code> file and the
 source_to_concept_map_extended table with the Usagi-extended files.</p>
@@ -634,7 +646,7 @@ supported by DatabaseConnector, and be applied directly.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/STCMToCDMTables.html">STCMToCDMTables</a></span><span class="op">(</span><span class="va">connection</span>, <span class="va">vocabularyDatabaseSchema</span>, <span class="va">sourceToConceptMapTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0529 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0602 secs</span></span></code></pre></div>
 <p>This populates the CONCEPT table:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">connection</span>, <span class="st">"CONCEPT"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -671,16 +683,16 @@ supported by DatabaseConnector, and be applied directly.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4,089 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>104        <span style="text-decoration: underline;">80</span>316 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>111     44<span style="text-decoration: underline;">811</span>663 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>116       <span style="text-decoration: underline;">440</span>937 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>119       <span style="text-decoration: underline;">434</span>557 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>120       <span style="text-decoration: underline;">434</span>557 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>123        <span style="text-decoration: underline;">81</span>496 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>125        <span style="text-decoration: underline;">80</span>626 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>132      4<span style="text-decoration: underline;">056</span>331 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>142       <span style="text-decoration: underline;">201</span>779 Maps to         1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>144       <span style="text-decoration: underline;">141</span>777 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>102      4<span style="text-decoration: underline;">111</span>401 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>105       <span style="text-decoration: underline;">437</span>772 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>106       <span style="text-decoration: underline;">133</span>685 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>109       <span style="text-decoration: underline;">134</span>264 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>110      4<span style="text-decoration: underline;">329</span>572 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>114      4<span style="text-decoration: underline;">173</span>717 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>118      4<span style="text-decoration: underline;">130</span>374 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>119      4<span style="text-decoration: underline;">174</span>262 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>120       <span style="text-decoration: underline;">376</span>337 Maps to         1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>121       <span style="text-decoration: underline;">441</span>776 Maps to         1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4,079 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 <ul>
@@ -694,16 +706,16 @@ supported by DatabaseConnector, and be applied directly.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4,089 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>      4<span style="text-decoration: underline;">111</span>401   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>102 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>      4<span style="text-decoration: underline;">166</span>072   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>103 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>        <span style="text-decoration: underline;">80</span>316   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>108 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>      4<span style="text-decoration: underline;">329</span>572   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>110 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>       <span style="text-decoration: underline;">440</span>937   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>116 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>      4<span style="text-decoration: underline;">150</span>516   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>117 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>      4<span style="text-decoration: underline;">098</span>475   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>122 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>        <span style="text-decoration: underline;">81</span>496   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>123 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>     36<span style="text-decoration: underline;">713</span>392   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>133 Mapped from     1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>       <span style="text-decoration: underline;">194</span>268   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>134 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>        <span style="text-decoration: underline;">80</span>316   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>104 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>       <span style="text-decoration: underline;">133</span>685   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>106 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>       <span style="text-decoration: underline;">134</span>264   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>109 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>      4<span style="text-decoration: underline;">173</span>717   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>114 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>       <span style="text-decoration: underline;">441</span>775   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>115 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>       <span style="text-decoration: underline;">434</span>557   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>119 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>       <span style="text-decoration: underline;">376</span>337   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>120 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>       <span style="text-decoration: underline;">441</span>776   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>121 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>      4<span style="text-decoration: underline;">121</span>541   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>124 Mapped from     1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>        <span style="text-decoration: underline;">80</span>626   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>125 Mapped from     1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4,079 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 <p>And if the columns <code>sourceConceptCode</code> and
@@ -743,16 +755,16 @@ they will be used to populate the CONCEPT_RELATIONSHIP table with</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 21 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>728 Subsumes        1997-08-24       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>739 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>742 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>755 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>469   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>471 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>729 Subsumes        2010-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>737 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>748 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>469   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>470 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>727 Subsumes        2010-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>768   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>731 Subsumes        1997-10-06       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>741 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>747 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>750 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>469   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>471 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>729 Subsumes        2010-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>737 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>748 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>469   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>470 Subsumes        1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
@@ -772,7 +784,7 @@ included in the <code>vocabularies.csv</code> file.</p>
 <span>  vocabularyList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICD10"</span>, <span class="st">"ICD10fi"</span>, <span class="st">"UNITfi"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0559 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0573 secs</span></span></code></pre></div>
 <p>Close the connection to the database.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/disconnect.html" class="external-link">disconnect</a></span><span class="op">(</span><span class="va">connection</span><span class="op">)</span></span></code></pre></div>
@@ -817,7 +829,6 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; Warning in DataQualityDashboard::executeDqChecks(connectionDetails =</span></span>
 <span><span class="co">#&gt; connectionDetails, : DEPRECATION WARNING - The plausibleGender check has been</span></span>
 <span><span class="co">#&gt; reimplemented with the plausibleGenderUseDescendants check.</span></span>
-<span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; Processing check description: cdmTable</span></span>
 <span><span class="co">#&gt; Processing check description: measurePersonCompleteness</span></span>
 <span><span class="co">#&gt; Processing check description: measureConditionEraCompleteness</span></span>
@@ -845,16 +856,15 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; Processing check description: plausibleGender</span></span>
 <span><span class="co">#&gt; Processing check description: plausibleGenderUseDescendants</span></span>
 <span><span class="co">#&gt; Processing check description: plausibleUnitConceptIds</span></span>
-<span><span class="co">#&gt; Writing results to file: /tmp/RtmphaWyHx/tmp_vocab_table-20251201090445.json</span></span>
+<span><span class="co">#&gt; Writing results to file: /tmp/Rtmpf5jrXJ/tmp_vocab_table-20260323093718.json</span></span>
 <span><span class="co">#&gt; Execution Complete</span></span>
 <span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; Writing results to table main.dqdashboard_results</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00658 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.0058 secs</span></span>
 <span><span class="co">#&gt; Warning in value[[3L]](cond): Writing table failed: Invalid Error: Conversion Error: Could not convert string 'Table CONCEPT_SYNONYM is empty.' to INT32 when casting from source column not_applicable_reason</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Context: rapi_execute</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Error type: INVALID</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Raw message: Conversion Error: Could not convert string 'Table CONCEPT_SYNONYM is empty.' to INT32 when casting from source column not_applicable_reason</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Error type: INVALID</span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">validationLogR6</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
