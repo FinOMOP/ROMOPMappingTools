@@ -10,6 +10,7 @@
 #' - Check if sourceName is less than 255 characters
 #' If usagi file has C&CR columns:
 #' - Check if concept_id is not 0 for APPROVED mappingStatus
+#' - Check if sourceConceptId is unique (each sourceConceptId belongs to only one sourceCode)
 #' - Check codes with mapping to more than one domain are mapped to compatible domains
 #' - Check if sourceValidStartDate is before sourceValidEndDate
 #' - Check if ADD_INFO:sourceParents is a valid concept code in the ADD_INFO:sourceParentVocabulary
@@ -237,6 +238,50 @@ validateUsagiFile <- function(
         result <- .applyValidationRules(usagiTibble, validations, validationLogR6)
         usagiTibble <- result$fileTibble
         validationLogR6 <- result$validationLogR6
+
+        # Check SourceConceptId is unique (each sourceConceptId should belong to only one sourceCode).
+        # Deduplication by (sourceCode, sourceConceptId) is needed first so that valid multi-mapped
+        # codes (one sourceCode → many conceptIds, all sharing the same sourceConceptId) are not
+        # incorrectly flagged.
+        usagiDistinct <- usagiTibble |>
+            dplyr::filter(!is.na(`ADD_INFO:sourceConceptId`)) |>
+            dplyr::distinct(sourceCode, `ADD_INFO:sourceConceptId`)
+
+        distinctValidationRules <- validate::validator(
+            SourceConceptId.is.not.unique = is_unique(`ADD_INFO:sourceConceptId`)
+        )
+        distinctValidations <- validate::confront(usagiDistinct, distinctValidationRules)
+        distinctValidationSummary <- validate::summary(distinctValidations) |> tibble::as_tibble()
+
+        if (distinctValidationSummary$fails[1] > 0) {
+            validationLogR6$ERROR(
+                "SourceConceptId is not unique",
+                paste0("Found ", distinctValidationSummary$fails[1], " sourceConceptIds assigned to more than one sourceCode")
+            )
+
+            notUniqueSourceConceptIds <- usagiDistinct[
+                !validate::values(distinctValidations)[, "SourceConceptId.is.not.unique"],
+            ] |>
+                dplyr::pull(`ADD_INFO:sourceConceptId`) |>
+                unique()
+
+            usagiTibble <- usagiTibble |>
+                dplyr::mutate(
+                    errorMessage = dplyr::if_else(
+                        `ADD_INFO:sourceConceptId` %in% notUniqueSourceConceptIds,
+                        "ERROR: SourceConceptId is not unique",
+                        NA_character_
+                    )
+                ) |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(
+                    !is.na(errorMessage),
+                    paste0(tmpvalidationMessages, " | ", errorMessage),
+                    tmpvalidationMessages
+                )) |>
+                dplyr::select(-errorMessage)
+        } else {
+            validationLogR6$SUCCESS("SourceConceptId is not unique", "")
+        }
 
         # check if when the code maps to more than one concept the combined domain is valid
         invalidDomainCombinations <- usagiTibble |>

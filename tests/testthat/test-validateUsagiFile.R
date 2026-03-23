@@ -190,6 +190,14 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not a number on the range")) |> dplyr::pull(mappingStatus) |> 
   expect_equal("FLAGGED")
 
+  # SourceConceptId is not unique
+  validationsSummary |> dplyr::filter(step == "SourceConceptId is not unique") |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not unique"))  |> nrow() |> expect_equal(1)
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not unique")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
+  expect_equal("ERROR: SourceConceptId is not unique")
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not unique")) |> dplyr::pull(mappingStatus) |> 
+  expect_equal("FLAGGED")
+
   # SourceConceptClass is empty
   validationsSummary |> dplyr::filter(step == "SourceConceptClass is empty") |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptClass is empty"))  |> nrow() |> expect_equal(1)
