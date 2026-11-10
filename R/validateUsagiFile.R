@@ -16,7 +16,7 @@
 #' - Check if ADD_INFO:sourceParents is a valid concept code in the ADD_INFO:sourceParentVocabulary
 #' If usagi file has the ADD_INFO:sourceName_fi column:
 #' - Check if sourceName_fi is less than 1000 characters
-#' - Check if sourceName_fi is the same for all the rows of a sourceCode
+#' - Check if sourceName_fi is the same for all the rows of a sourceConceptId
 #' - Warn if sourceName_fi is empty for APPROVED or UNCHECKED mappingStatus
 #'
 #' @param pathToUsagiFile Path to the Usagi mapping file to validate
@@ -364,27 +364,30 @@ validateUsagiFile <- function(
         usagiTibble <- result$fileTibble
         validationLogR6 <- result$validationLogR6
 
-        # check all rows of a sourceCode have the same sourceName_fi (multi-mapped codes repeat the source row)
-        sourceCodesWithDifferentNameFi <- usagiTibble |>
-            dplyr::distinct(sourceCode, `ADD_INFO:sourceName_fi`) |>
-            dplyr::count(sourceCode) |>
+        # check all rows of a sourceConceptId have the same sourceName_fi (multi-mapped codes repeat the source row),
+        # each sourceConceptId gets one Finnish synonym. A sourceCode can have several sourceConceptIds, valid for
+        # different periods, each with its own name, so the check is not done per sourceCode
+        sourceConceptIdsWithDifferentNameFi <- usagiTibble |>
+            dplyr::filter(!is.na(`ADD_INFO:sourceConceptId`)) |>
+            dplyr::distinct(`ADD_INFO:sourceConceptId`, `ADD_INFO:sourceName_fi`) |>
+            dplyr::count(`ADD_INFO:sourceConceptId`) |>
             dplyr::filter(n > 1) |>
-            dplyr::pull(sourceCode)
+            dplyr::pull(`ADD_INFO:sourceConceptId`)
 
-        if (length(sourceCodesWithDifferentNameFi) > 0) {
+        if (length(sourceConceptIdsWithDifferentNameFi) > 0) {
             validationLogR6$ERROR(
-                "SourceNameFi is not the same for all rows of the sourceCode",
-                paste0("Found ", length(sourceCodesWithDifferentNameFi), " sourceCodes with different sourceName_fi")
+                "SourceNameFi is not the same for all rows of the sourceConceptId",
+                paste0("Found ", length(sourceConceptIdsWithDifferentNameFi), " sourceConceptIds with different sourceName_fi")
             )
 
             usagiTibble <- usagiTibble |>
                 dplyr::mutate(tmpvalidationMessages = dplyr::if_else(
-                    sourceCode %in% sourceCodesWithDifferentNameFi,
-                    paste0(tmpvalidationMessages, " | ", "ERROR: SourceNameFi is not the same for all rows of the sourceCode"),
+                    `ADD_INFO:sourceConceptId` %in% sourceConceptIdsWithDifferentNameFi,
+                    paste0(tmpvalidationMessages, " | ", "ERROR: SourceNameFi is not the same for all rows of the sourceConceptId"),
                     tmpvalidationMessages
                 ))
         } else {
-            validationLogR6$SUCCESS("SourceNameFi is not the same for all rows of the sourceCode", "")
+            validationLogR6$SUCCESS("SourceNameFi is not the same for all rows of the sourceConceptId", "")
         }
 
         # warn if sourceName_fi is empty, the column is optional so this is not an error
