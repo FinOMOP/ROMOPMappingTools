@@ -1,9 +1,6 @@
-# ROMOPMappingTools (development version)
+# ROMOPMappingTools 2.2.0
 
-- Added `ADD_INFO:sourceName_fi` Usagi column. It is carried to the new `source_code_description_fi` column of the extended STCM table and inserted into `CONCEPT_SYNONYM` with `language_concept_id = 4181730` (Finnish). Names equal to `sourceName` are not added as synonyms.
-- Added rules to validate usagi file: sourceName_fi must be less than 1000 characters and the same for all rows of a sourceConceptId; a warning is given if it is empty for APPROVED or UNCHECKED rows.
-- `buildVocabulariesAll` checks that all Finnish names in the STCM table end up in `CONCEPT_SYNONYM`.
-- Fixed non-standard `==` in the `CONCEPT_SYNONYM` query of `calculateMappingStatus`.
+- Added `ADD_INFO:sourceName_fi` Usagi column, validated and loaded into `CONCEPT_SYNONYM` as Finnish synonyms.
 
 # ROMOPMappingTools 2.1.3
 
