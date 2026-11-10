@@ -84,6 +84,8 @@ Extended STCM columns (includes all default columns plus):
 
 - source_parents_concept_ids
 
+- source_code_description_fi
+
 Extended Usagi columns:
 
 - ADD_INFO:sourceConceptId
@@ -91,6 +93,8 @@ Extended Usagi columns:
 - ADD_INFO:sourceConceptClass
 
 - ADD_INFO:sourceDomain
+
+- ADD_INFO:sourceName_fi (optional, NA if missing)
 
 If formats don't match (e.g., extended Usagi with default STCM), the
 extended information will be ignored with a warning.

@@ -75,4 +75,7 @@ Optional ADD_INFO columns:
 
 - sourceParentVocabulary (character): Vocabulary of parent concepts
 
+- sourceName_fi (character): Finnish name of the source code, added to
+  CONCEPT_SYNONYM
+
 - validationMessagess (character): Validation messages

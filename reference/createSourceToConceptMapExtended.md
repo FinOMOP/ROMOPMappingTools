@@ -1,8 +1,8 @@
 # Create Extended Source to Concept Map Table
 
 Creates an extended version of the Source to Concept Map table that
-includes additional columns for source concept class, domain, and parent
-relationships.
+includes additional columns for source concept class, domain, parent
+relationships, and the Finnish source code description.
 
 ## Usage
 

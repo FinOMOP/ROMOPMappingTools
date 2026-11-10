@@ -75,6 +75,8 @@ The function writes a Usagi mapping file with the following columns:
 
 - ADD_INFO:sourceParentVocabulary (character): Source parent vocabulary
 
+- ADD_INFO:sourceName_fi (character): Source name in Finnish
+
 - ADD_INFO:validationMessages (character): Validation messages
 
 - ADD_INFO:autoUpdatingInfo (character): Auto updating info

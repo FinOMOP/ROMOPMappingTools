@@ -1,5 +1,10 @@
 # Changelog
 
+## ROMOPMappingTools 2.2.0
+
+- Added `ADD_INFO:sourceName_fi` Usagi column, validated and loaded into
+  `CONCEPT_SYNONYM` as Finnish synonyms.
+
 ## ROMOPMappingTools 2.1.3
 
 - Added rule to validate usagi file: sourceConceptId must be unique

@@ -1,6 +1,7 @@
 # Working with individual mapping files
 
 ``` r
+
 library(ROMOPMappingTools)
 ```
 
@@ -34,6 +35,7 @@ file, from the test data. This file contains the mappings for the
 ICD10fi vocabulary.
 
 ``` r
+
 pathToUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")
 
 usagiTibble <- readUsagiFile(pathToUsagiFile)
@@ -88,6 +90,7 @@ vocabulary with all the keys in other tables (see
 `inst/testdata/createTestData.R` for more details).
 
 ``` r
+
 pathToOMOPVocabularyDuckDBfile <-  helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
@@ -97,12 +100,27 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
 
 connection <- DatabaseConnector::connect(connectionDetails)
 #> Connecting using DuckDB driver
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpA8FVZS/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#> Warning in connectDuckdb(connectionDetails): The ICU extension of DuckDB is not
+#> installed. Attempting to install it.
+#>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.296 secs
+#>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.0475 secs
 vocabularyDatabaseSchema <- "main"
 
 pathToValidatedUsagiFile  <- tempfile(fileext = "usagi_validated.csv")
 ```
 
 ``` r
+
 validationsSummary <- validateUsagiFile(
   pathToUsagiFile,
   connection,
@@ -113,37 +131,41 @@ validationsSummary <- validateUsagiFile(
 ```
 
 ``` r
+
 knitr::kable(validationsSummary)
 ```
 
-| type    | step                                                     | message |
-|:--------|:---------------------------------------------------------|:--------|
-| SUCCESS | Missing default columns                                  |         |
-| SUCCESS | SourceCode is empty                                      |         |
-| SUCCESS | SourceCode and conceptId are not unique                  |         |
-| SUCCESS | SourceCode is more than 50 characters                    |         |
-| SUCCESS | SourceName is empty                                      |         |
-| SUCCESS | SourceName is more than 255 characters                   |         |
-| SUCCESS | SourceFrequency is not empty                             |         |
-| SUCCESS | MappingStatus is empty                                   |         |
-| SUCCESS | MappingStatus is not valid                               |         |
-| SUCCESS | APPROVED mappingStatus conceptId is 0                    |         |
-| SUCCESS | APPROVED mappingStatus with concepts outdated            |         |
-| SUCCESS | Not APPROVED mappingStatus with concepts outdated        |         |
-| SUCCESS | Missing C&CR columns                                     |         |
-| SUCCESS | SourceConceptId is empty                                 |         |
-| SUCCESS | SourceConceptId is not a number on the range             |         |
-| SUCCESS | SourceConceptClass is empty                              |         |
-| SUCCESS | SourceConceptClass is more than 20 characters            |         |
-| SUCCESS | SourceDomain is empty                                    |         |
-| SUCCESS | SourceDomain is not a valid domain                       |         |
-| SUCCESS | SourceConceptId is not unique                            |         |
-| SUCCESS | Not APPROVED mappingStatus with valid domain combination |         |
-| SUCCESS | APPROVED mappingStatus with valid domain combination     |         |
-| SUCCESS | Missing date columns                                     |         |
-| SUCCESS | SourceValidStartDate is after SourceValidEndDate         |         |
-| SUCCESS | Missing parent columns                                   |         |
-| SUCCESS | Invalid parent concept code                              |         |
+| type | step | message |
+|:---|:---|:---|
+| SUCCESS | Missing default columns |  |
+| SUCCESS | SourceCode is empty |  |
+| SUCCESS | SourceCode and conceptId are not unique |  |
+| SUCCESS | SourceCode is more than 50 characters |  |
+| SUCCESS | SourceName is empty |  |
+| SUCCESS | SourceName is more than 255 characters |  |
+| SUCCESS | SourceFrequency is not empty |  |
+| SUCCESS | MappingStatus is empty |  |
+| SUCCESS | MappingStatus is not valid |  |
+| SUCCESS | APPROVED mappingStatus conceptId is 0 |  |
+| SUCCESS | APPROVED mappingStatus with concepts outdated |  |
+| SUCCESS | Not APPROVED mappingStatus with concepts outdated |  |
+| SUCCESS | Missing C&CR columns |  |
+| SUCCESS | SourceConceptId is empty |  |
+| SUCCESS | SourceConceptId is not a number on the range |  |
+| SUCCESS | SourceConceptClass is empty |  |
+| SUCCESS | SourceConceptClass is more than 20 characters |  |
+| SUCCESS | SourceDomain is empty |  |
+| SUCCESS | SourceDomain is not a valid domain |  |
+| SUCCESS | SourceConceptId is not unique |  |
+| SUCCESS | Not APPROVED mappingStatus with valid domain combination |  |
+| SUCCESS | APPROVED mappingStatus with valid domain combination |  |
+| SUCCESS | SourceNameFi is more than 1000 characters |  |
+| SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
+| SUCCESS | SourceNameFi is empty |  |
+| SUCCESS | Missing date columns |  |
+| SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
+| SUCCESS | Missing parent columns |  |
+| SUCCESS | Invalid parent concept code |  |
 
 In this case the Usagi file is valid and no errors are found. Hence, the
 new validated Usagi file remains unchanged.
@@ -153,12 +175,14 @@ case we use an other Usagi file with all type of errors, wich is
 included in the package for unit testing purposes.
 
 ``` r
+
 pathToUsagiFileWithErrors <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_with_errors.usagi.csv", package = "ROMOPMappingTools")
 
 usagiTibbleWithErrors <- readUsagiFile(pathToUsagiFileWithErrors)
 ```
 
 ``` r
+
 validationsSummaryWithErrors <- validateUsagiFile(
   pathToUsagiFileWithErrors,
   connection,
@@ -169,37 +193,41 @@ validationsSummaryWithErrors <- validateUsagiFile(
 ```
 
 ``` r
+
 knitr::kable(validationsSummaryWithErrors)
 ```
 
-| type    | step                                                     | message                                                                                                                                                      |
-|:--------|:---------------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| SUCCESS | Missing default columns                                  |                                                                                                                                                              |
-| ERROR   | SourceCode is empty                                      | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceCode and conceptId are not unique                  | Number of failed rules: 2                                                                                                                                    |
-| ERROR   | SourceCode is more than 50 characters                    | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceName is empty                                      | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceName is more than 255 characters                   | Number of failed rules: 1                                                                                                                                    |
-| SUCCESS | SourceFrequency is not empty                             |                                                                                                                                                              |
-| SUCCESS | MappingStatus is empty                                   |                                                                                                                                                              |
-| SUCCESS | MappingStatus is not valid                               |                                                                                                                                                              |
-| ERROR   | APPROVED mappingStatus conceptId is 0                    | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | APPROVED mappingStatus with concepts outdated            | 3 conceptIds do not exist on the target vocabularies, 3 conceptNames are outdated, 3 domainIds are outdated, 8 standardConcepts have changed to non-standard |
-| WARNING | Not APPROVED mappingStatus with concepts outdated        | 3 conceptIds do not exist on the target vocabularies, 1 conceptNames are outdated, 3 domainIds are outdated, 5 standardConcepts have changed to non-standard |
-| SUCCESS | Missing C&CR columns                                     |                                                                                                                                                              |
-| ERROR   | SourceConceptId is empty                                 | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceConceptId is not a number on the range             | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceConceptClass is empty                              | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceConceptClass is more than 20 characters            | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceDomain is empty                                    | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceDomain is not a valid domain                       | Number of failed rules: 1                                                                                                                                    |
-| ERROR   | SourceConceptId is not unique                            | Found 2 sourceConceptIds assigned to more than one sourceCode                                                                                                |
-| WARNING | Not APPROVED mappingStatus with valid domain combination | Found 1 codes with invalid domain combinations                                                                                                               |
-| ERROR   | APPROVED mappingStatus with valid domain combination     | Found 1 codes with invalid domain combinations                                                                                                               |
-| SUCCESS | Missing date columns                                     |                                                                                                                                                              |
-| ERROR   | SourceValidStartDate is after SourceValidEndDate         | Number of failed rules: 1                                                                                                                                    |
-| SUCCESS | Missing parent columns                                   |                                                                                                                                                              |
-| ERROR   | Invalid parent concept code                              | Found 3 codes with invalid parent concept codes                                                                                                              |
+| type | step | message |
+|:---|:---|:---|
+| SUCCESS | Missing default columns |  |
+| ERROR | SourceCode is empty | Number of failed rules: 1 |
+| ERROR | SourceCode and conceptId are not unique | Number of failed rules: 2 |
+| ERROR | SourceCode is more than 50 characters | Number of failed rules: 1 |
+| ERROR | SourceName is empty | Number of failed rules: 1 |
+| ERROR | SourceName is more than 255 characters | Number of failed rules: 1 |
+| SUCCESS | SourceFrequency is not empty |  |
+| SUCCESS | MappingStatus is empty |  |
+| SUCCESS | MappingStatus is not valid |  |
+| ERROR | APPROVED mappingStatus conceptId is 0 | Number of failed rules: 1 |
+| ERROR | APPROVED mappingStatus with concepts outdated | 3 conceptIds do not exist on the target vocabularies, 3 conceptNames are outdated, 3 domainIds are outdated, 8 standardConcepts have changed to non-standard |
+| WARNING | Not APPROVED mappingStatus with concepts outdated | 3 conceptIds do not exist on the target vocabularies, 1 conceptNames are outdated, 3 domainIds are outdated, 5 standardConcepts have changed to non-standard |
+| SUCCESS | Missing C&CR columns |  |
+| ERROR | SourceConceptId is empty | Number of failed rules: 1 |
+| ERROR | SourceConceptId is not a number on the range | Number of failed rules: 1 |
+| ERROR | SourceConceptClass is empty | Number of failed rules: 1 |
+| ERROR | SourceConceptClass is more than 20 characters | Number of failed rules: 1 |
+| ERROR | SourceDomain is empty | Number of failed rules: 1 |
+| ERROR | SourceDomain is not a valid domain | Number of failed rules: 1 |
+| ERROR | SourceConceptId is not unique | Found 2 sourceConceptIds assigned to more than one sourceCode |
+| WARNING | Not APPROVED mappingStatus with valid domain combination | Found 1 codes with invalid domain combinations |
+| ERROR | APPROVED mappingStatus with valid domain combination | Found 1 codes with invalid domain combinations |
+| SUCCESS | SourceNameFi is more than 1000 characters |  |
+| ERROR | SourceNameFi is not the same for all rows of the sourceConceptId | Found 1 sourceConceptIds with different sourceName_fi |
+| SUCCESS | SourceNameFi is empty |  |
+| SUCCESS | Missing date columns |  |
+| ERROR | SourceValidStartDate is after SourceValidEndDate | Number of failed rules: 1 |
+| SUCCESS | Missing parent columns |  |
+| ERROR | Invalid parent concept code | Found 3 codes with invalid parent concept codes |
 
 In this case, if we open the new validate Usagi with the Usagi software
 these mapping with errors will appear as FLAGGED. Additionally, the
@@ -220,6 +248,7 @@ In this case we will use an other Usagi file with outdated concept ids,
 which is included in the package for unit testing purposes.
 
 ``` r
+
 pathToOutdatedUsagiFile <- system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi_outdated.usagi.csv", package = "ROMOPMappingTools")
 
 validationsSummaryWithErrors <- validateUsagiFile(
@@ -233,34 +262,37 @@ validationsSummaryWithErrors <- validateUsagiFile(
 knitr::kable(validationsSummaryWithErrors)
 ```
 
-| type    | step                                                     | message                                                                                                    |
-|:--------|:---------------------------------------------------------|:-----------------------------------------------------------------------------------------------------------|
-| SUCCESS | Missing default columns                                  |                                                                                                            |
-| SUCCESS | SourceCode is empty                                      |                                                                                                            |
-| SUCCESS | SourceCode and conceptId are not unique                  |                                                                                                            |
-| SUCCESS | SourceCode is more than 50 characters                    |                                                                                                            |
-| SUCCESS | SourceName is empty                                      |                                                                                                            |
-| SUCCESS | SourceName is more than 255 characters                   |                                                                                                            |
-| SUCCESS | SourceFrequency is not empty                             |                                                                                                            |
-| SUCCESS | MappingStatus is empty                                   |                                                                                                            |
-| SUCCESS | MappingStatus is not valid                               |                                                                                                            |
-| SUCCESS | APPROVED mappingStatus conceptId is 0                    |                                                                                                            |
-| ERROR   | APPROVED mappingStatus with concepts outdated            | 122 conceptNames are outdated, 92 domainIds are outdated, 24 standardConcepts have changed to non-standard |
-| SUCCESS | Not APPROVED mappingStatus with concepts outdated        |                                                                                                            |
-| SUCCESS | Missing C&CR columns                                     |                                                                                                            |
-| SUCCESS | SourceConceptId is empty                                 |                                                                                                            |
-| SUCCESS | SourceConceptId is not a number on the range             |                                                                                                            |
-| SUCCESS | SourceConceptClass is empty                              |                                                                                                            |
-| SUCCESS | SourceConceptClass is more than 20 characters            |                                                                                                            |
-| SUCCESS | SourceDomain is empty                                    |                                                                                                            |
-| SUCCESS | SourceDomain is not a valid domain                       |                                                                                                            |
-| SUCCESS | SourceConceptId is not unique                            |                                                                                                            |
-| SUCCESS | Not APPROVED mappingStatus with valid domain combination |                                                                                                            |
-| SUCCESS | APPROVED mappingStatus with valid domain combination     |                                                                                                            |
-| SUCCESS | Missing date columns                                     |                                                                                                            |
-| SUCCESS | SourceValidStartDate is after SourceValidEndDate         |                                                                                                            |
-| SUCCESS | Missing parent columns                                   |                                                                                                            |
-| SUCCESS | Invalid parent concept code                              |                                                                                                            |
+| type | step | message |
+|:---|:---|:---|
+| SUCCESS | Missing default columns |  |
+| SUCCESS | SourceCode is empty |  |
+| SUCCESS | SourceCode and conceptId are not unique |  |
+| SUCCESS | SourceCode is more than 50 characters |  |
+| SUCCESS | SourceName is empty |  |
+| SUCCESS | SourceName is more than 255 characters |  |
+| SUCCESS | SourceFrequency is not empty |  |
+| SUCCESS | MappingStatus is empty |  |
+| SUCCESS | MappingStatus is not valid |  |
+| SUCCESS | APPROVED mappingStatus conceptId is 0 |  |
+| ERROR | APPROVED mappingStatus with concepts outdated | 122 conceptNames are outdated, 92 domainIds are outdated, 24 standardConcepts have changed to non-standard |
+| SUCCESS | Not APPROVED mappingStatus with concepts outdated |  |
+| SUCCESS | Missing C&CR columns |  |
+| SUCCESS | SourceConceptId is empty |  |
+| SUCCESS | SourceConceptId is not a number on the range |  |
+| SUCCESS | SourceConceptClass is empty |  |
+| SUCCESS | SourceConceptClass is more than 20 characters |  |
+| SUCCESS | SourceDomain is empty |  |
+| SUCCESS | SourceDomain is not a valid domain |  |
+| SUCCESS | SourceConceptId is not unique |  |
+| SUCCESS | Not APPROVED mappingStatus with valid domain combination |  |
+| SUCCESS | APPROVED mappingStatus with valid domain combination |  |
+| SUCCESS | SourceNameFi is more than 1000 characters |  |
+| SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
+| SUCCESS | SourceNameFi is empty |  |
+| SUCCESS | Missing date columns |  |
+| SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
+| SUCCESS | Missing parent columns |  |
+| SUCCESS | Invalid parent concept code |  |
 
 If outdated error are detected, we can attempt to update the Usagi file
 automatically using the `updateUsagiFile` function. This function takes
@@ -269,6 +301,7 @@ schema with the vocabulary tables and a path to a file where to store
 the updated Usagi file.
 
 ``` r
+
 pathToUpdatedUsagiFile <- tempfile(fileext = "usagi_updated.csv")
 
 updateSummary <- updateUsagiFile(
@@ -278,19 +311,16 @@ updateSummary <- updateUsagiFile(
     pathToUpdatedUsagiFile,
     skipValidation = TRUE
   )
-#> Note: method with signature 'DBIConnection#SQL' chosen for function 'dbQuoteIdentifier',
-#>  target signature 'DatabaseConnectorDbiConnection#SQL'.
-#>  "DatabaseConnectorConnection#character" would also be valid
 
 knitr::kable(updateSummary)
 ```
 
-| type    | step                  | message                                                            |
-|:--------|:----------------------|:-------------------------------------------------------------------|
-| INFO    | Updated conceptIds    | Updated 20 conceptIds that don’t need review                       |
-| WARNING | Updated conceptIds    | 29 conceptIds could not be updated automatically, remapping needed |
-| INFO    | Updated domains       | Updated 38 domains                                                 |
-| INFO    | Updated concept names | Updated 100 concept names                                          |
+| type | step | message |
+|:---|:---|:---|
+| INFO | Updated conceptIds | Updated 20 conceptIds that don’t need review |
+| WARNING | Updated conceptIds | 29 conceptIds could not be updated automatically, remapping needed |
+| INFO | Updated domains | Updated 38 domains |
+| INFO | Updated concept names | Updated 100 concept names |
 
 This fuction updates changes in `domain_id`, `concept_name` and if the
 mapped `concept_id` point to a non-standard concept it will try to find
@@ -307,6 +337,7 @@ The new updates Usagi file can be validated again with the
 `validateUsagiFile` function to check if there are any errors.
 
 ``` r
+
 validationsSummaryWithErrors <- validateUsagiFile(
   pathToUpdatedUsagiFile,
   connection,
@@ -318,34 +349,37 @@ validationsSummaryWithErrors <- validateUsagiFile(
 knitr::kable(validationsSummaryWithErrors)
 ```
 
-| type    | step                                                     | message                                        |
-|:--------|:---------------------------------------------------------|:-----------------------------------------------|
-| SUCCESS | Missing default columns                                  |                                                |
-| SUCCESS | SourceCode is empty                                      |                                                |
-| SUCCESS | SourceCode and conceptId are not unique                  |                                                |
-| SUCCESS | SourceCode is more than 50 characters                    |                                                |
-| SUCCESS | SourceName is empty                                      |                                                |
-| SUCCESS | SourceName is more than 255 characters                   |                                                |
-| SUCCESS | SourceFrequency is not empty                             |                                                |
-| SUCCESS | MappingStatus is empty                                   |                                                |
-| SUCCESS | MappingStatus is not valid                               |                                                |
-| SUCCESS | APPROVED mappingStatus conceptId is 0                    |                                                |
-| SUCCESS | APPROVED mappingStatus with concepts outdated            |                                                |
-| SUCCESS | Not APPROVED mappingStatus with concepts outdated        |                                                |
-| SUCCESS | Missing C&CR columns                                     |                                                |
-| SUCCESS | SourceConceptId is empty                                 |                                                |
-| SUCCESS | SourceConceptId is not a number on the range             |                                                |
-| SUCCESS | SourceConceptClass is empty                              |                                                |
-| SUCCESS | SourceConceptClass is more than 20 characters            |                                                |
-| SUCCESS | SourceDomain is empty                                    |                                                |
-| SUCCESS | SourceDomain is not a valid domain                       |                                                |
-| SUCCESS | SourceConceptId is not unique                            |                                                |
-| SUCCESS | Not APPROVED mappingStatus with valid domain combination |                                                |
-| ERROR   | APPROVED mappingStatus with valid domain combination     | Found 6 codes with invalid domain combinations |
-| SUCCESS | Missing date columns                                     |                                                |
-| SUCCESS | SourceValidStartDate is after SourceValidEndDate         |                                                |
-| SUCCESS | Missing parent columns                                   |                                                |
-| SUCCESS | Invalid parent concept code                              |                                                |
+| type | step | message |
+|:---|:---|:---|
+| SUCCESS | Missing default columns |  |
+| SUCCESS | SourceCode is empty |  |
+| SUCCESS | SourceCode and conceptId are not unique |  |
+| SUCCESS | SourceCode is more than 50 characters |  |
+| SUCCESS | SourceName is empty |  |
+| SUCCESS | SourceName is more than 255 characters |  |
+| SUCCESS | SourceFrequency is not empty |  |
+| SUCCESS | MappingStatus is empty |  |
+| SUCCESS | MappingStatus is not valid |  |
+| SUCCESS | APPROVED mappingStatus conceptId is 0 |  |
+| SUCCESS | APPROVED mappingStatus with concepts outdated |  |
+| SUCCESS | Not APPROVED mappingStatus with concepts outdated |  |
+| SUCCESS | Missing C&CR columns |  |
+| SUCCESS | SourceConceptId is empty |  |
+| SUCCESS | SourceConceptId is not a number on the range |  |
+| SUCCESS | SourceConceptClass is empty |  |
+| SUCCESS | SourceConceptClass is more than 20 characters |  |
+| SUCCESS | SourceDomain is empty |  |
+| SUCCESS | SourceDomain is not a valid domain |  |
+| SUCCESS | SourceConceptId is not unique |  |
+| SUCCESS | Not APPROVED mappingStatus with valid domain combination |  |
+| ERROR | APPROVED mappingStatus with valid domain combination | Found 6 codes with invalid domain combinations |
+| SUCCESS | SourceNameFi is more than 1000 characters |  |
+| SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
+| SUCCESS | SourceNameFi is empty |  |
+| SUCCESS | Missing date columns |  |
+| SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
+| SUCCESS | Missing parent columns |  |
+| SUCCESS | Invalid parent concept code |  |
 
 Unfortunatelly, sometimes the updateUsagiFile is introducing new errors,
 in this case updates in the vocabulary have introduced invalid domain

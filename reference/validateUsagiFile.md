@@ -22,7 +22,15 @@ checks: Default Usagi columns:
 - Check if sourceValidStartDate is before sourceValidEndDate
 
 - Check if ADD_INFO:sourceParents is a valid concept code in the
-  ADD_INFO:sourceParentVocabulary
+  ADD_INFO:sourceParentVocabulary If usagi file has the
+  ADD_INFO:sourceName_fi column:
+
+- Check if sourceName_fi is less than 1000 characters
+
+- Check if sourceName_fi is the same for all the rows of a
+  sourceConceptId
+
+- Warn if sourceName_fi is empty for APPROVED or UNCHECKED mappingStatus
 
 ## Usage
 

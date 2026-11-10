@@ -1,6 +1,7 @@
 # Step by step example using individual functions
 
 ``` r
+
 library(ROMOPMappingTools)
 ```
 
@@ -58,6 +59,7 @@ in the package. Create a new database by making a copy of the
 `inst/testdata/OMOPVocabulary.duckdb` file.
 
 ``` r
+
 pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
 
 connectionDetails <- DatabaseConnector::createConnectionDetails(
@@ -67,10 +69,20 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
 
 connection <- DatabaseConnector::connect(connectionDetails)
 #> Connecting using DuckDB driver
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmplIrApQ/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 #> Warning in connectDuckdb(connectionDetails): The ICU extension of DuckDB is not
 #> installed. Attempting to install it.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.435 secs
+#> Executing SQL took 0.365 secs
+#>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.0369 secs
 vocabularyDatabaseSchema <- "main"
 ```
 
@@ -87,6 +99,7 @@ files](https://finomop.github.io/ROMOPMappingTools/articles/workWithOneMappingFi
 vignette.
 
 ``` r
+
 pathToVocabularyFolder <- system.file("testdata/VOCABULARIES", package = "ROMOPMappingTools")
 pathToValidatedUsagiFolder <- tempdir()
 
@@ -104,69 +117,76 @@ The function will return a tibble with the validations on the
 `vocabularies.csv` file and all the Usagi files.
 
 ``` r
+
 knitr::kable(validationsLogTibble)
 ```
 
-| context        | type    | step                                                     | message |
-|:---------------|:--------|:---------------------------------------------------------|:--------|
-| vocabulary.csv | SUCCESS | source_vocabulary_id is not empty                        |         |
-| vocabulary.csv | SUCCESS | source_vocabulary_id is less than 20 characters          |         |
-| vocabulary.csv | SUCCESS | source_vocabulary_name is not empty                      |         |
-| vocabulary.csv | SUCCESS | source_vocabulary_name is less than 255 characters       |         |
-| vocabulary.csv | SUCCESS | source_concept_id_offset is a number over 2 billion      |         |
-| vocabulary.csv | SUCCESS | source_concept_id_offset is unique                       |         |
-| ICD10fi        | SUCCESS | Missing default columns                                  |         |
-| ICD10fi        | SUCCESS | SourceCode is empty                                      |         |
-| ICD10fi        | SUCCESS | SourceCode and conceptId are not unique                  |         |
-| ICD10fi        | SUCCESS | SourceCode is more than 50 characters                    |         |
-| ICD10fi        | SUCCESS | SourceName is empty                                      |         |
-| ICD10fi        | SUCCESS | SourceName is more than 255 characters                   |         |
-| ICD10fi        | SUCCESS | SourceFrequency is not empty                             |         |
-| ICD10fi        | SUCCESS | MappingStatus is empty                                   |         |
-| ICD10fi        | SUCCESS | MappingStatus is not valid                               |         |
-| ICD10fi        | SUCCESS | APPROVED mappingStatus conceptId is 0                    |         |
-| ICD10fi        | SUCCESS | APPROVED mappingStatus with concepts outdated            |         |
-| ICD10fi        | SUCCESS | Not APPROVED mappingStatus with concepts outdated        |         |
-| ICD10fi        | SUCCESS | Missing C&CR columns                                     |         |
-| ICD10fi        | SUCCESS | SourceConceptId is empty                                 |         |
-| ICD10fi        | SUCCESS | SourceConceptId is not a number on the range             |         |
-| ICD10fi        | SUCCESS | SourceConceptClass is empty                              |         |
-| ICD10fi        | SUCCESS | SourceConceptClass is more than 20 characters            |         |
-| ICD10fi        | SUCCESS | SourceDomain is empty                                    |         |
-| ICD10fi        | SUCCESS | SourceDomain is not a valid domain                       |         |
-| ICD10fi        | SUCCESS | SourceConceptId is not unique                            |         |
-| ICD10fi        | SUCCESS | Not APPROVED mappingStatus with valid domain combination |         |
-| ICD10fi        | SUCCESS | APPROVED mappingStatus with valid domain combination     |         |
-| ICD10fi        | SUCCESS | Missing date columns                                     |         |
-| ICD10fi        | SUCCESS | SourceValidStartDate is after SourceValidEndDate         |         |
-| ICD10fi        | SUCCESS | Missing parent columns                                   |         |
-| ICD10fi        | SUCCESS | Invalid parent concept code                              |         |
-| UNITfi         | SUCCESS | Missing default columns                                  |         |
-| UNITfi         | SUCCESS | SourceCode is empty                                      |         |
-| UNITfi         | SUCCESS | SourceCode and conceptId are not unique                  |         |
-| UNITfi         | SUCCESS | SourceCode is more than 50 characters                    |         |
-| UNITfi         | SUCCESS | SourceName is empty                                      |         |
-| UNITfi         | SUCCESS | SourceName is more than 255 characters                   |         |
-| UNITfi         | SUCCESS | SourceFrequency is not empty                             |         |
-| UNITfi         | SUCCESS | MappingStatus is empty                                   |         |
-| UNITfi         | SUCCESS | MappingStatus is not valid                               |         |
-| UNITfi         | SUCCESS | APPROVED mappingStatus conceptId is 0                    |         |
-| UNITfi         | SUCCESS | APPROVED mappingStatus with concepts outdated            |         |
-| UNITfi         | SUCCESS | Not APPROVED mappingStatus with concepts outdated        |         |
-| UNITfi         | SUCCESS | Missing C&CR columns                                     |         |
-| UNITfi         | SUCCESS | SourceConceptId is empty                                 |         |
-| UNITfi         | SUCCESS | SourceConceptId is not a number on the range             |         |
-| UNITfi         | SUCCESS | SourceConceptClass is empty                              |         |
-| UNITfi         | SUCCESS | SourceConceptClass is more than 20 characters            |         |
-| UNITfi         | SUCCESS | SourceDomain is empty                                    |         |
-| UNITfi         | SUCCESS | SourceDomain is not a valid domain                       |         |
-| UNITfi         | SUCCESS | SourceConceptId is not unique                            |         |
-| UNITfi         | SUCCESS | Not APPROVED mappingStatus with valid domain combination |         |
-| UNITfi         | SUCCESS | APPROVED mappingStatus with valid domain combination     |         |
-| UNITfi         | SUCCESS | Missing date columns                                     |         |
-| UNITfi         | SUCCESS | SourceValidStartDate is after SourceValidEndDate         |         |
-| UNITfi         | SUCCESS | Missing parent columns                                   |         |
-| UNITfi         | SUCCESS | Invalid parent concept code                              |         |
+| context | type | step | message |
+|:---|:---|:---|:---|
+| vocabulary.csv | SUCCESS | source_vocabulary_id is not empty |  |
+| vocabulary.csv | SUCCESS | source_vocabulary_id is less than 20 characters |  |
+| vocabulary.csv | SUCCESS | source_vocabulary_name is not empty |  |
+| vocabulary.csv | SUCCESS | source_vocabulary_name is less than 255 characters |  |
+| vocabulary.csv | SUCCESS | source_concept_id_offset is a number over 2 billion |  |
+| vocabulary.csv | SUCCESS | source_concept_id_offset is unique |  |
+| ICD10fi | SUCCESS | Missing default columns |  |
+| ICD10fi | SUCCESS | SourceCode is empty |  |
+| ICD10fi | SUCCESS | SourceCode and conceptId are not unique |  |
+| ICD10fi | SUCCESS | SourceCode is more than 50 characters |  |
+| ICD10fi | SUCCESS | SourceName is empty |  |
+| ICD10fi | SUCCESS | SourceName is more than 255 characters |  |
+| ICD10fi | SUCCESS | SourceFrequency is not empty |  |
+| ICD10fi | SUCCESS | MappingStatus is empty |  |
+| ICD10fi | SUCCESS | MappingStatus is not valid |  |
+| ICD10fi | SUCCESS | APPROVED mappingStatus conceptId is 0 |  |
+| ICD10fi | SUCCESS | APPROVED mappingStatus with concepts outdated |  |
+| ICD10fi | SUCCESS | Not APPROVED mappingStatus with concepts outdated |  |
+| ICD10fi | SUCCESS | Missing C&CR columns |  |
+| ICD10fi | SUCCESS | SourceConceptId is empty |  |
+| ICD10fi | SUCCESS | SourceConceptId is not a number on the range |  |
+| ICD10fi | SUCCESS | SourceConceptClass is empty |  |
+| ICD10fi | SUCCESS | SourceConceptClass is more than 20 characters |  |
+| ICD10fi | SUCCESS | SourceDomain is empty |  |
+| ICD10fi | SUCCESS | SourceDomain is not a valid domain |  |
+| ICD10fi | SUCCESS | SourceConceptId is not unique |  |
+| ICD10fi | SUCCESS | Not APPROVED mappingStatus with valid domain combination |  |
+| ICD10fi | SUCCESS | APPROVED mappingStatus with valid domain combination |  |
+| ICD10fi | SUCCESS | SourceNameFi is more than 1000 characters |  |
+| ICD10fi | SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
+| ICD10fi | SUCCESS | SourceNameFi is empty |  |
+| ICD10fi | SUCCESS | Missing date columns |  |
+| ICD10fi | SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
+| ICD10fi | SUCCESS | Missing parent columns |  |
+| ICD10fi | SUCCESS | Invalid parent concept code |  |
+| UNITfi | SUCCESS | Missing default columns |  |
+| UNITfi | SUCCESS | SourceCode is empty |  |
+| UNITfi | SUCCESS | SourceCode and conceptId are not unique |  |
+| UNITfi | SUCCESS | SourceCode is more than 50 characters |  |
+| UNITfi | SUCCESS | SourceName is empty |  |
+| UNITfi | SUCCESS | SourceName is more than 255 characters |  |
+| UNITfi | SUCCESS | SourceFrequency is not empty |  |
+| UNITfi | SUCCESS | MappingStatus is empty |  |
+| UNITfi | SUCCESS | MappingStatus is not valid |  |
+| UNITfi | SUCCESS | APPROVED mappingStatus conceptId is 0 |  |
+| UNITfi | SUCCESS | APPROVED mappingStatus with concepts outdated |  |
+| UNITfi | SUCCESS | Not APPROVED mappingStatus with concepts outdated |  |
+| UNITfi | SUCCESS | Missing C&CR columns |  |
+| UNITfi | SUCCESS | SourceConceptId is empty |  |
+| UNITfi | SUCCESS | SourceConceptId is not a number on the range |  |
+| UNITfi | SUCCESS | SourceConceptClass is empty |  |
+| UNITfi | SUCCESS | SourceConceptClass is more than 20 characters |  |
+| UNITfi | SUCCESS | SourceDomain is empty |  |
+| UNITfi | SUCCESS | SourceDomain is not a valid domain |  |
+| UNITfi | SUCCESS | SourceConceptId is not unique |  |
+| UNITfi | SUCCESS | Not APPROVED mappingStatus with valid domain combination |  |
+| UNITfi | SUCCESS | APPROVED mappingStatus with valid domain combination |  |
+| UNITfi | SUCCESS | SourceNameFi is more than 1000 characters |  |
+| UNITfi | SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
+| UNITfi | WARNING | SourceNameFi is empty | Found 177 APPROVED or UNCHECKED rows with empty sourceName_fi |
+| UNITfi | SUCCESS | Missing date columns |  |
+| UNITfi | SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
+| UNITfi | SUCCESS | Missing parent columns |  |
+| UNITfi | SUCCESS | Invalid parent concept code |  |
 
 ### Upload all the Usagi files to the STCM table
 
@@ -183,10 +203,11 @@ format](https://finomop.github.io/ROMOPMappingTools/articles/filesFormat.md)
 vignette for more details.
 
 ``` r
+
 sourceToConceptMapTable <- "source_to_concept_map_extended"
 createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00933 secs
+#> Executing SQL took 0.00672 secs
 ```
 
 `vocabularyFolderToSTCMVocabularyConcepClassTables` needs the path to
@@ -194,6 +215,7 @@ the vocabulary folder, a connection to the database, the schema with the
 vocabulary tables and the name of the SourceToConceptMap table.
 
 ``` r
+
 vocabularyFolderToSTCMVocabularyConcepClassTables(
   pathToVocabularyFolder,
   connection,
@@ -202,32 +224,32 @@ vocabularyFolderToSTCMVocabularyConcepClassTables(
 )
 #> Appending vocabularies.csv to VOCABULARY table
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00635 secs
-#> Inserting data took 0.0122 secs
+#> Executing SQL took 0.00591 secs
+#> Inserting data took 0.0151 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00488 secs
-#> Inserting data took 0.0322 secs
+#> Executing SQL took 0.00468 secs
+#> Inserting data took 0.0328 secs
 #> Appending info from Usagi files to Concept Class table
 #> 
 #> Collecting concept classes from Usagi file ./ICD10fi/ICD10fi.usagi.csv
 #> 
 #> Collecting concept classes from Usagi file ./UNITfi/UNITfi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00432 secs
-#> Inserting data took 0.00953 secs
+#> Executing SQL took 0.00427 secs
+#> Inserting data took 0.0117 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0049 secs
-#> Inserting data took 0.0156 secs
+#> Executing SQL took 0.00598 secs
+#> Inserting data took 0.0185 secs
 #> Appending Usagi files to STCM table
 #> 
 #> Appending Usagi file ./ICD10fi/ICD10fi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00406 secs
-#> Inserting data took 0.014 secs
+#> Executing SQL took 0.00554 secs
+#> Inserting data took 0.0295 secs
 #> Appending Usagi file ./UNITfi/UNITfi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00379 secs
-#> Inserting data took 0.0107 secs
+#> Executing SQL took 0.00591 secs
+#> Inserting data took 0.0296 secs
 ```
 
 This function will populate the VOCABULARY table with the
@@ -235,6 +257,7 @@ This function will populate the VOCABULARY table with the
 with the Usagi-extended files.
 
 ``` r
+
 dplyr::tbl(connection, "VOCABULARY") |>
   dplyr::collect()
 #> # A tibble: 15 × 5
@@ -262,9 +285,10 @@ We can see on the botton that the ICD10fi and UNITfi vocabularies have
 been added to the VOCABULARY table.
 
 ``` r
+
 dplyr::tbl(connection, "source_to_concept_map_extended") |>
   dplyr::collect()
-#> # A tibble: 4,122 × 12
+#> # A tibble: 4,122 × 13
 #>    source_code source_concept_id source_vocabulary_id source_code_description   
 #>    <chr>                   <int> <chr>                <chr>                     
 #>  1 A01.0+G01          2000500101 ICD10fi              Meningitis (in) typhoid f…
@@ -278,10 +302,10 @@ dplyr::tbl(connection, "source_to_concept_map_extended") |>
 #>  9 A02.2+M01.3        2000500108 ICD10fi              Salmonella arthritis      
 #> 10 A02.2+M90.2        2000500109 ICD10fi              Salmonella osteomyelitis  
 #> # ℹ 4,112 more rows
-#> # ℹ 8 more variables: target_concept_id <int>, target_vocabulary_id <chr>,
+#> # ℹ 9 more variables: target_concept_id <int>, target_vocabulary_id <chr>,
 #> #   valid_start_date <date>, valid_end_date <date>, invalid_reason <chr>,
 #> #   source_concept_class <chr>, source_domain <chr>,
-#> #   source_parents_concept_ids <chr>
+#> #   source_parents_concept_ids <chr>, source_code_description_fi <chr>
 ```
 
 We can see the source_to_concept_map_extended table has been populated
@@ -300,20 +324,19 @@ package. This SQL code can be translated to any other database supported
 by DatabaseConnector, and be applied directly.
 
 ``` r
+
 STCMToCDMTables(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
-#>   |                                                                              |                                                                      |   0%  |                                                                              |============                                                          |  17%  |                                                                              |=======================                                               |  33%  |                                                                              |===================================                                   |  50%  |                                                                              |===============================================                       |  67%  |                                                                              |==========================================================            |  83%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0602 secs
+#>   |                                                                              |                                                                      |   0%  |                                                                              |=========                                                             |  12%  |                                                                              |==================                                                    |  25%  |                                                                              |==========================                                            |  38%  |                                                                              |===================================                                   |  50%  |                                                                              |============================================                          |  62%  |                                                                              |====================================================                  |  75%  |                                                                              |=============================================================         |  88%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.0668 secs
 ```
 
 This populates the CONCEPT table:
 
 ``` r
+
 dplyr::tbl(connection, "CONCEPT") |>
   dplyr::filter(vocabulary_id == "ICD10fi") |>
   dplyr::collect()
-#> Note: method with signature 'DBIConnection#SQL' chosen for function 'dbQuoteIdentifier',
-#>  target signature 'DatabaseConnectorDbiConnection#SQL'.
-#>  "DatabaseConnectorConnection#character" would also be valid
 #> # A tibble: 3,505 × 10
 #>    concept_id concept_name              domain_id vocabulary_id concept_class_id
 #>         <int> <chr>                     <chr>     <chr>         <chr>           
@@ -337,6 +360,7 @@ The CONCEPT_RELATIONSHIP table with
 - the ‘Maps to’ relationships:
 
 ``` r
+
 dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
   dplyr::filter(relationship_id == "Maps to") |>
   dplyr::filter(concept_id_1 > 2000500101) |>
@@ -344,16 +368,16 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 4,089 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1   2000500102      4111401 Maps to         1900-01-01       2099-12-31    
-#>  2   2000500105       437772 Maps to         1900-01-01       2099-12-31    
-#>  3   2000500106       133685 Maps to         1900-01-01       2099-12-31    
-#>  4   2000500109       134264 Maps to         1900-01-01       2099-12-31    
-#>  5   2000500110      4329572 Maps to         1900-01-01       2099-12-31    
-#>  6   2000500114      4173717 Maps to         1900-01-01       2099-12-31    
-#>  7   2000500118      4130374 Maps to         1900-01-01       2099-12-31    
-#>  8   2000500119      4174262 Maps to         1900-01-01       2099-12-31    
-#>  9   2000500120       376337 Maps to         1900-01-01       2099-12-31    
-#> 10   2000500121       441776 Maps to         1900-01-01       2099-12-31    
+#>  1   2000500104        80316 Maps to         1900-01-01       2099-12-31    
+#>  2   2000500111     44811663 Maps to         1900-01-01       2099-12-31    
+#>  3   2000500116       440937 Maps to         1900-01-01       2099-12-31    
+#>  4   2000500119       434557 Maps to         1900-01-01       2099-12-31    
+#>  5   2000500120       434557 Maps to         1900-01-01       2099-12-31    
+#>  6   2000500123        81496 Maps to         1900-01-01       2099-12-31    
+#>  7   2000500125        80626 Maps to         1900-01-01       2099-12-31    
+#>  8   2000500132      4056331 Maps to         1900-01-01       2099-12-31    
+#>  9   2000500142       201779 Maps to         1900-01-01       2099-12-31    
+#> 10   2000500144       141777 Maps to         1900-01-01       2099-12-31    
 #> # ℹ 4,079 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -361,6 +385,7 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 - the ‘Maps from’ relationships:
 
 ``` r
+
 dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
   dplyr::filter(relationship_id == "Mapped from") |>
   dplyr::filter(concept_id_2 > 2000500101) |>
@@ -368,16 +393,16 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 4,089 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1        80316   2000500104 Mapped from     1900-01-01       2099-12-31    
-#>  2       133685   2000500106 Mapped from     1900-01-01       2099-12-31    
-#>  3       134264   2000500109 Mapped from     1900-01-01       2099-12-31    
-#>  4      4173717   2000500114 Mapped from     1900-01-01       2099-12-31    
-#>  5       441775   2000500115 Mapped from     1900-01-01       2099-12-31    
-#>  6       434557   2000500119 Mapped from     1900-01-01       2099-12-31    
-#>  7       376337   2000500120 Mapped from     1900-01-01       2099-12-31    
-#>  8       441776   2000500121 Mapped from     1900-01-01       2099-12-31    
-#>  9      4121541   2000500124 Mapped from     1900-01-01       2099-12-31    
-#> 10        80626   2000500125 Mapped from     1900-01-01       2099-12-31    
+#>  1      4111401   2000500102 Mapped from     1900-01-01       2099-12-31    
+#>  2      4166072   2000500103 Mapped from     1900-01-01       2099-12-31    
+#>  3        80316   2000500108 Mapped from     1900-01-01       2099-12-31    
+#>  4      4329572   2000500110 Mapped from     1900-01-01       2099-12-31    
+#>  5       440937   2000500116 Mapped from     1900-01-01       2099-12-31    
+#>  6      4150516   2000500117 Mapped from     1900-01-01       2099-12-31    
+#>  7      4098475   2000500122 Mapped from     1900-01-01       2099-12-31    
+#>  8        81496   2000500123 Mapped from     1900-01-01       2099-12-31    
+#>  9     36713392   2000500133 Mapped from     1900-01-01       2099-12-31    
+#> 10       194268   2000500134 Mapped from     1900-01-01       2099-12-31    
 #> # ℹ 4,079 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -389,6 +414,7 @@ CONCEPT_RELATIONSHIP table with
 - the ‘Is a’ relationships:
 
 ``` r
+
 dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
   dplyr::filter(relationship_id == "Is a") |>
   dplyr::filter(concept_id_1 > 2000500101) |>
@@ -396,16 +422,16 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 5,353 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1   2000500263     45600423 Is a            1900-01-01       2099-12-31    
-#>  2   2000500264     45552189 Is a            1900-01-01       2099-12-31    
-#>  3   2000500265     45552189 Is a            1900-01-01       2099-12-31    
-#>  4   2000500277     45547422 Is a            1900-01-01       2099-12-31    
-#>  5   2000500279     45547422 Is a            1900-01-01       2099-12-31    
-#>  6   2000500281     45581128 Is a            1900-01-01       2099-12-31    
-#>  7   2000500283     45581128 Is a            1900-01-01       2099-12-31    
-#>  8   2000500288     45595594 Is a            1900-01-01       2099-12-31    
-#>  9   2000500294     45595594 Is a            1900-01-01       2099-12-31    
-#> 10   2000500296     45595594 Is a            1900-01-01       2099-12-31    
+#>  1   2000500266     45581124 Is a            1900-01-01       2099-12-31    
+#>  2   2000500272     45566516 Is a            1900-01-01       2099-12-31    
+#>  3   2000500274     45566516 Is a            1900-01-01       2099-12-31    
+#>  4   2000500276     45566516 Is a            1900-01-01       2099-12-31    
+#>  5   2000500280     45547423 Is a            1900-01-01       2099-12-31    
+#>  6   2000500295     45595594 Is a            1900-01-01       2099-12-31    
+#>  7   2000500297     45595594 Is a            1900-01-01       2099-12-31    
+#>  8   2000500299     45556916 Is a            1900-01-01       2099-12-31    
+#>  9   2000500300     45595595 Is a            1900-01-01       2099-12-31    
+#> 10   2000500305     45532853 Is a            1900-01-01       2099-12-31    
 #> # ℹ 5,343 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -413,6 +439,7 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 - the `Subsumes` relationships:
 
 ``` r
+
 dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
   dplyr::filter(relationship_id == "Subsumes") |>
   dplyr::filter(concept_id_1 > 2000500101) |>
@@ -420,16 +447,16 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 21 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1   2000503768   2000503725 Subsumes        1900-01-01       2099-12-31    
-#>  2   2000503725   2000503731 Subsumes        1997-10-06       2099-12-31    
-#>  3   2000503769   2000503741 Subsumes        1900-01-01       2099-12-31    
-#>  4   2000503769   2000503747 Subsumes        1900-01-01       2099-12-31    
-#>  5   2000503769   2000503750 Subsumes        1900-01-01       2099-12-31    
-#>  6   2000500469   2000500471 Subsumes        1900-01-01       2099-12-31    
-#>  7   2000503725   2000503729 Subsumes        2010-01-01       2099-12-31    
-#>  8   2000503769   2000503737 Subsumes        1900-01-01       2099-12-31    
-#>  9   2000503769   2000503748 Subsumes        1900-01-01       2099-12-31    
-#> 10   2000500469   2000500470 Subsumes        1900-01-01       2099-12-31    
+#>  1   2000500469   2000500470 Subsumes        1900-01-01       2099-12-31    
+#>  2   2000503725   2000503727 Subsumes        2010-01-01       2099-12-31    
+#>  3   2000503769   2000503738 Subsumes        1900-01-01       2099-12-31    
+#>  4   2000503769   2000503740 Subsumes        1900-01-01       2099-12-31    
+#>  5   2000503769   2000503744 Subsumes        1900-01-01       2099-12-31    
+#>  6   2000503769   2000503745 Subsumes        1900-01-01       2099-12-31    
+#>  7   2000503769   2000503746 Subsumes        1900-01-01       2099-12-31    
+#>  8   2000503769   2000503749 Subsumes        1900-01-01       2099-12-31    
+#>  9   2000500469   2000500471 Subsumes        1900-01-01       2099-12-31    
+#> 10   2000503725   2000503729 Subsumes        2010-01-01       2099-12-31    
 #> # ℹ 11 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -445,18 +472,20 @@ This can be applied to any non-standard vocabulary, not only the ones
 included in the `vocabularies.csv` file.
 
 ``` r
+
 conceptRelationshipToAncestorTables(
   connection,
   vocabularyDatabaseSchema,
   vocabularyList = c("ICD10", "ICD10fi", "UNITfi")
 )
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0573 secs
+#> Executing SQL took 0.0429 secs
 ```
 
 Close the connection to the database.
 
 ``` r
+
 DatabaseConnector::disconnect(connection)
 ```
 
@@ -468,12 +497,33 @@ errors. We include the function `validateCDMtablesWithDQD` in the
 package to facilitate this task.
 
 ``` r
+
 # Create connectionDetails from the existing connection
 validationResultsFolder <- tempdir()
 
 validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
 #> Connecting using DuckDB driver
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmplIrApQ/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.0405 secs
 #> Connecting using DuckDB driver
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmplIrApQ/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.0352 secs
 #> Currently in a tryCatch or withCallingHandlers block, so unable to add global calling handlers. ParallelLogger will not capture R messages, errors, and warnings, only explicit calls to ParallelLogger. (This message will not be shown again this R session)
 #> 
 #> 
@@ -500,6 +550,17 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> Warning in DataQualityDashboard::executeDqChecks(connectionDetails =
 #> connectionDetails, : DEPRECATION WARNING - The plausibleGender check has been
 #> reimplemented with the plausibleGenderUseDescendants check.
+#> Connecting using DuckDB driver
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmplIrApQ/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.00313 secs
 #> Processing check description: cdmTable
 #> Processing check description: measurePersonCompleteness
 #> Processing check description: measureConditionEraCompleteness
@@ -527,230 +588,245 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> Processing check description: plausibleGender
 #> Processing check description: plausibleGenderUseDescendants
 #> Processing check description: plausibleUnitConceptIds
-#> Writing results to file: /tmp/Rtmpf5jrXJ/tmp_vocab_table-20260323093718.json
+#> Writing results to file: /tmp/RtmplIrApQ/tmp_vocab_table-20261110193043.json
 #> Execution Complete
 #> Connecting using DuckDB driver
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmplIrApQ/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
+#>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
+#> Executing SQL took 0.00329 secs
 #> Writing results to table main.dqdashboard_results
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0058 secs
-#> Warning in value[[3L]](cond): Writing table failed: Invalid Error: Conversion Error: Could not convert string 'Table CONCEPT_SYNONYM is empty.' to INT32 when casting from source column not_applicable_reason
+#> Executing SQL took 0.00745 secs
+#> Warning in value[[3L]](cond): Writing table failed: Conversion Error: Could not convert string 'Table DRUG_STRENGTH is empty.' to INT32 when casting from source column not_applicable_reason
+#> 
+#> LINE 3: ..., "error", checkid, failed, passed, is_error, not_applicable, not_applicable_reason, threshold_value, notes_value FROM...
+#>                                                                          ^^^^^^^^^^^^^^^^^^^^^
 #> ℹ Context: rapi_execute
-#> ℹ Error type: INVALID
+#> ℹ Error type: CONVERSION
 ```
 
 ``` r
+
 knitr::kable(validationLogR6)
 ```
 
-| context | type    | step                                                                                                                                                                                                                                       | message                        |
-|:--------|:--------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:-------------------------------|
-| DQD     | SUCCESS | CONCEPT: A yes or no value indicating if CONCEPT table is present as expected based on the specification.                                                                                                                                  | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY: A yes or no value indicating if VOCABULARY table is present as expected based on the specification.                                                                                                                            | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN: A yes or no value indicating if DOMAIN table is present as expected based on the specification.                                                                                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS: A yes or no value indicating if CONCEPT_CLASS table is present as expected based on the specification.                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP: A yes or no value indicating if CONCEPT_RELATIONSHIP table is present as expected based on the specification.                                                                                                        | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP: A yes or no value indicating if RELATIONSHIP table is present as expected based on the specification.                                                                                                                        | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_SYNONYM: A yes or no value indicating if CONCEPT_SYNONYM table is present as expected based on the specification.                                                                                                                  | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR: A yes or no value indicating if CONCEPT_ANCESTOR table is present as expected based on the specification.                                                                                                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH: A yes or no value indicating if DRUG_STRENGTH table is present as expected based on the specification.                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: A yes or no value indicating if CONCEPT_CLASS_ID is present in the CONCEPT table as expected based on the specification.                                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_CODE: A yes or no value indicating if CONCEPT_CODE is present in the CONCEPT table as expected based on the specification.                                                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_ID: A yes or no value indicating if CONCEPT_ID is present in the CONCEPT table as expected based on the specification.                                                                                                     | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_NAME: A yes or no value indicating if CONCEPT_NAME is present in the CONCEPT table as expected based on the specification.                                                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.DOMAIN_ID: A yes or no value indicating if DOMAIN_ID is present in the CONCEPT table as expected based on the specification.                                                                                                       | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.INVALID_REASON: A yes or no value indicating if INVALID_REASON is present in the CONCEPT table as expected based on the specification.                                                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.STANDARD_CONCEPT: A yes or no value indicating if STANDARD_CONCEPT is present in the CONCEPT table as expected based on the specification.                                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VALID_END_DATE: A yes or no value indicating if VALID_END_DATE is present in the CONCEPT table as expected based on the specification.                                                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VALID_START_DATE: A yes or no value indicating if VALID_START_DATE is present in the CONCEPT table as expected based on the specification.                                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VOCABULARY_ID: A yes or no value indicating if VOCABULARY_ID is present in the CONCEPT table as expected based on the specification.                                                                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: A yes or no value indicating if ANCESTOR_CONCEPT_ID is present in the CONCEPT_ANCESTOR table as expected based on the specification.                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: A yes or no value indicating if DESCENDANT_CONCEPT_ID is present in the CONCEPT_ANCESTOR table as expected based on the specification.                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: A yes or no value indicating if MAX_LEVELS_OF_SEPARATION is present in the CONCEPT_ANCESTOR table as expected based on the specification.                                                       | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: A yes or no value indicating if MIN_LEVELS_OF_SEPARATION is present in the CONCEPT_ANCESTOR table as expected based on the specification.                                                       | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: A yes or no value indicating if CONCEPT_CLASS_CONCEPT_ID is present in the CONCEPT_CLASS table as expected based on the specification.                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: A yes or no value indicating if CONCEPT_CLASS_ID is present in the CONCEPT_CLASS table as expected based on the specification.                                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_NAME: A yes or no value indicating if CONCEPT_CLASS_NAME is present in the CONCEPT_CLASS table as expected based on the specification.                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: A yes or no value indicating if CONCEPT_ID_1 is present in the CONCEPT_RELATIONSHIP table as expected based on the specification.                                                                       | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: A yes or no value indicating if CONCEPT_ID_2 is present in the CONCEPT_RELATIONSHIP table as expected based on the specification.                                                                       | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.INVALID_REASON: A yes or no value indicating if INVALID_REASON is present in the CONCEPT_RELATIONSHIP table as expected based on the specification.                                                                   | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: A yes or no value indicating if RELATIONSHIP_ID is present in the CONCEPT_RELATIONSHIP table as expected based on the specification.                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: A yes or no value indicating if VALID_END_DATE is present in the CONCEPT_RELATIONSHIP table as expected based on the specification.                                                                   | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: A yes or no value indicating if VALID_START_DATE is present in the CONCEPT_RELATIONSHIP table as expected based on the specification.                                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_SYNONYM.CONCEPT_ID: A yes or no value indicating if CONCEPT_ID is present in the CONCEPT_SYNONYM table as expected based on the specification.                                                                                     | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: A yes or no value indicating if CONCEPT_SYNONYM_NAME is present in the CONCEPT_SYNONYM table as expected based on the specification.                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: A yes or no value indicating if LANGUAGE_CONCEPT_ID is present in the CONCEPT_SYNONYM table as expected based on the specification.                                                                   | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: A yes or no value indicating if DOMAIN_CONCEPT_ID is present in the DOMAIN table as expected based on the specification.                                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_ID: A yes or no value indicating if DOMAIN_ID is present in the DOMAIN table as expected based on the specification.                                                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_NAME: A yes or no value indicating if DOMAIN_NAME is present in the DOMAIN table as expected based on the specification.                                                                                                     | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: A yes or no value indicating if AMOUNT_UNIT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification.                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.AMOUNT_VALUE: A yes or no value indicating if AMOUNT_VALUE is present in the DRUG_STRENGTH table as expected based on the specification.                                                                                     | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.BOX_SIZE: A yes or no value indicating if BOX_SIZE is present in the DRUG_STRENGTH table as expected based on the specification.                                                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: A yes or no value indicating if DENOMINATOR_UNIT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification.                                                       | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.DENOMINATOR_VALUE: A yes or no value indicating if DENOMINATOR_VALUE is present in the DRUG_STRENGTH table as expected based on the specification.                                                                           | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.DRUG_CONCEPT_ID: A yes or no value indicating if DRUG_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification.                                                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: A yes or no value indicating if INGREDIENT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification.                                                                   | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.INVALID_REASON: A yes or no value indicating if INVALID_REASON is present in the DRUG_STRENGTH table as expected based on the specification.                                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: A yes or no value indicating if NUMERATOR_UNIT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification.                                                           | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.NUMERATOR_VALUE: A yes or no value indicating if NUMERATOR_VALUE is present in the DRUG_STRENGTH table as expected based on the specification.                                                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.VALID_END_DATE: A yes or no value indicating if VALID_END_DATE is present in the DRUG_STRENGTH table as expected based on the specification.                                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | DRUG_STRENGTH.VALID_START_DATE: A yes or no value indicating if VALID_START_DATE is present in the DRUG_STRENGTH table as expected based on the specification.                                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.DEFINES_ANCESTRY: A yes or no value indicating if DEFINES_ANCESTRY is present in the RELATIONSHIP table as expected based on the specification.                                                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.IS_HIERARCHICAL: A yes or no value indicating if IS_HIERARCHICAL is present in the RELATIONSHIP table as expected based on the specification.                                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: A yes or no value indicating if RELATIONSHIP_CONCEPT_ID is present in the RELATIONSHIP table as expected based on the specification.                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: A yes or no value indicating if RELATIONSHIP_ID is present in the RELATIONSHIP table as expected based on the specification.                                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_NAME: A yes or no value indicating if RELATIONSHIP_NAME is present in the RELATIONSHIP table as expected based on the specification.                                                                             | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.REVERSE_RELATIONSHIP_ID: A yes or no value indicating if REVERSE_RELATIONSHIP_ID is present in the RELATIONSHIP table as expected based on the specification.                                                                 | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: A yes or no value indicating if VOCABULARY_CONCEPT_ID is present in the VOCABULARY table as expected based on the specification.                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_ID: A yes or no value indicating if VOCABULARY_ID is present in the VOCABULARY table as expected based on the specification.                                                                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_NAME: A yes or no value indicating if VOCABULARY_NAME is present in the VOCABULARY table as expected based on the specification.                                                                                     | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_REFERENCE: A yes or no value indicating if VOCABULARY_REFERENCE is present in the VOCABULARY table as expected based on the specification.                                                                           | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_VERSION: A yes or no value indicating if VOCABULARY_VERSION is present in the VOCABULARY table as expected based on the specification.                                                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT that is considered not nullable.                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_CODE: The number and percent of records with a NULL value in the CONCEPT_CODE of the CONCEPT that is considered not nullable.                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT that is considered not nullable.                                                                                                  | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_NAME: The number and percent of records with a NULL value in the CONCEPT_NAME of the CONCEPT that is considered not nullable.                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the CONCEPT that is considered not nullable.                                                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT that is considered not nullable.                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT that is considered not nullable.                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the CONCEPT that is considered not nullable.                                                                                            | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: The number and percent of records with a NULL value in the ANCESTOR_CONCEPT_ID of the CONCEPT_ANCESTOR that is considered not nullable.                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: The number and percent of records with a NULL value in the DESCENDANT_CONCEPT_ID of the CONCEPT_ANCESTOR that is considered not nullable.                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MAX_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR that is considered not nullable.                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MIN_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR that is considered not nullable.                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_CONCEPT_ID of the CONCEPT_CLASS that is considered not nullable.                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT_CLASS that is considered not nullable.                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_NAME: The number and percent of records with a NULL value in the CONCEPT_CLASS_NAME of the CONCEPT_CLASS that is considered not nullable.                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: The number and percent of records with a NULL value in the CONCEPT_ID_1 of the CONCEPT_RELATIONSHIP that is considered not nullable.                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: The number and percent of records with a NULL value in the CONCEPT_ID_2 of the CONCEPT_RELATIONSHIP that is considered not nullable.                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the CONCEPT_RELATIONSHIP that is considered not nullable.                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT_RELATIONSHIP that is considered not nullable.                                                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT_RELATIONSHIP that is considered not nullable.                                                            | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT_SYNONYM that is considered not nullable.                                                                                  | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: The number and percent of records with a NULL value in the CONCEPT_SYNONYM_NAME of the CONCEPT_SYNONYM that is considered not nullable.                                                              | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and percent of records with a NULL value in the LANGUAGE_CONCEPT_ID of the CONCEPT_SYNONYM that is considered not nullable.                                                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: The number and percent of records with a NULL value in the DOMAIN_CONCEPT_ID of the DOMAIN that is considered not nullable.                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the DOMAIN that is considered not nullable.                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_NAME: The number and percent of records with a NULL value in the DOMAIN_NAME of the DOMAIN that is considered not nullable.                                                                                                  | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records with a NULL value in the DRUG_CONCEPT_ID of the DRUG_STRENGTH that is considered not nullable.                                                                            | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records with a NULL value in the INGREDIENT_CONCEPT_ID of the DRUG_STRENGTH that is considered not nullable.                                                                | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the DRUG_STRENGTH that is considered not nullable.                                                                              | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the DRUG_STRENGTH that is considered not nullable.                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.DEFINES_ANCESTRY: The number and percent of records with a NULL value in the DEFINES_ANCESTRY of the RELATIONSHIP that is considered not nullable.                                                                            | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.IS_HIERARCHICAL: The number and percent of records with a NULL value in the IS_HIERARCHICAL of the RELATIONSHIP that is considered not nullable.                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: The number and percent of records with a NULL value in the RELATIONSHIP_CONCEPT_ID of the RELATIONSHIP that is considered not nullable.                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the RELATIONSHIP that is considered not nullable.                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_NAME: The number and percent of records with a NULL value in the RELATIONSHIP_NAME of the RELATIONSHIP that is considered not nullable.                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.REVERSE_RELATIONSHIP_ID: The number and percent of records with a NULL value in the REVERSE_RELATIONSHIP_ID of the RELATIONSHIP that is considered not nullable.                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: The number and percent of records with a NULL value in the VOCABULARY_CONCEPT_ID of the VOCABULARY that is considered not nullable.                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the VOCABULARY that is considered not nullable.                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_NAME: The number and percent of records with a NULL value in the VOCABULARY_NAME of the VOCABULARY that is considered not nullable.                                                                                  | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_ID: A yes or no value indicating if the CONCEPT_ID in the CONCEPT is the expected data type based on the specification. Only checks integer fields.                                                                        | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: A yes or no value indicating if the ANCESTOR_CONCEPT_ID in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields.                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: A yes or no value indicating if the DESCENDANT_CONCEPT_ID in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields.                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: A yes or no value indicating if the MAX_LEVELS_OF_SEPARATION in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields.                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: A yes or no value indicating if the MIN_LEVELS_OF_SEPARATION in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields.                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: A yes or no value indicating if the CONCEPT_CLASS_CONCEPT_ID in the CONCEPT_CLASS is the expected data type based on the specification. Only checks integer fields.                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: A yes or no value indicating if the CONCEPT_ID_1 in the CONCEPT_RELATIONSHIP is the expected data type based on the specification. Only checks integer fields.                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: A yes or no value indicating if the CONCEPT_ID_2 in the CONCEPT_RELATIONSHIP is the expected data type based on the specification. Only checks integer fields.                                          | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.CONCEPT_ID: A yes or no value indicating if the CONCEPT_ID in the CONCEPT_SYNONYM is the expected data type based on the specification. Only checks integer fields.                                                        | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: A yes or no value indicating if the LANGUAGE_CONCEPT_ID in the CONCEPT_SYNONYM is the expected data type based on the specification. Only checks integer fields.                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: A yes or no value indicating if the DOMAIN_CONCEPT_ID in the DOMAIN is the expected data type based on the specification. Only checks integer fields.                                                            | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: A yes or no value indicating if the AMOUNT_UNIT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields.                                    | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.BOX_SIZE: A yes or no value indicating if the BOX_SIZE in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields.                                                                | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: A yes or no value indicating if the DENOMINATOR_UNIT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields.                          | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: A yes or no value indicating if the DRUG_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields.                                                  | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: A yes or no value indicating if the INGREDIENT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields.                                      | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: A yes or no value indicating if the NUMERATOR_UNIT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields.                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: A yes or no value indicating if the RELATIONSHIP_CONCEPT_ID in the RELATIONSHIP is the expected data type based on the specification. Only checks integer fields.                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: A yes or no value indicating if the VOCABULARY_CONCEPT_ID in the VOCABULARY is the expected data type based on the specification. Only checks integer fields.                                            | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_ID: The number and percent of records that have a duplicate value in the CONCEPT_ID field of the CONCEPT.                                                                                                                  | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: The number and percent of records that have a duplicate value in the CONCEPT_CLASS_ID field of the CONCEPT_CLASS.                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_ID: The number and percent of records that have a duplicate value in the DOMAIN_ID field of the DOMAIN.                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records that have a duplicate value in the RELATIONSHIP_ID field of the RELATIONSHIP.                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_ID: The number and percent of records that have a duplicate value in the VOCABULARY_ID field of the VOCABULARY.                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: The number and percent of records that have a value in the CONCEPT_CLASS_ID field in the CONCEPT table that does not exist in the CONCEPT_CLASS table.                                                           | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.DOMAIN_ID: The number and percent of records that have a value in the DOMAIN_ID field in the CONCEPT table that does not exist in the DOMAIN table.                                                                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VOCABULARY_ID: The number and percent of records that have a value in the VOCABULARY_ID field in the CONCEPT table that does not exist in the VOCABULARY table.                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: The number and percent of records that have a value in the ANCESTOR_CONCEPT_ID field in the CONCEPT_ANCESTOR table that does not exist in the CONCEPT table.                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: The number and percent of records that have a value in the DESCENDANT_CONCEPT_ID field in the CONCEPT_ANCESTOR table that does not exist in the CONCEPT table.                                     | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: The number and percent of records that have a value in the CONCEPT_CLASS_CONCEPT_ID field in the CONCEPT_CLASS table that does not exist in the CONCEPT table.                                     | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: The number and percent of records that have a value in the CONCEPT_ID_1 field in the CONCEPT_RELATIONSHIP table that does not exist in the CONCEPT table.                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: The number and percent of records that have a value in the CONCEPT_ID_2 field in the CONCEPT_RELATIONSHIP table that does not exist in the CONCEPT table.                                               | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records that have a value in the RELATIONSHIP_ID field in the CONCEPT_RELATIONSHIP table that does not exist in the RELATIONSHIP table.                                    | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of records that have a value in the CONCEPT_ID field in the CONCEPT_SYNONYM table that does not exist in the CONCEPT table.                                                             | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and percent of records that have a value in the LANGUAGE_CONCEPT_ID field in the CONCEPT_SYNONYM table that does not exist in the CONCEPT table.                                           | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: The number and percent of records that have a value in the DOMAIN_CONCEPT_ID field in the DOMAIN table that does not exist in the CONCEPT table.                                                                 | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: The number and percent of records that have a value in the AMOUNT_UNIT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table.                                         | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: The number and percent of records that have a value in the DENOMINATOR_UNIT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table.                               | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records that have a value in the DRUG_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table.                                                       | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records that have a value in the INGREDIENT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table.                                           | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: The number and percent of records that have a value in the NUMERATOR_UNIT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table.                                   | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: The number and percent of records that have a value in the RELATIONSHIP_CONCEPT_ID field in the RELATIONSHIP table that does not exist in the CONCEPT table.                                         | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: The number and percent of records that have a value in the VOCABULARY_CONCEPT_ID field in the VOCABULARY table that does not exist in the CONCEPT table.                                                 | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records that have a value in the DRUG_CONCEPT_ID field in the DRUG_STRENGTH table that do not conform to the DRUG domain.                                                         | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records that have a value in the INGREDIENT_CONCEPT_ID field in the DRUG_STRENGTH table that do not conform to the INGREDIENT class.                                        | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT.                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_CODE: The number and percent of records with a NULL value in the CONCEPT_CODE of the CONCEPT.                                                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT.                                                                                                                                  | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.CONCEPT_NAME: The number and percent of records with a NULL value in the CONCEPT_NAME of the CONCEPT.                                                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the CONCEPT.                                                                                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.INVALID_REASON: The number and percent of records with a NULL value in the INVALID_REASON of the CONCEPT.                                                                                                                          | Number of violated rows: 30785 |
-| DQD     | SUCCESS | CONCEPT.STANDARD_CONCEPT: The number and percent of records with a NULL value in the STANDARD_CONCEPT of the CONCEPT.                                                                                                                      | Number of violated rows: 20551 |
-| DQD     | SUCCESS | CONCEPT.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT.                                                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT.                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the CONCEPT.                                                                                                                            | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: The number and percent of records with a NULL value in the ANCESTOR_CONCEPT_ID of the CONCEPT_ANCESTOR.                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: The number and percent of records with a NULL value in the DESCENDANT_CONCEPT_ID of the CONCEPT_ANCESTOR.                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MAX_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR.                                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MIN_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR.                                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_CONCEPT_ID of the CONCEPT_CLASS.                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT_CLASS.                                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_NAME: The number and percent of records with a NULL value in the CONCEPT_CLASS_NAME of the CONCEPT_CLASS.                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: The number and percent of records with a NULL value in the CONCEPT_ID_1 of the CONCEPT_RELATIONSHIP.                                                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: The number and percent of records with a NULL value in the CONCEPT_ID_2 of the CONCEPT_RELATIONSHIP.                                                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.INVALID_REASON: The number and percent of records with a NULL value in the INVALID_REASON of the CONCEPT_RELATIONSHIP.                                                                                                | Number of violated rows: 57725 |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the CONCEPT_RELATIONSHIP.                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT_RELATIONSHIP.                                                                                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT_RELATIONSHIP.                                                                                            | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT_SYNONYM.                                                                                                                  | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: The number and percent of records with a NULL value in the CONCEPT_SYNONYM_NAME of the CONCEPT_SYNONYM.                                                                                              | Number of violated rows: 0     |
-| DQD     | WARNING | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and percent of records with a NULL value in the LANGUAGE_CONCEPT_ID of the CONCEPT_SYNONYM.                                                                                                | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: The number and percent of records with a NULL value in the DOMAIN_CONCEPT_ID of the DOMAIN.                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the DOMAIN.                                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | DOMAIN.DOMAIN_NAME: The number and percent of records with a NULL value in the DOMAIN_NAME of the DOMAIN.                                                                                                                                  | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: The number and percent of records with a NULL value in the AMOUNT_UNIT_CONCEPT_ID of the DRUG_STRENGTH.                                                                                              | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.AMOUNT_VALUE: The number and percent of records with a NULL value in the AMOUNT_VALUE of the DRUG_STRENGTH.                                                                                                                  | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.BOX_SIZE: The number and percent of records with a NULL value in the BOX_SIZE of the DRUG_STRENGTH.                                                                                                                          | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: The number and percent of records with a NULL value in the DENOMINATOR_UNIT_CONCEPT_ID of the DRUG_STRENGTH.                                                                                    | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DENOMINATOR_VALUE: The number and percent of records with a NULL value in the DENOMINATOR_VALUE of the DRUG_STRENGTH.                                                                                                        | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records with a NULL value in the DRUG_CONCEPT_ID of the DRUG_STRENGTH.                                                                                                            | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records with a NULL value in the INGREDIENT_CONCEPT_ID of the DRUG_STRENGTH.                                                                                                | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.INVALID_REASON: The number and percent of records with a NULL value in the INVALID_REASON of the DRUG_STRENGTH.                                                                                                              | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: The number and percent of records with a NULL value in the NUMERATOR_UNIT_CONCEPT_ID of the DRUG_STRENGTH.                                                                                        | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.NUMERATOR_VALUE: The number and percent of records with a NULL value in the NUMERATOR_VALUE of the DRUG_STRENGTH.                                                                                                            | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the DRUG_STRENGTH.                                                                                                              | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the DRUG_STRENGTH.                                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.DEFINES_ANCESTRY: The number and percent of records with a NULL value in the DEFINES_ANCESTRY of the RELATIONSHIP.                                                                                                            | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.IS_HIERARCHICAL: The number and percent of records with a NULL value in the IS_HIERARCHICAL of the RELATIONSHIP.                                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: The number and percent of records with a NULL value in the RELATIONSHIP_CONCEPT_ID of the RELATIONSHIP.                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the RELATIONSHIP.                                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.RELATIONSHIP_NAME: The number and percent of records with a NULL value in the RELATIONSHIP_NAME of the RELATIONSHIP.                                                                                                          | Number of violated rows: 0     |
-| DQD     | SUCCESS | RELATIONSHIP.REVERSE_RELATIONSHIP_ID: The number and percent of records with a NULL value in the REVERSE_RELATIONSHIP_ID of the RELATIONSHIP.                                                                                              | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: The number and percent of records with a NULL value in the VOCABULARY_CONCEPT_ID of the VOCABULARY.                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the VOCABULARY.                                                                                                                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_NAME: The number and percent of records with a NULL value in the VOCABULARY_NAME of the VOCABULARY.                                                                                                                  | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_REFERENCE: The number and percent of records with a NULL value in the VOCABULARY_REFERENCE of the VOCABULARY.                                                                                                        | Number of violated rows: 0     |
-| DQD     | SUCCESS | VOCABULARY.VOCABULARY_VERSION: The number and percent of records with a NULL value in the VOCABULARY_VERSION of the VOCABULARY.                                                                                                            | Number of violated rows: 4     |
-| DQD     | SUCCESS | CONCEPT.VALID_END_DATE: The number and percent of records with a value in the VALID_END_DATE field of the CONCEPT that occurs prior to the date in the VALID_START_DATE field of the CONCEPT table.                                        | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: The number and percent of records with a value in the VALID_END_DATE field of the CONCEPT_RELATIONSHIP that occurs prior to the date in the VALID_START_DATE field of the CONCEPT_RELATIONSHIP table. | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.VALID_END_DATE: The number and percent of records with a value in the VALID_END_DATE field of the DRUG_STRENGTH that occurs prior to the date in the VALID_START_DATE field of the DRUG_STRENGTH table.                      | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT.VALID_START_DATE: The number and percent of records with a value in the VALID_START_DATE field of the CONCEPT that occurs after the date in the VALID_END_DATE.                                                                    | Number of violated rows: 0     |
-| DQD     | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: The number and percent of records with a value in the VALID_START_DATE field of the CONCEPT_RELATIONSHIP that occurs after the date in the VALID_END_DATE.                                          | Number of violated rows: 0     |
-| DQD     | WARNING | DRUG_STRENGTH.VALID_START_DATE: The number and percent of records with a value in the VALID_START_DATE field of the DRUG_STRENGTH that occurs after the date in the VALID_END_DATE.                                                        | Number of violated rows: 0     |
+| context | type | step | message |
+|:---|:---|:---|:---|
+| DQD | SUCCESS | CONCEPT: A yes or no value indicating if CONCEPT table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY: A yes or no value indicating if VOCABULARY table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN: A yes or no value indicating if DOMAIN table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS: A yes or no value indicating if CONCEPT_CLASS table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP: A yes or no value indicating if CONCEPT_RELATIONSHIP table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP: A yes or no value indicating if RELATIONSHIP table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM: A yes or no value indicating if CONCEPT_SYNONYM table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR: A yes or no value indicating if CONCEPT_ANCESTOR table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH: A yes or no value indicating if DRUG_STRENGTH table is present as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: A yes or no value indicating if CONCEPT_CLASS_ID is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_CODE: A yes or no value indicating if CONCEPT_CODE is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_ID: A yes or no value indicating if CONCEPT_ID is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_NAME: A yes or no value indicating if CONCEPT_NAME is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.DOMAIN_ID: A yes or no value indicating if DOMAIN_ID is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.INVALID_REASON: A yes or no value indicating if INVALID_REASON is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.STANDARD_CONCEPT: A yes or no value indicating if STANDARD_CONCEPT is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VALID_END_DATE: A yes or no value indicating if VALID_END_DATE is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VALID_START_DATE: A yes or no value indicating if VALID_START_DATE is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VOCABULARY_ID: A yes or no value indicating if VOCABULARY_ID is present in the CONCEPT table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: A yes or no value indicating if ANCESTOR_CONCEPT_ID is present in the CONCEPT_ANCESTOR table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: A yes or no value indicating if DESCENDANT_CONCEPT_ID is present in the CONCEPT_ANCESTOR table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: A yes or no value indicating if MAX_LEVELS_OF_SEPARATION is present in the CONCEPT_ANCESTOR table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: A yes or no value indicating if MIN_LEVELS_OF_SEPARATION is present in the CONCEPT_ANCESTOR table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: A yes or no value indicating if CONCEPT_CLASS_CONCEPT_ID is present in the CONCEPT_CLASS table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: A yes or no value indicating if CONCEPT_CLASS_ID is present in the CONCEPT_CLASS table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_NAME: A yes or no value indicating if CONCEPT_CLASS_NAME is present in the CONCEPT_CLASS table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: A yes or no value indicating if CONCEPT_ID_1 is present in the CONCEPT_RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: A yes or no value indicating if CONCEPT_ID_2 is present in the CONCEPT_RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.INVALID_REASON: A yes or no value indicating if INVALID_REASON is present in the CONCEPT_RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: A yes or no value indicating if RELATIONSHIP_ID is present in the CONCEPT_RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: A yes or no value indicating if VALID_END_DATE is present in the CONCEPT_RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: A yes or no value indicating if VALID_START_DATE is present in the CONCEPT_RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_ID: A yes or no value indicating if CONCEPT_ID is present in the CONCEPT_SYNONYM table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: A yes or no value indicating if CONCEPT_SYNONYM_NAME is present in the CONCEPT_SYNONYM table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: A yes or no value indicating if LANGUAGE_CONCEPT_ID is present in the CONCEPT_SYNONYM table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: A yes or no value indicating if DOMAIN_CONCEPT_ID is present in the DOMAIN table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_ID: A yes or no value indicating if DOMAIN_ID is present in the DOMAIN table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_NAME: A yes or no value indicating if DOMAIN_NAME is present in the DOMAIN table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: A yes or no value indicating if AMOUNT_UNIT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.AMOUNT_VALUE: A yes or no value indicating if AMOUNT_VALUE is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.BOX_SIZE: A yes or no value indicating if BOX_SIZE is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: A yes or no value indicating if DENOMINATOR_UNIT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.DENOMINATOR_VALUE: A yes or no value indicating if DENOMINATOR_VALUE is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.DRUG_CONCEPT_ID: A yes or no value indicating if DRUG_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: A yes or no value indicating if INGREDIENT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.INVALID_REASON: A yes or no value indicating if INVALID_REASON is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: A yes or no value indicating if NUMERATOR_UNIT_CONCEPT_ID is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.NUMERATOR_VALUE: A yes or no value indicating if NUMERATOR_VALUE is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.VALID_END_DATE: A yes or no value indicating if VALID_END_DATE is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | DRUG_STRENGTH.VALID_START_DATE: A yes or no value indicating if VALID_START_DATE is present in the DRUG_STRENGTH table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.DEFINES_ANCESTRY: A yes or no value indicating if DEFINES_ANCESTRY is present in the RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.IS_HIERARCHICAL: A yes or no value indicating if IS_HIERARCHICAL is present in the RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: A yes or no value indicating if RELATIONSHIP_CONCEPT_ID is present in the RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: A yes or no value indicating if RELATIONSHIP_ID is present in the RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_NAME: A yes or no value indicating if RELATIONSHIP_NAME is present in the RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.REVERSE_RELATIONSHIP_ID: A yes or no value indicating if REVERSE_RELATIONSHIP_ID is present in the RELATIONSHIP table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: A yes or no value indicating if VOCABULARY_CONCEPT_ID is present in the VOCABULARY table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_ID: A yes or no value indicating if VOCABULARY_ID is present in the VOCABULARY table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_NAME: A yes or no value indicating if VOCABULARY_NAME is present in the VOCABULARY table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_REFERENCE: A yes or no value indicating if VOCABULARY_REFERENCE is present in the VOCABULARY table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_VERSION: A yes or no value indicating if VOCABULARY_VERSION is present in the VOCABULARY table as expected based on the specification. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_CODE: The number and percent of records with a NULL value in the CONCEPT_CODE of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_NAME: The number and percent of records with a NULL value in the CONCEPT_NAME of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the CONCEPT that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: The number and percent of records with a NULL value in the ANCESTOR_CONCEPT_ID of the CONCEPT_ANCESTOR that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: The number and percent of records with a NULL value in the DESCENDANT_CONCEPT_ID of the CONCEPT_ANCESTOR that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MAX_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MIN_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_CONCEPT_ID of the CONCEPT_CLASS that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT_CLASS that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_NAME: The number and percent of records with a NULL value in the CONCEPT_CLASS_NAME of the CONCEPT_CLASS that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: The number and percent of records with a NULL value in the CONCEPT_ID_1 of the CONCEPT_RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: The number and percent of records with a NULL value in the CONCEPT_ID_2 of the CONCEPT_RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the CONCEPT_RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT_RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT_RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT_SYNONYM that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: The number and percent of records with a NULL value in the CONCEPT_SYNONYM_NAME of the CONCEPT_SYNONYM that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and percent of records with a NULL value in the LANGUAGE_CONCEPT_ID of the CONCEPT_SYNONYM that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: The number and percent of records with a NULL value in the DOMAIN_CONCEPT_ID of the DOMAIN that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the DOMAIN that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_NAME: The number and percent of records with a NULL value in the DOMAIN_NAME of the DOMAIN that is considered not nullable. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records with a NULL value in the DRUG_CONCEPT_ID of the DRUG_STRENGTH that is considered not nullable. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records with a NULL value in the INGREDIENT_CONCEPT_ID of the DRUG_STRENGTH that is considered not nullable. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the DRUG_STRENGTH that is considered not nullable. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the DRUG_STRENGTH that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.DEFINES_ANCESTRY: The number and percent of records with a NULL value in the DEFINES_ANCESTRY of the RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.IS_HIERARCHICAL: The number and percent of records with a NULL value in the IS_HIERARCHICAL of the RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: The number and percent of records with a NULL value in the RELATIONSHIP_CONCEPT_ID of the RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_NAME: The number and percent of records with a NULL value in the RELATIONSHIP_NAME of the RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.REVERSE_RELATIONSHIP_ID: The number and percent of records with a NULL value in the REVERSE_RELATIONSHIP_ID of the RELATIONSHIP that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: The number and percent of records with a NULL value in the VOCABULARY_CONCEPT_ID of the VOCABULARY that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the VOCABULARY that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_NAME: The number and percent of records with a NULL value in the VOCABULARY_NAME of the VOCABULARY that is considered not nullable. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_ID: A yes or no value indicating if the CONCEPT_ID in the CONCEPT is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: A yes or no value indicating if the ANCESTOR_CONCEPT_ID in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: A yes or no value indicating if the DESCENDANT_CONCEPT_ID in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: A yes or no value indicating if the MAX_LEVELS_OF_SEPARATION in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: A yes or no value indicating if the MIN_LEVELS_OF_SEPARATION in the CONCEPT_ANCESTOR is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: A yes or no value indicating if the CONCEPT_CLASS_CONCEPT_ID in the CONCEPT_CLASS is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: A yes or no value indicating if the CONCEPT_ID_1 in the CONCEPT_RELATIONSHIP is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: A yes or no value indicating if the CONCEPT_ID_2 in the CONCEPT_RELATIONSHIP is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_ID: A yes or no value indicating if the CONCEPT_ID in the CONCEPT_SYNONYM is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: A yes or no value indicating if the LANGUAGE_CONCEPT_ID in the CONCEPT_SYNONYM is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: A yes or no value indicating if the DOMAIN_CONCEPT_ID in the DOMAIN is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: A yes or no value indicating if the AMOUNT_UNIT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.BOX_SIZE: A yes or no value indicating if the BOX_SIZE in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: A yes or no value indicating if the DENOMINATOR_UNIT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: A yes or no value indicating if the DRUG_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: A yes or no value indicating if the INGREDIENT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: A yes or no value indicating if the NUMERATOR_UNIT_CONCEPT_ID in the DRUG_STRENGTH is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: A yes or no value indicating if the RELATIONSHIP_CONCEPT_ID in the RELATIONSHIP is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: A yes or no value indicating if the VOCABULARY_CONCEPT_ID in the VOCABULARY is the expected data type based on the specification. Only checks integer fields. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_ID: The number and percent of records that have a duplicate value in the CONCEPT_ID field of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: The number and percent of records that have a duplicate value in the CONCEPT_CLASS_ID field of the CONCEPT_CLASS. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_ID: The number and percent of records that have a duplicate value in the DOMAIN_ID field of the DOMAIN. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records that have a duplicate value in the RELATIONSHIP_ID field of the RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_ID: The number and percent of records that have a duplicate value in the VOCABULARY_ID field of the VOCABULARY. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: The number and percent of records that have a value in the CONCEPT_CLASS_ID field in the CONCEPT table that does not exist in the CONCEPT_CLASS table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.DOMAIN_ID: The number and percent of records that have a value in the DOMAIN_ID field in the CONCEPT table that does not exist in the DOMAIN table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VOCABULARY_ID: The number and percent of records that have a value in the VOCABULARY_ID field in the CONCEPT table that does not exist in the VOCABULARY table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: The number and percent of records that have a value in the ANCESTOR_CONCEPT_ID field in the CONCEPT_ANCESTOR table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: The number and percent of records that have a value in the DESCENDANT_CONCEPT_ID field in the CONCEPT_ANCESTOR table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: The number and percent of records that have a value in the CONCEPT_CLASS_CONCEPT_ID field in the CONCEPT_CLASS table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: The number and percent of records that have a value in the CONCEPT_ID_1 field in the CONCEPT_RELATIONSHIP table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: The number and percent of records that have a value in the CONCEPT_ID_2 field in the CONCEPT_RELATIONSHIP table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records that have a value in the RELATIONSHIP_ID field in the CONCEPT_RELATIONSHIP table that does not exist in the RELATIONSHIP table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of records that have a value in the CONCEPT_ID field in the CONCEPT_SYNONYM table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and percent of records that have a value in the LANGUAGE_CONCEPT_ID field in the CONCEPT_SYNONYM table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: The number and percent of records that have a value in the DOMAIN_CONCEPT_ID field in the DOMAIN table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: The number and percent of records that have a value in the AMOUNT_UNIT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: The number and percent of records that have a value in the DENOMINATOR_UNIT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records that have a value in the DRUG_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records that have a value in the INGREDIENT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: The number and percent of records that have a value in the NUMERATOR_UNIT_CONCEPT_ID field in the DRUG_STRENGTH table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: The number and percent of records that have a value in the RELATIONSHIP_CONCEPT_ID field in the RELATIONSHIP table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: The number and percent of records that have a value in the VOCABULARY_CONCEPT_ID field in the VOCABULARY table that does not exist in the CONCEPT table. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records that have a value in the DRUG_CONCEPT_ID field in the DRUG_STRENGTH table that do not conform to the DRUG domain. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records that have a value in the INGREDIENT_CONCEPT_ID field in the DRUG_STRENGTH table that do not conform to the INGREDIENT class. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_CODE: The number and percent of records with a NULL value in the CONCEPT_CODE of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.CONCEPT_NAME: The number and percent of records with a NULL value in the CONCEPT_NAME of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.INVALID_REASON: The number and percent of records with a NULL value in the INVALID_REASON of the CONCEPT. | Number of violated rows: 30786 |
+| DQD | SUCCESS | CONCEPT.STANDARD_CONCEPT: The number and percent of records with a NULL value in the STANDARD_CONCEPT of the CONCEPT. | Number of violated rows: 20551 |
+| DQD | SUCCESS | CONCEPT.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the CONCEPT. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.ANCESTOR_CONCEPT_ID: The number and percent of records with a NULL value in the ANCESTOR_CONCEPT_ID of the CONCEPT_ANCESTOR. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.DESCENDANT_CONCEPT_ID: The number and percent of records with a NULL value in the DESCENDANT_CONCEPT_ID of the CONCEPT_ANCESTOR. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MAX_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MAX_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_ANCESTOR.MIN_LEVELS_OF_SEPARATION: The number and percent of records with a NULL value in the MIN_LEVELS_OF_SEPARATION of the CONCEPT_ANCESTOR. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_CONCEPT_ID of the CONCEPT_CLASS. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_ID: The number and percent of records with a NULL value in the CONCEPT_CLASS_ID of the CONCEPT_CLASS. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_CLASS.CONCEPT_CLASS_NAME: The number and percent of records with a NULL value in the CONCEPT_CLASS_NAME of the CONCEPT_CLASS. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_1: The number and percent of records with a NULL value in the CONCEPT_ID_1 of the CONCEPT_RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.CONCEPT_ID_2: The number and percent of records with a NULL value in the CONCEPT_ID_2 of the CONCEPT_RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.INVALID_REASON: The number and percent of records with a NULL value in the INVALID_REASON of the CONCEPT_RELATIONSHIP. | Number of violated rows: 57725 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the CONCEPT_RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the CONCEPT_RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the CONCEPT_RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_ID: The number and percent of records with a NULL value in the CONCEPT_ID of the CONCEPT_SYNONYM. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.CONCEPT_SYNONYM_NAME: The number and percent of records with a NULL value in the CONCEPT_SYNONYM_NAME of the CONCEPT_SYNONYM. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_SYNONYM.LANGUAGE_CONCEPT_ID: The number and percent of records with a NULL value in the LANGUAGE_CONCEPT_ID of the CONCEPT_SYNONYM. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_CONCEPT_ID: The number and percent of records with a NULL value in the DOMAIN_CONCEPT_ID of the DOMAIN. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_ID: The number and percent of records with a NULL value in the DOMAIN_ID of the DOMAIN. | Number of violated rows: 0 |
+| DQD | SUCCESS | DOMAIN.DOMAIN_NAME: The number and percent of records with a NULL value in the DOMAIN_NAME of the DOMAIN. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.AMOUNT_UNIT_CONCEPT_ID: The number and percent of records with a NULL value in the AMOUNT_UNIT_CONCEPT_ID of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.AMOUNT_VALUE: The number and percent of records with a NULL value in the AMOUNT_VALUE of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.BOX_SIZE: The number and percent of records with a NULL value in the BOX_SIZE of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DENOMINATOR_UNIT_CONCEPT_ID: The number and percent of records with a NULL value in the DENOMINATOR_UNIT_CONCEPT_ID of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DENOMINATOR_VALUE: The number and percent of records with a NULL value in the DENOMINATOR_VALUE of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.DRUG_CONCEPT_ID: The number and percent of records with a NULL value in the DRUG_CONCEPT_ID of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.INGREDIENT_CONCEPT_ID: The number and percent of records with a NULL value in the INGREDIENT_CONCEPT_ID of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.INVALID_REASON: The number and percent of records with a NULL value in the INVALID_REASON of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.NUMERATOR_UNIT_CONCEPT_ID: The number and percent of records with a NULL value in the NUMERATOR_UNIT_CONCEPT_ID of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.NUMERATOR_VALUE: The number and percent of records with a NULL value in the NUMERATOR_VALUE of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.VALID_END_DATE: The number and percent of records with a NULL value in the VALID_END_DATE of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.VALID_START_DATE: The number and percent of records with a NULL value in the VALID_START_DATE of the DRUG_STRENGTH. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.DEFINES_ANCESTRY: The number and percent of records with a NULL value in the DEFINES_ANCESTRY of the RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.IS_HIERARCHICAL: The number and percent of records with a NULL value in the IS_HIERARCHICAL of the RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_CONCEPT_ID: The number and percent of records with a NULL value in the RELATIONSHIP_CONCEPT_ID of the RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_ID: The number and percent of records with a NULL value in the RELATIONSHIP_ID of the RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.RELATIONSHIP_NAME: The number and percent of records with a NULL value in the RELATIONSHIP_NAME of the RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | RELATIONSHIP.REVERSE_RELATIONSHIP_ID: The number and percent of records with a NULL value in the REVERSE_RELATIONSHIP_ID of the RELATIONSHIP. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_CONCEPT_ID: The number and percent of records with a NULL value in the VOCABULARY_CONCEPT_ID of the VOCABULARY. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_ID: The number and percent of records with a NULL value in the VOCABULARY_ID of the VOCABULARY. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_NAME: The number and percent of records with a NULL value in the VOCABULARY_NAME of the VOCABULARY. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_REFERENCE: The number and percent of records with a NULL value in the VOCABULARY_REFERENCE of the VOCABULARY. | Number of violated rows: 0 |
+| DQD | SUCCESS | VOCABULARY.VOCABULARY_VERSION: The number and percent of records with a NULL value in the VOCABULARY_VERSION of the VOCABULARY. | Number of violated rows: 4 |
+| DQD | SUCCESS | CONCEPT.VALID_END_DATE: The number and percent of records with a value in the VALID_END_DATE field of the CONCEPT that occurs prior to the date in the VALID_START_DATE field of the CONCEPT table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_END_DATE: The number and percent of records with a value in the VALID_END_DATE field of the CONCEPT_RELATIONSHIP that occurs prior to the date in the VALID_START_DATE field of the CONCEPT_RELATIONSHIP table. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.VALID_END_DATE: The number and percent of records with a value in the VALID_END_DATE field of the DRUG_STRENGTH that occurs prior to the date in the VALID_START_DATE field of the DRUG_STRENGTH table. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT.VALID_START_DATE: The number and percent of records with a value in the VALID_START_DATE field of the CONCEPT that occurs after the date in the VALID_END_DATE. | Number of violated rows: 0 |
+| DQD | SUCCESS | CONCEPT_RELATIONSHIP.VALID_START_DATE: The number and percent of records with a value in the VALID_START_DATE field of the CONCEPT_RELATIONSHIP that occurs after the date in the VALID_END_DATE. | Number of violated rows: 0 |
+| DQD | WARNING | DRUG_STRENGTH.VALID_START_DATE: The number and percent of records with a value in the VALID_START_DATE field of the DRUG_STRENGTH that occurs after the date in the VALID_END_DATE. | Number of violated rows: 0 |
 
 We can see that there are no errors.
 
 ``` r
+
 validationLogR6 |>
   dplyr::filter(type == "ERROR") |>
   knitr::kable()
