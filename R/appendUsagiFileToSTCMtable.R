@@ -12,11 +12,13 @@
 #' - source_concept_class
 #' - source_domain
 #' - source_parents_concept_ids
+#' - source_code_description_fi
 #'
 #' Extended Usagi columns:
 #' - ADD_INFO:sourceConceptId
 #' - ADD_INFO:sourceConceptClass
 #' - ADD_INFO:sourceDomain
+#' - ADD_INFO:sourceName_fi (optional, NA if missing)
 #'
 #' If formats don't match (e.g., extended Usagi with default STCM), the extended information
 #' will be ignored with a warning.
@@ -83,7 +85,8 @@ appendUsagiFileToSTCMtable <- function(
     stcmExtendedColumns <- c(
         "source_code", "source_concept_id", "source_vocabulary_id", "source_code_description",
         "target_concept_id", "target_vocabulary_id", "valid_start_date", "valid_end_date",
-        "invalid_reason", "source_concept_class", "source_domain", "source_parents_concept_ids"
+        "invalid_reason", "source_concept_class", "source_domain", "source_parents_concept_ids",
+        "source_code_description_fi"
     )
 
     if (all(stcmExtendedColumns %in% stcmTableColumns)) {
@@ -149,6 +152,10 @@ appendUsagiFileToSTCMtable <- function(
         }
         if (!"ADD_INFO:sourceValidEndDate" %in% usagiTibbleColumns) {
             usagiTibble <- usagiTibble |> dplyr::mutate(`ADD_INFO:sourceValidEndDate` = lubridate::as_date(ymd("2099-12-31")))
+        }
+        # if colum `ADD_INFO:sourceName_fi` is not present, set it to NA
+        if (!"ADD_INFO:sourceName_fi" %in% usagiTibbleColumns) {
+            usagiTibble <- usagiTibble |> dplyr::mutate(`ADD_INFO:sourceName_fi` = NA_character_)
         }
 
         # if colums `ADD_INFO:sourceParents` and `ADD_INFO:sourceParentVocabulary` are present and any of the `ADD_INFO:sourceParents` is not NA
@@ -227,7 +234,8 @@ appendUsagiFileToSTCMtable <- function(
                 invalid_reason = NA_character_,
                 source_concept_class = `ADD_INFO:sourceConceptClass`,
                 source_domain = `ADD_INFO:sourceDomain`,
-                source_parents_concept_ids = sourceParentConceptIds
+                source_parents_concept_ids = sourceParentConceptIds,
+                source_code_description_fi = `ADD_INFO:sourceName_fi`
             )
     }
 

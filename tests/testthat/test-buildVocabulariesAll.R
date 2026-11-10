@@ -28,6 +28,9 @@ test_that("buildVocabulariesAll works", {
     # Check results
     validationLogTibble |> dplyr::filter(type == "ERROR") |> nrow() |> expect_equal(0)
 
+    # Finnish names were added to CONCEPT_SYNONYM
+    validationLogTibble |> dplyr::filter(step == "Finnish names in CONCEPT_SYNONYM") |> dplyr::pull(type) |> as.character() |> expect_equal("SUCCESS")
+
     # check the validation results folder
     expect_true(!file.exists(file.path(validationResultsFolder, "resultsDQD.json")))
 })  

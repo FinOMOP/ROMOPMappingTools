@@ -22,5 +22,5 @@ createSourceToConceptMapExtended(
 }
 \description{
 Creates an extended version of the Source to Concept Map table that includes additional columns
-for source concept class, domain, and parent relationships.
+for source concept class, domain, parent relationships, and the Finnish source code description.
 }

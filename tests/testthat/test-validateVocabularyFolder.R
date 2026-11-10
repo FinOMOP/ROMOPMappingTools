@@ -23,7 +23,12 @@ test_that("validateVocabularyFolder returns all SUCCESS for valid vocabulary fol
     )
 
     # Check validation results
-    validationsLogTibble |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(0)
+    # only warning: UNITfi has the ADD_INFO:sourceName_fi column but all values are empty
+    notSuccess <- validationsLogTibble |> dplyr::filter(type != "SUCCESS")
+    notSuccess |> nrow() |> expect_equal(1)
+    notSuccess |> dplyr::pull(context) |> as.character() |> expect_equal("UNITfi")
+    notSuccess |> dplyr::pull(type) |> as.character() |> expect_equal("WARNING")
+    notSuccess |> dplyr::pull(step) |> expect_equal("SourceNameFi is empty")
 
     # Check that validated files were created
     expect_true(dir.exists(pathToValidatedVocabularyFolder))

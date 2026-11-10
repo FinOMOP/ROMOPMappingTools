@@ -30,6 +30,7 @@
 #' - sourceValidEndDate (date): End date of validity
 #' - sourceParents (character): Parent concepts
 #' - sourceParentVocabulary (character): Vocabulary of parent concepts
+#' - sourceName_fi (character): Finnish name of the source code, added to CONCEPT_SYNONYM
 #' - validationMessagess (character): Validation messages
 #'
 #' @param pathToUsagiFile Path to the Usagi mapping file to read
@@ -69,6 +70,7 @@ readUsagiFile <- function(pathToUsagiFile) {
         `ADD_INFO:sourceValidEndDate` = readr::col_date(),
         `ADD_INFO:sourceParents` = readr::col_character(),
         `ADD_INFO:sourceParentVocabulary` = readr::col_character(),
+        `ADD_INFO:sourceName_fi` = readr::col_character(),
         `ADD_INFO:validationMessages` = readr::col_character(),
         #
         .default = readr::col_character()
@@ -110,6 +112,7 @@ readUsagiFile <- function(pathToUsagiFile) {
 #' - ADD_INFO:sourceValidEndDate (date): Source valid end date
 #' - ADD_INFO:sourceParents (character): Source parents
 #' - ADD_INFO:sourceParentVocabulary (character): Source parent vocabulary
+#' - ADD_INFO:sourceName_fi (character): Source name in Finnish
 #' - ADD_INFO:validationMessages (character): Validation messages
 #' - ADD_INFO:autoUpdatingInfo (character): Auto updating info
 #'
@@ -147,7 +150,8 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
         "ADD_INFO:sourceValidStartDate",
         "ADD_INFO:sourceValidEndDate",
         "ADD_INFO:sourceParents",
-        "ADD_INFO:sourceParentVocabulary"
+        "ADD_INFO:sourceParentVocabulary",
+        "ADD_INFO:sourceName_fi"
     )
 
     lastColNames <- c(
@@ -164,7 +168,7 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
             dplyr::any_of(c(firstColNames, midColNames, lastColNames))
         )
 
-    # force "ADD_INFO:validationMessages" and "ADD_INFO:autoUpdatingInfo" to be NA if they are empty, if they exist
+    # force "ADD_INFO:validationMessages", "ADD_INFO:autoUpdatingInfo" and "ADD_INFO:sourceName_fi" to be NA if they are empty, if they exist
     if ("ADD_INFO:validationMessages" %in% colNames) {
         usagiTibble <- usagiTibble |>
             dplyr::mutate(
@@ -175,6 +179,12 @@ writeUsagiFile <- function(usagiTibble, pathToUsagiFile) {
         usagiTibble <- usagiTibble |>
             dplyr::mutate(
                 `ADD_INFO:autoUpdatingInfo` = ifelse(`ADD_INFO:autoUpdatingInfo` == "", NA, `ADD_INFO:autoUpdatingInfo`)
+            )
+    }
+    if ("ADD_INFO:sourceName_fi" %in% colNames) {
+        usagiTibble <- usagiTibble |>
+            dplyr::mutate(
+                `ADD_INFO:sourceName_fi` = ifelse(`ADD_INFO:sourceName_fi` == "", NA, `ADD_INFO:sourceName_fi`)
             )
     }
 

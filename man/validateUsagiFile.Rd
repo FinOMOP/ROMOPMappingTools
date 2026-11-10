@@ -37,5 +37,9 @@ If usagi file has C&CR columns:
 \item Check codes with mapping to more than one domain are mapped to compatible domains
 \item Check if sourceValidStartDate is before sourceValidEndDate
 \item Check if ADD_INFO:sourceParents is a valid concept code in the ADD_INFO:sourceParentVocabulary
+If usagi file has the ADD_INFO:sourceName_fi column:
+\item Check if sourceName_fi is less than 1000 characters
+\item Check if sourceName_fi is the same for all the rows of a sourceCode
+\item Warn if sourceName_fi is empty for APPROVED or UNCHECKED mappingStatus
 }
 }

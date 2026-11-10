@@ -42,7 +42,8 @@ allUsagiFiles <- dplyr::bind_rows(ICD10fiUsagiFile, UNITfiUsagiFile, ICD10fiUsag
 
 conceptIdsToMap <- allUsagiFiles |> dplyr::pull(conceptId) |> unique()
 # add extra conceptIds to map
-conceptIdsToMap <- c(conceptIdsToMap, 138604, 313219)
+# 4181730 is the Finnish language concept, used as language_concept_id in CONCEPT_SYNONYM
+conceptIdsToMap <- c(conceptIdsToMap, 138604, 313219, 4181730)
 
 
 # For each table we have to add also the concepts to the concept table

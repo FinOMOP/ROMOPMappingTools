@@ -300,4 +300,42 @@ SELECT DISTINCT
     ) AS valid_end_date,
     NULL AS invalid_reason
 FROM split_parents AS sp
-WHERE sp.source_parents_concept_ids IS NOT NULL
+WHERE sp.source_parents_concept_ids IS NOT NULL;
+
+
+-- 5. CONCEPT_SYNONYM table
+-- Only Finnish synonyms (language_concept_id = 4181730) are managed here, synonyms in other languages are not touched
+-- Delete previous Finnish rows with the same concept_id as in the source_to_concept_map.source_concept_id
+-- Insert one row for each **unique** source_concept_id with a non-empty source_code_description_fi
+-- that is different from source_code_description (same name as concept_name adds nothing as synonym)
+--  - concept_id = source_to_concept_map.source_concept_id
+--  - concept_synonym_name = source_to_concept_map.source_code_description_fi
+--  - language_concept_id = 4181730 (Finnish)
+DELETE FROM
+    @vocabularyDatabaseSchema.CONCEPT_SYNONYM
+WHERE
+    language_concept_id = 4181730
+    AND concept_id IN (
+        SELECT
+            DISTINCT stcm.source_concept_id
+        FROM
+            @vocabularyDatabaseSchema.@sourceToConceptMapTable AS stcm
+    );
+
+INSERT INTO
+    @vocabularyDatabaseSchema.CONCEPT_SYNONYM (
+        concept_id,
+        concept_synonym_name,
+        language_concept_id
+    )
+SELECT DISTINCT
+    stcm.source_concept_id AS concept_id,
+    stcm.source_code_description_fi AS concept_synonym_name,
+    4181730 AS language_concept_id
+FROM
+    @vocabularyDatabaseSchema.@sourceToConceptMapTable AS stcm
+WHERE
+    stcm.source_concept_id != 0
+    AND stcm.source_code_description_fi IS NOT NULL
+    AND LTRIM(RTRIM(stcm.source_code_description_fi)) != ''
+    AND (stcm.source_code_description IS NULL OR stcm.source_code_description_fi != stcm.source_code_description);

@@ -44,6 +44,7 @@ The function writes a Usagi mapping file with the following columns:
 \item ADD_INFO:sourceValidEndDate (date): Source valid end date
 \item ADD_INFO:sourceParents (character): Source parents
 \item ADD_INFO:sourceParentVocabulary (character): Source parent vocabulary
+\item ADD_INFO:sourceName_fi (character): Source name in Finnish
 \item ADD_INFO:validationMessages (character): Validation messages
 \item ADD_INFO:autoUpdatingInfo (character): Auto updating info
 }
