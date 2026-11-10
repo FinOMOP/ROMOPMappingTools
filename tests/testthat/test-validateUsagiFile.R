@@ -193,8 +193,9 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
   # SourceConceptId is not unique
   validationsSummary |> dplyr::filter(step == "SourceConceptId is not unique") |> nrow() |> expect_equal(1)
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not unique"))  |> nrow() |> expect_equal(1)
-  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not unique")) |> dplyr::pull(`ADD_INFO:validationMessages`) |> 
-  expect_equal("ERROR: SourceConceptId is not unique")
+  # the row shares sourceConceptId with another sourceCode that has a different sourceName_fi
+  validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not unique")) |> dplyr::pull(`ADD_INFO:validationMessages`) |>
+  expect_equal("ERROR: SourceConceptId is not unique | ERROR: SourceNameFi is not the same for all rows of the sourceConceptId")
   validatedUsagiFile |> dplyr::filter(stringr::str_detect(sourceName, "SourceConceptId is not unique")) |> dplyr::pull(mappingStatus) |> 
   expect_equal("FLAGGED")
 
@@ -324,7 +325,7 @@ test_that("test validateUsagiFile validates ADD_INFO:sourceName_fi", {
         sourceCode == "A01.0+G01" ~ strrep("a", 1001),
         # empty
         sourceCode == "A01.0+I39.8" ~ NA_character_,
-        # different within a multi-mapped sourceCode
+        # different within a multi-mapped sourceCode, all rows share the same sourceConceptId
         sourceCode == "A02.2+H22.0" & dplyr::row_number() == min(which(sourceCode == "A02.2+H22.0")) ~ "Eri nimi",
         TRUE ~ `ADD_INFO:sourceName_fi`
       )
@@ -352,7 +353,7 @@ test_that("test validateUsagiFile validates ADD_INFO:sourceName_fi", {
   validationsSummary |> dplyr::filter(type != "SUCCESS") |> dplyr::pull(step) |>
     expect_setequal(c(
       "SourceNameFi is more than 1000 characters",
-      "SourceNameFi is not the same for all rows of the sourceCode",
+      "SourceNameFi is not the same for all rows of the sourceConceptId",
       "SourceNameFi is empty"
     ))
 
@@ -362,10 +363,10 @@ test_that("test validateUsagiFile validates ADD_INFO:sourceName_fi", {
     expect_equal("ERROR: SourceNameFi is more than 1000 characters")
   validatedUsagiFile |> dplyr::filter(sourceCode == "A01.0+G01") |> dplyr::pull(mappingStatus) |> expect_equal("FLAGGED")
 
-  # SourceNameFi is not the same for all rows of the sourceCode
-  validationsSummary |> dplyr::filter(step == "SourceNameFi is not the same for all rows of the sourceCode") |> dplyr::pull(type) |> as.character() |> expect_equal("ERROR")
+  # SourceNameFi is not the same for all rows of the sourceConceptId
+  validationsSummary |> dplyr::filter(step == "SourceNameFi is not the same for all rows of the sourceConceptId") |> dplyr::pull(type) |> as.character() |> expect_equal("ERROR")
   validatedUsagiFile |> dplyr::filter(sourceCode == "A02.2+H22.0") |> dplyr::pull(`ADD_INFO:validationMessages`) |>
-    expect_equal(rep("ERROR: SourceNameFi is not the same for all rows of the sourceCode", 2))
+    expect_equal(rep("ERROR: SourceNameFi is not the same for all rows of the sourceConceptId", 2))
   validatedUsagiFile |> dplyr::filter(sourceCode == "A02.2+H22.0") |> dplyr::pull(mappingStatus) |> expect_equal(rep("FLAGGED", 2))
 
   # SourceNameFi is empty, only a warning, mappingStatus is not changed
@@ -394,4 +395,31 @@ test_that("test validateUsagiFile requires C&CR columns when ADD_INFO:sourceName
   validationsSummary <- validateUsagiFile(pathToUsagiFile, connection, "main", tempfile(fileext = ".csv"), 2000500000)
 
   validationsSummary |> dplyr::filter(step == "Missing C&CR columns") |> dplyr::pull(type) |> as.character() |> expect_equal("ERROR")
+})
+
+test_that("test validateUsagiFile allows different ADD_INFO:sourceName_fi for different sourceConceptIds of the same sourceCode", {
+
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+
+  # a sourceCode with two sourceConceptIds valid in different periods, each with its own names
+  usagiTibble <- readUsagiFile(system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools"))
+  secondRow <- which(usagiTibble$sourceCode == "A02.2+H22.0")[2]
+  usagiTibble$`ADD_INFO:sourceConceptId`[secondRow] <- 2000599999
+  usagiTibble$sourceName[secondRow] <- "Other name for a later period"
+  usagiTibble$`ADD_INFO:sourceName_fi`[secondRow] <- "Toinen nimi myöhemmälle jaksolle"
+  pathToUsagiFile <- tempfile(fileext = ".csv")
+  writeUsagiFile(usagiTibble, pathToUsagiFile)
+
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  validationsSummary <- validateUsagiFile(pathToUsagiFile, connection, "main", tempfile(fileext = ".csv"), 2000500000)
+
+  validationsSummary |> dplyr::filter(step == "SourceNameFi is not the same for all rows of the sourceConceptId") |>
+    dplyr::pull(type) |> as.character() |> expect_equal("SUCCESS")
+  validationsSummary |> dplyr::filter(type != "SUCCESS") |> nrow() |> expect_equal(0)
 })
