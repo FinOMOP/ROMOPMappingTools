@@ -14,6 +14,10 @@
 #' - Check codes with mapping to more than one domain are mapped to compatible domains
 #' - Check if sourceValidStartDate is before sourceValidEndDate
 #' - Check if ADD_INFO:sourceParents is a valid concept code in the ADD_INFO:sourceParentVocabulary
+#' If usagi file has the ADD_INFO:sourceName_fi column:
+#' - Check if sourceName_fi is less than 1000 characters
+#' - Check if sourceName_fi is the same for all the rows of a sourceConceptId
+#' - Warn if sourceName_fi is empty for APPROVED or UNCHECKED mappingStatus
 #'
 #' @param pathToUsagiFile Path to the Usagi mapping file to validate
 #' @param connection A DatabaseConnector connection object
@@ -202,7 +206,8 @@ validateUsagiFile <- function(
     # if it has any of the 3 columns it must have the other 2
     if ("ADD_INFO:sourceConceptId" %in% usagiTibbleColumns || "ADD_INFO:sourceConceptClass" %in% usagiTibbleColumns || "ADD_INFO:sourceDomain" %in% usagiTibbleColumns ||
         "ADD_INFO:sourceValidStartDate" %in% usagiTibbleColumns || "ADD_INFO:sourceValidEndDate" %in% usagiTibbleColumns ||
-        "ADD_INFO:sourceParents" %in% usagiTibbleColumns || "ADD_INFO:sourceParentVocabulary" %in% usagiTibbleColumns) {
+        "ADD_INFO:sourceParents" %in% usagiTibbleColumns || "ADD_INFO:sourceParentVocabulary" %in% usagiTibbleColumns ||
+        "ADD_INFO:sourceName_fi" %in% usagiTibbleColumns) {
         missingColumns <-
             c(
                 "ADD_INFO:sourceConceptId",
@@ -344,6 +349,64 @@ validateUsagiFile <- function(
             )
         } else {
             validationLogR6$SUCCESS("APPROVED mappingStatus with valid domain combination", "")
+        }
+    }
+
+    # - Check ADD_INFO:sourceName_fi, it will be used as Finnish CONCEPT_SYNONYM
+    # (whitespace-only names are read as NA by readUsagiFile, so they are reported as empty)
+    if ("ADD_INFO:sourceName_fi" %in% usagiTibbleColumns) {
+        validationRules <- validate::validator(
+            SourceNameFi.is.more.than.1000.characters = field_length(`ADD_INFO:sourceName_fi`, min = 0, max = 1000)
+        )
+        validations <- validate::confront(usagiTibble, validationRules)
+
+        result <- .applyValidationRules(usagiTibble, validations, validationLogR6)
+        usagiTibble <- result$fileTibble
+        validationLogR6 <- result$validationLogR6
+
+        # check all rows of a sourceConceptId have the same sourceName_fi (multi-mapped codes repeat the source row),
+        # each sourceConceptId gets one Finnish synonym. A sourceCode can have several sourceConceptIds, valid for
+        # different periods, each with its own name, so the check is not done per sourceCode
+        sourceConceptIdsWithDifferentNameFi <- usagiTibble |>
+            dplyr::filter(!is.na(`ADD_INFO:sourceConceptId`)) |>
+            dplyr::distinct(`ADD_INFO:sourceConceptId`, `ADD_INFO:sourceName_fi`) |>
+            dplyr::count(`ADD_INFO:sourceConceptId`) |>
+            dplyr::filter(n > 1) |>
+            dplyr::pull(`ADD_INFO:sourceConceptId`)
+
+        if (length(sourceConceptIdsWithDifferentNameFi) > 0) {
+            validationLogR6$ERROR(
+                "SourceNameFi is not the same for all rows of the sourceConceptId",
+                paste0("Found ", length(sourceConceptIdsWithDifferentNameFi), " sourceConceptIds with different sourceName_fi")
+            )
+
+            usagiTibble <- usagiTibble |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(
+                    `ADD_INFO:sourceConceptId` %in% sourceConceptIdsWithDifferentNameFi,
+                    paste0(tmpvalidationMessages, " | ", "ERROR: SourceNameFi is not the same for all rows of the sourceConceptId"),
+                    tmpvalidationMessages
+                ))
+        } else {
+            validationLogR6$SUCCESS("SourceNameFi is not the same for all rows of the sourceConceptId", "")
+        }
+
+        # warn if sourceName_fi is empty, the column is optional so this is not an error
+        isEmptyNameFi <- usagiTibble$mappingStatus %in% c("APPROVED", "UNCHECKED") & is.na(usagiTibble$`ADD_INFO:sourceName_fi`)
+
+        if (any(isEmptyNameFi)) {
+            validationLogR6$WARNING(
+                "SourceNameFi is empty",
+                paste0("Found ", sum(isEmptyNameFi), " APPROVED or UNCHECKED rows with empty sourceName_fi")
+            )
+
+            usagiTibble <- usagiTibble |>
+                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(
+                    isEmptyNameFi,
+                    paste0(tmpvalidationMessages, " | ", "WARNING: SourceNameFi is empty"),
+                    tmpvalidationMessages
+                ))
+        } else {
+            validationLogR6$SUCCESS("SourceNameFi is empty", "")
         }
     }
 

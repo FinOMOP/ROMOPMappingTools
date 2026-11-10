@@ -57,6 +57,7 @@ Extended STCM columns (includes all default columns plus):
 \item source_concept_class
 \item source_domain
 \item source_parents_concept_ids
+\item source_code_description_fi
 }
 
 Extended Usagi columns:
@@ -64,6 +65,7 @@ Extended Usagi columns:
 \item ADD_INFO:sourceConceptId
 \item ADD_INFO:sourceConceptClass
 \item ADD_INFO:sourceDomain
+\item ADD_INFO:sourceName_fi (optional, NA if missing)
 }
 
 If formats don't match (e.g., extended Usagi with default STCM), the extended information

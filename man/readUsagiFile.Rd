@@ -47,6 +47,7 @@ Optional ADD_INFO columns:
 \item sourceValidEndDate (date): End date of validity
 \item sourceParents (character): Parent concepts
 \item sourceParentVocabulary (character): Vocabulary of parent concepts
+\item sourceName_fi (character): Finnish name of the source code, added to CONCEPT_SYNONYM
 \item validationMessagess (character): Validation messages
 }
 }

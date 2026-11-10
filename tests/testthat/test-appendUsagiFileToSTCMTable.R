@@ -81,12 +81,18 @@ test_that("test appendUsagiFileToSTCMTable appends the usagi file to the sourceT
         expect_equal(c(
             "source_code", "source_concept_id", "source_vocabulary_id", "source_code_description", "target_concept_id",
              "target_vocabulary_id", "valid_start_date", "valid_end_date", "invalid_reason", "source_concept_class",
-             "source_domain", "source_parents_concept_ids"))
+             "source_domain", "source_parents_concept_ids", "source_code_description_fi"))
 
     stcmTable |>
         dplyr::filter(is.na(source_parents_concept_ids)) |>
         nrow() |>
         expect_equal(0)
+
+    # source_code_description_fi comes from ADD_INFO:sourceName_fi
+    stcmTable |>
+        dplyr::filter(source_code == "A01.0+G01") |>
+        dplyr::pull(source_code_description_fi) |>
+        expect_equal("Lavantautiin liittyvä aivokalvotulehdus")
 
 })
 
@@ -129,4 +135,35 @@ test_that("test appendUsagiFileToSTCMTable appends the ICD10fi usagi file to the
     dplyr::pull(source_parents_concept_ids) |>
     expect_equal("2000503725")
 
+})
+
+test_that("test appendUsagiFileToSTCMTable sets source_code_description_fi to NA when the usagi file has no ADD_INFO:sourceName_fi", {
+  usagiTibble <- readUsagiFile(system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")) |>
+    dplyr::select(-`ADD_INFO:sourceName_fi`)
+  pathToUsagiFile <- tempfile(fileext = ".csv")
+  writeUsagiFile(usagiTibble, pathToUsagiFile)
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+  vocabularyDatabaseSchema <- "main"
+
+  connection <- DatabaseConnector::connect(
+    dbms = "duckdb",
+    server = pathToOMOPVocabularyDuckDBfile
+  )
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  sourceToConceptMapTable <- "source_to_concept_map_extended"
+  createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
+
+  appendUsagiFileToSTCMtable(
+    vocabularyId = "ICD10fi",
+    pathToUsagiFile = pathToUsagiFile,
+    connection = connection,
+    vocabularyDatabaseSchema = vocabularyDatabaseSchema,
+    sourceToConceptMapTable = sourceToConceptMapTable
+  )
+
+  stcmTable <- DBI::dbReadTable(connection, sourceToConceptMapTable) |> tibble::as_tibble()
+  stcmTable |> nrow() |> expect_equal(nrow(usagiTibble))
+  stcmTable |> dplyr::pull(source_code_description_fi) |> is.na() |> all() |> expect_true()
 })
