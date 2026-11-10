@@ -306,3 +306,92 @@ test_that("test validateUsagiFile returns errors with the errored usagi file", {
 
 
 
+
+test_that("test validateUsagiFile validates ADD_INFO:sourceName_fi", {
+
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+  pathToValidatedUsagiFile <- tempfile(fileext = ".csv")
+  vocabularyDatabaseSchema = "main"
+  sourceConceptIdOffset = 2000500000
+
+  # make a copy of a valid usagi file with errors in ADD_INFO:sourceName_fi
+  usagiTibble <- readUsagiFile(system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools"))
+  usagiTibble <- usagiTibble |>
+    dplyr::mutate(
+      `ADD_INFO:sourceName_fi` = dplyr::case_when(
+        # too long
+        sourceCode == "A01.0+G01" ~ strrep("a", 1001),
+        # empty
+        sourceCode == "A01.0+I39.8" ~ NA_character_,
+        # different within a multi-mapped sourceCode
+        sourceCode == "A02.2+H22.0" & dplyr::row_number() == min(which(sourceCode == "A02.2+H22.0")) ~ "Eri nimi",
+        TRUE ~ `ADD_INFO:sourceName_fi`
+      )
+    )
+  pathToUsagiFile <- tempfile(fileext = ".csv")
+  writeUsagiFile(usagiTibble, pathToUsagiFile)
+
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  validationsSummary <- validateUsagiFile(
+    pathToUsagiFile,
+    connection,
+    vocabularyDatabaseSchema,
+    pathToValidatedUsagiFile,
+    sourceConceptIdOffset
+  )
+
+  validatedUsagiFile <- readUsagiFile(pathToValidatedUsagiFile)
+
+  # only the sourceName_fi validations fail
+  validationsSummary |> dplyr::filter(type != "SUCCESS") |> dplyr::pull(step) |>
+    expect_setequal(c(
+      "SourceNameFi is more than 1000 characters",
+      "SourceNameFi is not the same for all rows of the sourceCode",
+      "SourceNameFi is empty"
+    ))
+
+  # SourceNameFi is more than 1000 characters
+  validationsSummary |> dplyr::filter(step == "SourceNameFi is more than 1000 characters") |> dplyr::pull(type) |> as.character() |> expect_equal("ERROR")
+  validatedUsagiFile |> dplyr::filter(sourceCode == "A01.0+G01") |> dplyr::pull(`ADD_INFO:validationMessages`) |>
+    expect_equal("ERROR: SourceNameFi is more than 1000 characters")
+  validatedUsagiFile |> dplyr::filter(sourceCode == "A01.0+G01") |> dplyr::pull(mappingStatus) |> expect_equal("FLAGGED")
+
+  # SourceNameFi is not the same for all rows of the sourceCode
+  validationsSummary |> dplyr::filter(step == "SourceNameFi is not the same for all rows of the sourceCode") |> dplyr::pull(type) |> as.character() |> expect_equal("ERROR")
+  validatedUsagiFile |> dplyr::filter(sourceCode == "A02.2+H22.0") |> dplyr::pull(`ADD_INFO:validationMessages`) |>
+    expect_equal(rep("ERROR: SourceNameFi is not the same for all rows of the sourceCode", 2))
+  validatedUsagiFile |> dplyr::filter(sourceCode == "A02.2+H22.0") |> dplyr::pull(mappingStatus) |> expect_equal(rep("FLAGGED", 2))
+
+  # SourceNameFi is empty, only a warning, mappingStatus is not changed
+  validationsSummary |> dplyr::filter(step == "SourceNameFi is empty") |> dplyr::pull(type) |> as.character() |> expect_equal("WARNING")
+  validatedUsagiFile |> dplyr::filter(sourceCode == "A01.0+I39.8") |> dplyr::pull(`ADD_INFO:validationMessages`) |>
+    expect_equal("WARNING: SourceNameFi is empty")
+  validatedUsagiFile |> dplyr::filter(sourceCode == "A01.0+I39.8") |> dplyr::pull(mappingStatus) |> expect_equal("APPROVED")
+})
+
+test_that("test validateUsagiFile requires C&CR columns when ADD_INFO:sourceName_fi is present", {
+
+  pathToOMOPVocabularyDuckDBfile <- helper_createATemporaryCopyOfTheOMOPVocabularyDuckDB()
+  withr::defer(unlink(pathToOMOPVocabularyDuckDBfile))
+
+  usagiTibble <- readUsagiFile(system.file("testdata/VOCABULARIES/ICD10fi/ICD10fi.usagi.csv", package = "ROMOPMappingTools")) |>
+    dplyr::select(-dplyr::starts_with("ADD_INFO:"), `ADD_INFO:sourceName_fi`)
+  pathToUsagiFile <- tempfile(fileext = ".csv")
+  writeUsagiFile(usagiTibble, pathToUsagiFile)
+
+  connection <- DatabaseConnector::connect(
+        dbms = "duckdb",
+        server = pathToOMOPVocabularyDuckDBfile
+    )
+  on.exit(DatabaseConnector::disconnect(connection))
+
+  validationsSummary <- validateUsagiFile(pathToUsagiFile, connection, "main", tempfile(fileext = ".csv"), 2000500000)
+
+  validationsSummary |> dplyr::filter(step == "Missing C&CR columns") |> dplyr::pull(type) |> as.character() |> expect_equal("ERROR")
+})

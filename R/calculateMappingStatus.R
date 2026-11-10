@@ -90,7 +90,7 @@ calculateMappingStatus <- function(
         ON c.concept_id = cr.concept_id_1
       LEFT JOIN (
         SELECT concept_id, concept_synonym_name  FROM @vocabulary_database_schema.CONCEPT_SYNONYM
-        WHERE language_concept_id == 4181730
+        WHERE language_concept_id = 4181730
       ) AS cs
         ON c.concept_id = cs.concept_id
   "

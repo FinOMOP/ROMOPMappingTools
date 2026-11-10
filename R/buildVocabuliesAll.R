@@ -111,6 +111,48 @@ buildVocabulariesAll <- function(
         return(validationLogTibble)
     }
 
+    # check all the Finnish names in the SourceToConceptMap table are in the CONCEPT_SYNONYM table
+    nFinnishNamesInSTCM <- DatabaseConnector::renderTranslateQuerySql(
+        connection,
+        "SELECT COUNT(*) AS n FROM (
+            SELECT DISTINCT source_concept_id, source_code_description_fi
+            FROM @vocabulary_database_schema.@source_to_concept_map_table
+            WHERE source_concept_id != 0
+              AND source_code_description_fi IS NOT NULL
+              AND LTRIM(RTRIM(source_code_description_fi)) != ''
+              AND (source_code_description IS NULL OR source_code_description_fi != source_code_description)
+        ) AS t",
+        vocabulary_database_schema = vocabularyDatabaseSchema,
+        source_to_concept_map_table = sourceToConceptMapTable
+    )[[1]]
+    nFinnishSynonymsInCDM <- DatabaseConnector::renderTranslateQuerySql(
+        connection,
+        "SELECT COUNT(*) AS n FROM @vocabulary_database_schema.CONCEPT_SYNONYM
+        WHERE language_concept_id = 4181730
+          AND concept_id IN (SELECT DISTINCT source_concept_id FROM @vocabulary_database_schema.@source_to_concept_map_table)",
+        vocabulary_database_schema = vocabularyDatabaseSchema,
+        source_to_concept_map_table = sourceToConceptMapTable
+    )[[1]]
+
+    if (nFinnishNamesInSTCM != nFinnishSynonymsInCDM) {
+        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
+            context = "STCMToCDMTables",
+            type = "ERROR",
+            step = "Finnish names in CONCEPT_SYNONYM",
+            message = paste0(
+                "Found ", nFinnishSynonymsInCDM, " Finnish synonyms in CONCEPT_SYNONYM but ",
+                nFinnishNamesInSTCM, " Finnish names in the SourceToConceptMap table"
+            )
+        ))
+    } else {
+        validationLogTibble <- dplyr::bind_rows(validationLogTibble, dplyr::tibble(
+            context = "STCMToCDMTables",
+            type = "SUCCESS",
+            step = "Finnish names in CONCEPT_SYNONYM",
+            message = ""
+        ))
+    }
+
     # create the ancestor tables
     message("Creating the ancestor tables")
     errorMessage <- ""

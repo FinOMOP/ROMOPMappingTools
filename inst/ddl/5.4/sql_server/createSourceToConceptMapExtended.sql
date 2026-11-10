@@ -18,5 +18,6 @@ CREATE TABLE @vocabularyDatabaseSchema.@sourceToConceptMapTable (
 			invalid_reason varchar(1) NULL , 
             source_concept_class varchar(20) NULL,
             source_domain varchar(20) NULL,
-            source_parents_concept_ids varchar(255) NULL
+            source_parents_concept_ids varchar(255) NULL,
+            source_code_description_fi varchar(1000) NULL
 			);
