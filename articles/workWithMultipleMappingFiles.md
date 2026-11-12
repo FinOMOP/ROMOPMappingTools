@@ -70,7 +70,7 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
 connection <- DatabaseConnector::connect(connectionDetails)
 #> Connecting using DuckDB driver
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmplIrApQ/duckdb
+#> ℹ /tmp/RtmpSbkymK/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -80,9 +80,9 @@ connection <- DatabaseConnector::connect(connectionDetails)
 #> Warning in connectDuckdb(connectionDetails): The ICU extension of DuckDB is not
 #> installed. Attempting to install it.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.365 secs
+#> Executing SQL took 0.218 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0369 secs
+#> Executing SQL took 0.0566 secs
 vocabularyDatabaseSchema <- "main"
 ```
 
@@ -153,7 +153,6 @@ knitr::kable(validationsLogTibble)
 | ICD10fi | SUCCESS | APPROVED mappingStatus with valid domain combination |  |
 | ICD10fi | SUCCESS | SourceNameFi is more than 1000 characters |  |
 | ICD10fi | SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
-| ICD10fi | SUCCESS | SourceNameFi is empty |  |
 | ICD10fi | SUCCESS | Missing date columns |  |
 | ICD10fi | SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
 | ICD10fi | SUCCESS | Missing parent columns |  |
@@ -182,7 +181,6 @@ knitr::kable(validationsLogTibble)
 | UNITfi | SUCCESS | APPROVED mappingStatus with valid domain combination |  |
 | UNITfi | SUCCESS | SourceNameFi is more than 1000 characters |  |
 | UNITfi | SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
-| UNITfi | WARNING | SourceNameFi is empty | Found 177 APPROVED or UNCHECKED rows with empty sourceName_fi |
 | UNITfi | SUCCESS | Missing date columns |  |
 | UNITfi | SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
 | UNITfi | SUCCESS | Missing parent columns |  |
@@ -207,7 +205,7 @@ vignette for more details.
 sourceToConceptMapTable <- "source_to_concept_map_extended"
 createSourceToConceptMapExtended(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00672 secs
+#> Executing SQL took 0.0121 secs
 ```
 
 `vocabularyFolderToSTCMVocabularyConcepClassTables` needs the path to
@@ -224,32 +222,32 @@ vocabularyFolderToSTCMVocabularyConcepClassTables(
 )
 #> Appending vocabularies.csv to VOCABULARY table
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00591 secs
-#> Inserting data took 0.0151 secs
+#> Executing SQL took 0.00747 secs
+#> Inserting data took 0.0188 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00468 secs
-#> Inserting data took 0.0328 secs
+#> Executing SQL took 0.00653 secs
+#> Inserting data took 0.0427 secs
 #> Appending info from Usagi files to Concept Class table
 #> 
 #> Collecting concept classes from Usagi file ./ICD10fi/ICD10fi.usagi.csv
 #> 
 #> Collecting concept classes from Usagi file ./UNITfi/UNITfi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00427 secs
-#> Inserting data took 0.0117 secs
+#> Executing SQL took 0.00531 secs
+#> Inserting data took 0.0149 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00598 secs
-#> Inserting data took 0.0185 secs
+#> Executing SQL took 0.00719 secs
+#> Inserting data took 0.0219 secs
 #> Appending Usagi files to STCM table
 #> 
 #> Appending Usagi file ./ICD10fi/ICD10fi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00554 secs
-#> Inserting data took 0.0295 secs
+#> Executing SQL took 0.00688 secs
+#> Inserting data took 0.0294 secs
 #> Appending Usagi file ./UNITfi/UNITfi.usagi.csv
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00591 secs
-#> Inserting data took 0.0296 secs
+#> Executing SQL took 0.00431 secs
+#> Inserting data took 0.0241 secs
 ```
 
 This function will populate the VOCABULARY table with the
@@ -327,7 +325,7 @@ by DatabaseConnector, and be applied directly.
 
 STCMToCDMTables(connection, vocabularyDatabaseSchema, sourceToConceptMapTable)
 #>   |                                                                              |                                                                      |   0%  |                                                                              |=========                                                             |  12%  |                                                                              |==================                                                    |  25%  |                                                                              |==========================                                            |  38%  |                                                                              |===================================                                   |  50%  |                                                                              |============================================                          |  62%  |                                                                              |====================================================                  |  75%  |                                                                              |=============================================================         |  88%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0668 secs
+#> Executing SQL took 0.0705 secs
 ```
 
 This populates the CONCEPT table:
@@ -422,16 +420,16 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #> # A tibble: 5,353 × 6
 #>    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date
 #>           <int>        <int> <chr>           <date>           <date>        
-#>  1   2000500266     45581124 Is a            1900-01-01       2099-12-31    
-#>  2   2000500272     45566516 Is a            1900-01-01       2099-12-31    
-#>  3   2000500274     45566516 Is a            1900-01-01       2099-12-31    
-#>  4   2000500276     45566516 Is a            1900-01-01       2099-12-31    
-#>  5   2000500280     45547423 Is a            1900-01-01       2099-12-31    
-#>  6   2000500295     45595594 Is a            1900-01-01       2099-12-31    
-#>  7   2000500297     45595594 Is a            1900-01-01       2099-12-31    
-#>  8   2000500299     45556916 Is a            1900-01-01       2099-12-31    
-#>  9   2000500300     45595595 Is a            1900-01-01       2099-12-31    
-#> 10   2000500305     45532853 Is a            1900-01-01       2099-12-31    
+#>  1   2000500106     45532807 Is a            1900-01-01       2099-12-31    
+#>  2   2000500107     45532807 Is a            1900-01-01       2099-12-31    
+#>  3   2000500108     45532807 Is a            1900-01-01       2099-12-31    
+#>  4   2000500125     45755302 Is a            1900-01-01       2099-12-31    
+#>  5   2000500129     45755302 Is a            1900-01-01       2099-12-31    
+#>  6   2000500143     45755302 Is a            1998-08-19       2099-12-31    
+#>  7   2000500150     45755302 Is a            1998-08-19       2099-12-31    
+#>  8   2000500151     45755302 Is a            1998-08-19       2099-12-31    
+#>  9   2000500152     45585906 Is a            1900-01-01       2099-12-31    
+#> 10   2000500153     45576234 Is a            1900-01-01       2099-12-31    
 #> # ℹ 5,343 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -455,8 +453,8 @@ dplyr::tbl(connection, "CONCEPT_RELATIONSHIP") |>
 #>  6   2000503769   2000503745 Subsumes        1900-01-01       2099-12-31    
 #>  7   2000503769   2000503746 Subsumes        1900-01-01       2099-12-31    
 #>  8   2000503769   2000503749 Subsumes        1900-01-01       2099-12-31    
-#>  9   2000500469   2000500471 Subsumes        1900-01-01       2099-12-31    
-#> 10   2000503725   2000503729 Subsumes        2010-01-01       2099-12-31    
+#>  9   2000503768   2000503725 Subsumes        1900-01-01       2099-12-31    
+#> 10   2000503725   2000503731 Subsumes        1997-10-06       2099-12-31    
 #> # ℹ 11 more rows
 #> # ℹ 1 more variable: invalid_reason <chr>
 ```
@@ -479,7 +477,7 @@ conceptRelationshipToAncestorTables(
   vocabularyList = c("ICD10", "ICD10fi", "UNITfi")
 )
 #>   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0429 secs
+#> Executing SQL took 0.0469 secs
 ```
 
 Close the connection to the database.
@@ -504,7 +502,7 @@ validationResultsFolder <- tempdir()
 validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabaseSchema, validationResultsFolder)
 #> Connecting using DuckDB driver
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmplIrApQ/duckdb
+#> ℹ /tmp/RtmpSbkymK/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -515,7 +513,7 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> Executing SQL took 0.0405 secs
 #> Connecting using DuckDB driver
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmplIrApQ/duckdb
+#> ℹ /tmp/RtmpSbkymK/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -523,7 +521,7 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0352 secs
+#> Executing SQL took 0.0427 secs
 #> Currently in a tryCatch or withCallingHandlers block, so unable to add global calling handlers. ParallelLogger will not capture R messages, errors, and warnings, only explicit calls to ParallelLogger. (This message will not be shown again this R session)
 #> 
 #> 
@@ -552,7 +550,7 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> reimplemented with the plausibleGenderUseDescendants check.
 #> Connecting using DuckDB driver
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmplIrApQ/duckdb
+#> ℹ /tmp/RtmpSbkymK/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -560,7 +558,7 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00313 secs
+#> Executing SQL took 0.00349 secs
 #> Processing check description: cdmTable
 #> Processing check description: measurePersonCompleteness
 #> Processing check description: measureConditionEraCompleteness
@@ -588,11 +586,11 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> Processing check description: plausibleGender
 #> Processing check description: plausibleGenderUseDescendants
 #> Processing check description: plausibleUnitConceptIds
-#> Writing results to file: /tmp/RtmplIrApQ/tmp_vocab_table-20261110193043.json
+#> Writing results to file: /tmp/RtmpSbkymK/tmp_vocab_table-20261112095806.json
 #> Execution Complete
 #> Connecting using DuckDB driver
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmplIrApQ/duckdb
+#> ℹ /tmp/RtmpSbkymK/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -600,10 +598,10 @@ validationLogR6 <- validateCDMtablesWithDQD(connectionDetails, vocabularyDatabas
 #> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
 #> ℹ See ?duckdb_storage for details and alternatives.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00329 secs
+#> Executing SQL took 0.0035 secs
 #> Writing results to table main.dqdashboard_results
 #>   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.00745 secs
+#> Executing SQL took 0.00852 secs
 #> Warning in value[[3L]](cond): Writing table failed: Conversion Error: Could not convert string 'Table DRUG_STRENGTH is empty.' to INT32 when casting from source column not_applicable_reason
 #> 
 #> LINE 3: ..., "error", checkid, failed, passed, is_error, not_applicable, not_applicable_reason, threshold_value, notes_value FROM...

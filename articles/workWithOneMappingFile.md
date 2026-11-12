@@ -101,7 +101,7 @@ connectionDetails <- DatabaseConnector::createConnectionDetails(
 connection <- DatabaseConnector::connect(connectionDetails)
 #> Connecting using DuckDB driver
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpA8FVZS/duckdb
+#> ℹ /tmp/RtmpPWMyfC/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -111,9 +111,9 @@ connection <- DatabaseConnector::connect(connectionDetails)
 #> Warning in connectDuckdb(connectionDetails): The ICU extension of DuckDB is not
 #> installed. Attempting to install it.
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.296 secs
+#> Executing SQL took 0.201 secs
 #>   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%
-#> Executing SQL took 0.0475 secs
+#> Executing SQL took 0.0472 secs
 vocabularyDatabaseSchema <- "main"
 
 pathToValidatedUsagiFile  <- tempfile(fileext = "usagi_validated.csv")
@@ -161,7 +161,6 @@ knitr::kable(validationsSummary)
 | SUCCESS | APPROVED mappingStatus with valid domain combination |  |
 | SUCCESS | SourceNameFi is more than 1000 characters |  |
 | SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
-| SUCCESS | SourceNameFi is empty |  |
 | SUCCESS | Missing date columns |  |
 | SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
 | SUCCESS | Missing parent columns |  |
@@ -223,7 +222,6 @@ knitr::kable(validationsSummaryWithErrors)
 | ERROR | APPROVED mappingStatus with valid domain combination | Found 1 codes with invalid domain combinations |
 | SUCCESS | SourceNameFi is more than 1000 characters |  |
 | ERROR | SourceNameFi is not the same for all rows of the sourceConceptId | Found 1 sourceConceptIds with different sourceName_fi |
-| SUCCESS | SourceNameFi is empty |  |
 | SUCCESS | Missing date columns |  |
 | ERROR | SourceValidStartDate is after SourceValidEndDate | Number of failed rules: 1 |
 | SUCCESS | Missing parent columns |  |
@@ -288,7 +286,6 @@ knitr::kable(validationsSummaryWithErrors)
 | SUCCESS | APPROVED mappingStatus with valid domain combination |  |
 | SUCCESS | SourceNameFi is more than 1000 characters |  |
 | SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
-| SUCCESS | SourceNameFi is empty |  |
 | SUCCESS | Missing date columns |  |
 | SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
 | SUCCESS | Missing parent columns |  |
@@ -375,7 +372,6 @@ knitr::kable(validationsSummaryWithErrors)
 | ERROR | APPROVED mappingStatus with valid domain combination | Found 6 codes with invalid domain combinations |
 | SUCCESS | SourceNameFi is more than 1000 characters |  |
 | SUCCESS | SourceNameFi is not the same for all rows of the sourceConceptId |  |
-| SUCCESS | SourceNameFi is empty |  |
 | SUCCESS | Missing date columns |  |
 | SUCCESS | SourceValidStartDate is after SourceValidEndDate |  |
 | SUCCESS | Missing parent columns |  |

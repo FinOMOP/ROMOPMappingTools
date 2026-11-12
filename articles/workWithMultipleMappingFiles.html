@@ -124,7 +124,7 @@ included in the package. Create a new database by making a copy of the
 <span><span class="va">connection</span> <span class="op">&lt;-</span> <span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/connect.html" class="external-link">connect</a></span><span class="op">(</span><span class="va">connectionDetails</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmplIrApQ/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpSbkymK/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -134,9 +134,9 @@ included in the package. Create a new database by making a copy of the
 <span><span class="co">#&gt; Warning in connectDuckdb(connectionDetails): The ICU extension of DuckDB is not</span></span>
 <span><span class="co">#&gt; installed. Attempting to install it.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.365 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.218 secs</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0369 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.0566 secs</span></span>
 <span><span class="va">vocabularyDatabaseSchema</span> <span class="op">&lt;-</span> <span class="st">"main"</span></span></code></pre></div>
 </div>
 <div class="section level3">
@@ -167,10 +167,10 @@ files</a> vignette.</p>
 <code class="sourceCode R"><span><span class="fu">knitr</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/knitr/man/kable.html" class="external-link">kable</a></span><span class="op">(</span><span class="va">validationsLogTibble</span><span class="op">)</span></span></code></pre></div>
 <table class="table">
 <colgroup>
-<col width="10%">
-<col width="5%">
-<col width="43%">
-<col width="41%">
+<col width="15%">
+<col width="8%">
+<col width="67%">
+<col width="8%">
 </colgroup>
 <thead><tr class="header">
 <th align="left">context</th>
@@ -366,186 +366,173 @@ sourceConceptId</td>
 <tr class="odd">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
-<td align="left">SourceNameFi is empty</td>
-<td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">ICD10fi</td>
-<td align="left">SUCCESS</td>
 <td align="left">Missing date columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceValidStartDate is after SourceValidEndDate</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Missing parent columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">ICD10fi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Invalid parent concept code</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Missing default columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceCode is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceCode and conceptId are not unique</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceCode is more than 50 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceName is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceName is more than 255 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceFrequency is not empty</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">MappingStatus is not valid</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus conceptId is 0</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with concepts outdated</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Missing C&amp;CR columns</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is not a number on the range</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptClass is more than 20 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is empty</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceDomain is not a valid domain</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceConceptId is not unique</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">Not APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">APPROVED mappingStatus with valid domain
 combination</td>
 <td align="left"></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceNameFi is more than 1000 characters</td>
 <td align="left"></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">UNITfi</td>
 <td align="left">SUCCESS</td>
 <td align="left">SourceNameFi is not the same for all rows of the
 sourceConceptId</td>
 <td align="left"></td>
-</tr>
-<tr class="even">
-<td align="left">UNITfi</td>
-<td align="left">WARNING</td>
-<td align="left">SourceNameFi is empty</td>
-<td align="left">Found 177 APPROVED or UNCHECKED rows with empty
-sourceName_fi</td>
 </tr>
 <tr class="odd">
 <td align="left">UNITfi</td>
@@ -588,7 +575,7 @@ source_to_concept_map_extended table, see the <a href="filesFormat.html">Files f
 <code class="sourceCode R"><span><span class="va">sourceToConceptMapTable</span> <span class="op">&lt;-</span> <span class="st">"source_to_concept_map_extended"</span></span>
 <span><span class="fu"><a href="../reference/createSourceToConceptMapExtended.html">createSourceToConceptMapExtended</a></span><span class="op">(</span><span class="va">connection</span>, <span class="va">vocabularyDatabaseSchema</span>, <span class="va">sourceToConceptMapTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00672 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0121 secs</span></span></code></pre></div>
 <p><code>vocabularyFolderToSTCMVocabularyConcepClassTables</code> needs
 the path to the vocabulary folder, a connection to the database, the
 schema with the vocabulary tables and the name of the SourceToConceptMap
@@ -602,32 +589,32 @@ table.</p>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt; Appending vocabularies.csv to VOCABULARY table</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00591 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0151 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00747 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0188 secs</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00468 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0328 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00653 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0427 secs</span></span>
 <span><span class="co">#&gt; Appending info from Usagi files to Concept Class table</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Collecting concept classes from Usagi file ./ICD10fi/ICD10fi.usagi.csv</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Collecting concept classes from Usagi file ./UNITfi/UNITfi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00427 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0117 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00531 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0149 secs</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00598 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0185 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00719 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0219 secs</span></span>
 <span><span class="co">#&gt; Appending Usagi files to STCM table</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Appending Usagi file ./ICD10fi/ICD10fi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00554 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0295 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00688 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0294 secs</span></span>
 <span><span class="co">#&gt; Appending Usagi file ./UNITfi/UNITfi.usagi.csv</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00591 secs</span></span>
-<span><span class="co">#&gt; Inserting data took 0.0296 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.00431 secs</span></span>
+<span><span class="co">#&gt; Inserting data took 0.0241 secs</span></span></code></pre></div>
 <p>This function will populate the VOCABULARY table with the
 <code>vocabularies.csv</code> file and the
 source_to_concept_map_extended table with the Usagi-extended files.</p>
@@ -694,7 +681,7 @@ supported by DatabaseConnector, and be applied directly.</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/STCMToCDMTables.html">STCMToCDMTables</a></span><span class="op">(</span><span class="va">connection</span>, <span class="va">vocabularyDatabaseSchema</span>, <span class="va">sourceToConceptMapTable</span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |=========                                                             |  12%  |                                                                              |==================                                                    |  25%  |                                                                              |==========================                                            |  38%  |                                                                              |===================================                                   |  50%  |                                                                              |============================================                          |  62%  |                                                                              |====================================================                  |  75%  |                                                                              |=============================================================         |  88%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0668 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0705 secs</span></span></code></pre></div>
 <p>This populates the CONCEPT table:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/tbl.html" class="external-link">tbl</a></span><span class="op">(</span><span class="va">connection</span>, <span class="st">"CONCEPT"</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -777,16 +764,16 @@ they will be used to populate the CONCEPT_RELATIONSHIP table with</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 5,353 × 6</span></span></span>
 <span><span class="co">#&gt;    concept_id_1 concept_id_2 relationship_id valid_start_date valid_end_date</span></span>
 <span><span class="co">#&gt;           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;date&gt;</span>        </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>266     45<span style="text-decoration: underline;">581</span>124 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>272     45<span style="text-decoration: underline;">566</span>516 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>274     45<span style="text-decoration: underline;">566</span>516 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>276     45<span style="text-decoration: underline;">566</span>516 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>280     45<span style="text-decoration: underline;">547</span>423 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>295     45<span style="text-decoration: underline;">595</span>594 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>297     45<span style="text-decoration: underline;">595</span>594 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>299     45<span style="text-decoration: underline;">556</span>916 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>300     45<span style="text-decoration: underline;">595</span>595 Is a            1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>305     45<span style="text-decoration: underline;">532</span>853 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>106     45<span style="text-decoration: underline;">532</span>807 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>107     45<span style="text-decoration: underline;">532</span>807 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>108     45<span style="text-decoration: underline;">532</span>807 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>125     45<span style="text-decoration: underline;">755</span>302 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>129     45<span style="text-decoration: underline;">755</span>302 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>143     45<span style="text-decoration: underline;">755</span>302 Is a            1998-08-19       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>150     45<span style="text-decoration: underline;">755</span>302 Is a            1998-08-19       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>151     45<span style="text-decoration: underline;">755</span>302 Is a            1998-08-19       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>152     45<span style="text-decoration: underline;">585</span>906 Is a            1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>153     45<span style="text-decoration: underline;">576</span>234 Is a            1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5,343 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 <ul>
@@ -808,8 +795,8 @@ they will be used to populate the CONCEPT_RELATIONSHIP table with</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>745 Subsumes        1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>746 Subsumes        1900-01-01       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>769   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>749 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>469   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">500</span>471 Subsumes        1900-01-01       2099-12-31    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>729 Subsumes        2010-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>768   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725 Subsumes        1900-01-01       2099-12-31    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>725   <span style="text-decoration: underline;">2</span>000<span style="text-decoration: underline;">503</span>731 Subsumes        1997-10-06       2099-12-31    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 11 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: invalid_reason &lt;chr&gt;</span></span></span></code></pre></div>
 </div>
@@ -829,7 +816,7 @@ included in the <code>vocabularies.csv</code> file.</p>
 <span>  vocabularyList <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"ICD10"</span>, <span class="st">"ICD10fi"</span>, <span class="st">"UNITfi"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |==============                                                        |  20%  |                                                                              |============================                                          |  40%  |                                                                              |==========================================                            |  60%  |                                                                              |========================================================              |  80%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0429 secs</span></span></code></pre></div>
+<span><span class="co">#&gt; Executing SQL took 0.0469 secs</span></span></code></pre></div>
 <p>Close the connection to the database.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">DatabaseConnector</span><span class="fu">::</span><span class="fu"><a href="https://ohdsi.github.io/DatabaseConnector/reference/disconnect.html" class="external-link">disconnect</a></span><span class="op">(</span><span class="va">connection</span><span class="op">)</span></span></code></pre></div>
@@ -848,7 +835,7 @@ the package to facilitate this task.</p>
 <span><span class="va">validationLogR6</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/validateCDMtablesWithDQD.html">validateCDMtablesWithDQD</a></span><span class="op">(</span><span class="va">connectionDetails</span>, <span class="va">vocabularyDatabaseSchema</span>, <span class="va">validationResultsFolder</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmplIrApQ/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpSbkymK/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -859,7 +846,7 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; Executing SQL took 0.0405 secs</span></span>
 <span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmplIrApQ/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpSbkymK/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -867,7 +854,7 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.0352 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.0427 secs</span></span>
 <span><span class="co">#&gt; Currently in a tryCatch or withCallingHandlers block, so unable to add global calling handlers. ParallelLogger will not capture R messages, errors, and warnings, only explicit calls to ParallelLogger. (This message will not be shown again this R session)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; </span></span>
@@ -896,7 +883,7 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; reimplemented with the plausibleGenderUseDescendants check.</span></span>
 <span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmplIrApQ/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpSbkymK/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -904,7 +891,7 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00313 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00349 secs</span></span>
 <span><span class="co">#&gt; Processing check description: cdmTable</span></span>
 <span><span class="co">#&gt; Processing check description: measurePersonCompleteness</span></span>
 <span><span class="co">#&gt; Processing check description: measureConditionEraCompleteness</span></span>
@@ -932,11 +919,11 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; Processing check description: plausibleGender</span></span>
 <span><span class="co">#&gt; Processing check description: plausibleGenderUseDescendants</span></span>
 <span><span class="co">#&gt; Processing check description: plausibleUnitConceptIds</span></span>
-<span><span class="co">#&gt; Writing results to file: /tmp/RtmplIrApQ/tmp_vocab_table-20261110193043.json</span></span>
+<span><span class="co">#&gt; Writing results to file: /tmp/RtmpSbkymK/tmp_vocab_table-20261112095806.json</span></span>
 <span><span class="co">#&gt; Execution Complete</span></span>
 <span><span class="co">#&gt; Connecting using DuckDB driver</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmplIrApQ/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpSbkymK/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -944,10 +931,10 @@ the package to facilitate this task.</p>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
 <span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00329 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.0035 secs</span></span>
 <span><span class="co">#&gt; Writing results to table main.dqdashboard_results</span></span>
 <span><span class="co">#&gt;   |                                                                              |                                                                      |   0%  |                                                                              |===================================                                   |  50%  |                                                                              |======================================================================| 100%</span></span>
-<span><span class="co">#&gt; Executing SQL took 0.00745 secs</span></span>
+<span><span class="co">#&gt; Executing SQL took 0.00852 secs</span></span>
 <span><span class="co">#&gt; Warning in value[[3L]](cond): Writing table failed: Conversion Error: Could not convert string 'Table DRUG_STRENGTH is empty.' to INT32 when casting from source column not_applicable_reason</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; LINE 3: ..., "error", checkid, failed, passed, is_error, not_applicable, not_applicable_reason, threshold_value, notes_value FROM...</span></span>

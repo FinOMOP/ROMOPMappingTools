@@ -30,8 +30,6 @@ checks: Default Usagi columns:
 - Check if sourceName_fi is the same for all the rows of a
   sourceConceptId
 
-- Warn if sourceName_fi is empty for APPROVED or UNCHECKED mappingStatus
-
 ## Usage
 
 ``` r
