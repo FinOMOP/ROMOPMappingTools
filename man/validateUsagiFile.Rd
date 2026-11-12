@@ -40,6 +40,5 @@ If usagi file has C&CR columns:
 If usagi file has the ADD_INFO:sourceName_fi column:
 \item Check if sourceName_fi is less than 1000 characters
 \item Check if sourceName_fi is the same for all the rows of a sourceConceptId
-\item Warn if sourceName_fi is empty for APPROVED or UNCHECKED mappingStatus
 }
 }
