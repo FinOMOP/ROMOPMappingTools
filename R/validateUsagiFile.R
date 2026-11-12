@@ -17,7 +17,6 @@
 #' If usagi file has the ADD_INFO:sourceName_fi column:
 #' - Check if sourceName_fi is less than 1000 characters
 #' - Check if sourceName_fi is the same for all the rows of a sourceConceptId
-#' - Warn if sourceName_fi is empty for APPROVED or UNCHECKED mappingStatus
 #'
 #' @param pathToUsagiFile Path to the Usagi mapping file to validate
 #' @param connection A DatabaseConnector connection object
@@ -388,25 +387,6 @@ validateUsagiFile <- function(
                 ))
         } else {
             validationLogR6$SUCCESS("SourceNameFi is not the same for all rows of the sourceConceptId", "")
-        }
-
-        # warn if sourceName_fi is empty, the column is optional so this is not an error
-        isEmptyNameFi <- usagiTibble$mappingStatus %in% c("APPROVED", "UNCHECKED") & is.na(usagiTibble$`ADD_INFO:sourceName_fi`)
-
-        if (any(isEmptyNameFi)) {
-            validationLogR6$WARNING(
-                "SourceNameFi is empty",
-                paste0("Found ", sum(isEmptyNameFi), " APPROVED or UNCHECKED rows with empty sourceName_fi")
-            )
-
-            usagiTibble <- usagiTibble |>
-                dplyr::mutate(tmpvalidationMessages = dplyr::if_else(
-                    isEmptyNameFi,
-                    paste0(tmpvalidationMessages, " | ", "WARNING: SourceNameFi is empty"),
-                    tmpvalidationMessages
-                ))
-        } else {
-            validationLogR6$SUCCESS("SourceNameFi is empty", "")
         }
     }
 

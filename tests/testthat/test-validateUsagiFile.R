@@ -353,8 +353,7 @@ test_that("test validateUsagiFile validates ADD_INFO:sourceName_fi", {
   validationsSummary |> dplyr::filter(type != "SUCCESS") |> dplyr::pull(step) |>
     expect_setequal(c(
       "SourceNameFi is more than 1000 characters",
-      "SourceNameFi is not the same for all rows of the sourceConceptId",
-      "SourceNameFi is empty"
+      "SourceNameFi is not the same for all rows of the sourceConceptId"
     ))
 
   # SourceNameFi is more than 1000 characters
@@ -369,10 +368,9 @@ test_that("test validateUsagiFile validates ADD_INFO:sourceName_fi", {
     expect_equal(rep("ERROR: SourceNameFi is not the same for all rows of the sourceConceptId", 2))
   validatedUsagiFile |> dplyr::filter(sourceCode == "A02.2+H22.0") |> dplyr::pull(mappingStatus) |> expect_equal(rep("FLAGGED", 2))
 
-  # SourceNameFi is empty, only a warning, mappingStatus is not changed
-  validationsSummary |> dplyr::filter(step == "SourceNameFi is empty") |> dplyr::pull(type) |> as.character() |> expect_equal("WARNING")
+  # empty sourceName_fi is allowed, no message and mappingStatus is not changed
   validatedUsagiFile |> dplyr::filter(sourceCode == "A01.0+I39.8") |> dplyr::pull(`ADD_INFO:validationMessages`) |>
-    expect_equal("WARNING: SourceNameFi is empty")
+    expect_equal(NA_character_)
   validatedUsagiFile |> dplyr::filter(sourceCode == "A01.0+I39.8") |> dplyr::pull(mappingStatus) |> expect_equal("APPROVED")
 })
 
